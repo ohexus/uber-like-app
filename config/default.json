@@ -1,0 +1,4 @@
+{
+    "port": 8081,
+    "jwtSecret": "The quick brown fox jumps over the lazy dog."
+}
