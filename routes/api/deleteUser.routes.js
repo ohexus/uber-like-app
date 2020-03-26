@@ -8,8 +8,8 @@ router.post('/deleteuser', async (req, res) => {
         if (e) return handleError(e);
         console.log('Successful deletion');
     });
-    
-    res.clearCookie('token');
+
+    res.json({ status: 'successful deletion' });
 });
 
 module.exports = router;
