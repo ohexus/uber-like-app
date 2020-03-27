@@ -3,39 +3,44 @@ const router = require('express').Router();
 const User = require('../../models/User');
 const Truck = require('../../models/Truck');
 
+// created_by: {type: Types.ObjectId, ref: 'User'},
+// assigned_to: {type: Types.ObjectId, ref: 'User', default: ''},
+// status: {type: String, default: 'IS'},
+// type: String,
+// truckName: String,
+// brand: String,
+// model: String
+
 // api/truck/create
 router.post('/create', async (req, res) => {
     console.log('create');
     try {
-        const { truckName, brand, model, carrying, length, width, height } = req.body;
+        const { type, truckName, brand, model } = req.body;
 
-        if ( !truckName || !brand || !model || !carrying || !length || !width || !height ) {
+        if ( !type || !truckName || !brand || !model ) {
             return res.status(401).json({ status: 'Please fill in all the fields' });
         }
 
         const truckNameFound = await Truck.findOne({ $and: [
-            { owner: req.user._id },
+            { created_by: req.user._id },
             { truckName: truckName }
         ]});
 
         if (truckNameFound) {
-            return res.status(401).json({ status: 'Please choose another truck name' });
+            return res.status(401).json({ status: 'This truck name is already exist' });
         }
         
         const truck = new Truck({
-            owner: req.user._id,
+            created_by: req.user._id,
+            type: type,
             truckName: truckName,
             brand: brand,
-            model: model,
-            carrying: carrying,
-            length: length,
-            width: width,
-            height: height
+            model: model
         });
         
         await truck.save();
 
-        res.status(200).json({ truckId: truck._id });
+        res.status(200).send(truck._id);
 
         console.log('Truck saved successfully');
 
@@ -48,16 +53,16 @@ router.post('/create', async (req, res) => {
 router.put('/assign', async (req, res) => {
     try {
         await Truck.updateMany(
-            { owner: req.user._id },
-            { isAssigned: false }
+            { created_by: req.user._id },
+            { assigned_to: null }
         );
 
         await Truck.findOneAndUpdate(
             { $and: [
-                { owner: req.user._id },
-                { truckName: req.body.truckName }
+                { created_by: req.user._id },
+                { _id: req.body.truckId }
             ]},
-            { isAssigned: true }
+            { assigned_to: req.user._id }
         );
 
         res.status(200).json({ status: 'truck assigned' });
@@ -72,25 +77,23 @@ router.put('/assign', async (req, res) => {
 // api/truck/update
 router.put('/update', async (req, res) => {
     try {
-        const { truckName, brand, model, carrying, length, width, height } = req.body;
+        const { truckId, type, truckName, brand, model } = req.body;
 
-        if ( !truckName || !brand || !model || !carrying || !length || !width || !height ) {
+        if ( !truckId || !type || !truckName || !brand || !model ) {
             return res.status(401).json({ status: 'Please fill in all the fields' });
         }
 
         await Truck.findOneAndUpdate(
             { $and: [
-                { owner: req.user._id },
-                { truckName: truckName },
-                { isAssigned: false }
+                { created_by: req.user._id },
+                { _id: truckId },
+                { assigned_to: null }
             ]},
             {
+                type: type,
+                truckName: truckName,
                 brand: brand,
                 model: model,
-                carrying: carrying,
-                length: length,
-                width: width,
-                height: height
             },
             (err) => {
                 if (err) {
@@ -112,9 +115,9 @@ router.delete('/delete', async (req, res) => {
     try {
         await Truck.findOneAndDelete(
             { $and: [
-                { owner: req.user._id },
-                { truckName: req.body.truckName },
-                { isAssigned: false }
+                { created_by: req.user._id },
+                { _id: req.body.truckId },
+                { assigned_to: null }
             ]}, 
             (err) => {
                 if (err) {
@@ -134,7 +137,7 @@ router.delete('/delete', async (req, res) => {
 // api/truck/all
 router.get('/all', async (req, res) => {
     try {
-        const trucks = await Truck.find({ owner: req.user._id });
+        const trucks = await Truck.find({ created_by: req.user._id });
 
         res.status(200).json({ trucks: trucks });
 
