@@ -35,7 +35,7 @@ router.post('/signup', async (req, res) => {
         
         await user.save();
 
-        res.send({userId: user._id});
+        res.status(200).send({ _id: user._id});
 
     } catch (e) {
         res.status(500).json({ status: e.message });
