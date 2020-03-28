@@ -108,6 +108,15 @@ router.put('/assign', async (req, res) => {
         );
 
         if (!truckFound) {
+            await Load.findOneAndUpdate(
+                { 
+                    _id: req.body.loadId 
+                },
+                {
+                    status: 'NEW'
+                }
+            );
+
             return res.status(401).json({ status: 'All matched trucks is on load, try again later' });
         }
 
