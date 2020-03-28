@@ -9,14 +9,14 @@ export default function Signup() {
     const [lastName, setLastName] = useState('');
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
-    const [phone, setPhone] = useState('');
+    const [mobileNumber, setMobileNumber] = useState('');
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('');
     const [routeRedirect, setRouteRedirect] = useState(false);
     
     const fetchSignup = async (e) => {
         e.preventDefault();
-        await axios.post(SIGNUP_API, { firstName, lastName, username, email, phone, password, role });
+        await axios.post(SIGNUP_API, { firstName, lastName, username, email, mobileNumber, password, role });
         alert('Signed up successfully!');
         setRouteRedirect(true);
     }
@@ -37,8 +37,8 @@ export default function Signup() {
         setEmail(e.target.value);
     }
 
-    const handlePhoneInput = (e) => {
-        setPhone(e.target.value);
+    const handleMobileNumberInput = (e) => {
+        setMobileNumber(e.target.value);
     }
 
     const handlePasswordInput = (e) => {
@@ -109,9 +109,9 @@ export default function Signup() {
                 <span> Phone Number: </span>
                 <input 
                     type='text'
-                    name='phone'
-                    value={phone}
-                    onChange={handlePhoneInput}
+                    name='mobileNumber'
+                    value={mobileNumber}
+                    onChange={handleMobileNumberInput}
                     required
                 />
                 <hr/>

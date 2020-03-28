@@ -1,8 +1,8 @@
 const router = require('express').Router();
 
-const User = require('../../models/User');
 const Truck = require('../../models/Truck');
 
+// Truck Schema
 // created_by: {type: Types.ObjectId, ref: 'User'},
 // assigned_to: {type: Types.ObjectId, ref: 'User', default: ''},
 // status: {type: String, default: 'IS'},
@@ -13,8 +13,11 @@ const Truck = require('../../models/Truck');
 
 // api/truck/create
 router.post('/create', async (req, res) => {
-    console.log('create');
     try {
+        if (req.user.role === 'shipper') {
+            return res.status(401).json({ status: 'You are not a driver' });
+        }
+        
         const { type, truckName, brand, model } = req.body;
 
         if ( !type || !truckName || !brand || !model ) {
@@ -40,7 +43,7 @@ router.post('/create', async (req, res) => {
         
         await truck.save();
 
-        res.status(200).send(truck._id);
+        res.status(200).send(truck);
 
         console.log('Truck saved successfully');
 
@@ -52,6 +55,10 @@ router.post('/create', async (req, res) => {
 // api/truck/assign
 router.put('/assign', async (req, res) => {
     try {
+        if (req.user.role === 'shipper') {
+            return res.status(401).json({ status: 'You are not a driver' });
+        }
+        
         await Truck.updateMany(
             { created_by: req.user._id },
             { assigned_to: null }
@@ -77,6 +84,10 @@ router.put('/assign', async (req, res) => {
 // api/truck/update
 router.put('/update', async (req, res) => {
     try {
+        if (req.user.role === 'shipper') {
+            return res.status(401).json({ status: 'You are not a driver' });
+        }
+        
         const { truckId, type, truckName, brand, model } = req.body;
 
         if ( !truckId || !type || !truckName || !brand || !model ) {
@@ -94,12 +105,8 @@ router.put('/update', async (req, res) => {
                 truckName: truckName,
                 brand: brand,
                 model: model,
-            },
-            (err) => {
-                if (err) {
-                    res.status(500).json({ status: 'failed to update' });
-                }
-        });    
+            }
+        );    
 
         res.status(200).json({ status: 'truck updated' });
 
@@ -113,17 +120,17 @@ router.put('/update', async (req, res) => {
 // api/truck/delete
 router.delete('/delete', async (req, res) => {
     try {
+        if (req.user.role === 'shipper') {
+            return res.status(401).json({ status: 'You are not a driver' });
+        }
+        
         await Truck.findOneAndDelete(
             { $and: [
                 { created_by: req.user._id },
                 { _id: req.body.truckId },
                 { assigned_to: null }
-            ]}, 
-            (err) => {
-                if (err) {
-                    res.status(500).json({ status: 'failed to delete' });
-                }
-        });
+            ]}
+        );
 
         res.status(200).json({ status: 'truck deleted' });
 

@@ -7,20 +7,20 @@ const User = require('../../models/User');
 // api/auth/signup
 router.post('/signup', async (req, res) => {
     try {
-        const { firstName, lastName, username, email, phone, password, role } = req.body;
+        const { firstName, lastName, username, email, mobileNumber, password, role } = req.body;
 
-        if ( !firstName || !lastName || !username || !email || !phone || !password || !role ) {
+        if ( !firstName || !lastName || !username || !email || !mobileNumber || !password || !role ) {
             return res.status(401).json({ status: 'Please fill in all the fields' });
         }
 
         const userFound = await User.findOne({ $or: [
             { 'username': username },
             { 'email': email },
-            { 'phone': phone }
+            { 'mobile_number': mobileNumber }
         ]});
 
         if (userFound) {
-            return res.status(401).json({ status: 'This email, username or phone number is already registered' });
+            return res.status(401).json({ status: 'This email, username or mobile number is already registered' });
         }
         
         const user = new User({
@@ -28,7 +28,7 @@ router.post('/signup', async (req, res) => {
             lastName: lastName,
             username: username,
             email: email,
-            phone: phone,
+            mobile_number: mobileNumber,
             password: password,
             role: role
         });

@@ -19,6 +19,7 @@ const auth = require('./routes/middleware/auth.middleware');
 const authRouter = require('./routes/api/auth.routes');
 const userRouter = require('./routes/api/user.routes');
 const truckRouter = require('./routes/api/truck.routes');
+const loadRouter = require('./routes/api/load.routes');
 
 app.use(log);
 
@@ -28,6 +29,7 @@ app.use(auth);
 
 app.use('/api/user', userRouter);
 app.use('/api/truck', truckRouter);
+app.use('/api/load', loadRouter);
 
 app.get('/api/users', (req, res) => {
     User.find({})

@@ -16,10 +16,10 @@ module.exports = model('Load', new Schema({
     created_by: {type: Types.ObjectId, ref: 'User'},
     assigned_to: {type: Types.ObjectId, ref: 'User', default: null},
     status: {type: String, default: 'NEW'},
-    state: String,
+    state: {type: String, default: null},
     dimensions: {
-        width: Number,
         length: Number,
+        width: Number,
         height: Number
     },
     payload: Number
