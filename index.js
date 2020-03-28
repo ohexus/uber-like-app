@@ -17,7 +17,7 @@ const log = require('./routes/middleware/log.middleware');
 const auth = require('./routes/middleware/auth.middleware');
 
 const authRouter = require('./routes/api/auth.routes');
-const deleteUserRouter = require('./routes/api/deleteUser.routes');
+const userRouter = require('./routes/api/user.routes');
 const truckRouter = require('./routes/api/truck.routes');
 
 app.use(log);
@@ -26,7 +26,7 @@ app.use('/api/auth', authRouter);
 
 app.use(auth);
 
-app.use('/api', deleteUserRouter);
+app.use('/api/user', userRouter);
 app.use('/api/truck', truckRouter);
 
 app.get('/api/users', (req, res) => {
