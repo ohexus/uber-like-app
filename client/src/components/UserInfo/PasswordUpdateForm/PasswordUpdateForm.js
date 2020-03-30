@@ -1,0 +1,103 @@
+import React, { useState } from 'react';
+
+import './PasswordUpdateForm.scss';
+
+import axios from 'axios';
+const API_URL = 'http://localhost:8081';
+const UPDATEPASSWORD_API = `${API_URL}/api/user/updatepassword`;
+
+export default function PasswordUpdateForm(props) {
+    const [oldPassword, setOldPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [checkNewPassword, setCheckNewPassword] = useState('');
+    const [alertMessage, setAlertMessage] = useState('');
+    const [showAlertMessage, setShowAlertMessage] = useState(false);
+    
+    const updatePassword = async () => {
+        await axios.put(UPDATEPASSWORD_API, { 
+            newPassword 
+        }, {
+            headers: {
+                'authorization': localStorage.getItem('jwt_token')
+            }
+        });
+    }
+    
+    const checkUpdatePassword = (e) => {
+        e.preventDefault();
+
+        if (oldPassword !== props.password) {
+            return handleAlert('Wrong old password!');
+        }
+
+        if (newPassword === oldPassword) {
+            return handleAlert('The new password must be different!');
+        }
+
+        if (newPassword === checkNewPassword) {
+            updatePassword();
+            window.location.reload(false);
+        } else {
+            return handleAlert('New passwords does not match!');
+        }
+    }
+
+    const handleAlert = (message) => {
+        setAlertMessage(message);
+        setShowAlertMessage(true);
+    }
+    
+    const handleOldPasswordInput = (e) => {
+        setOldPassword(e.target.value);
+    }
+    
+    const handleNewPasswordInput = (e) => {
+        setNewPassword(e.target.value);
+    }
+    
+    const handleCheckNewPasswordInput = (e) => {
+        setCheckNewPassword(e.target.value);
+    }
+
+    return (
+
+        <form className={`updatepassword ${props.className}`} onSubmit={checkUpdatePassword}>
+            <h1> Password Update: </h1>
+
+            {showAlertMessage && <span className='updatepassword__alert'> {alertMessage} </span>}
+
+            <label htmlFor='oldPassword'> Old password: </label>
+            <input 
+                type='text'
+                name='oldPassword'
+                value={oldPassword}
+                onChange={handleOldPasswordInput}
+                required 
+            />
+            <hr/>
+            
+            <label htmlFor='newPassword'> New password: </label>
+            <input 
+                type='text'
+                name='newPassword'
+                value={newPassword}
+                onChange={handleNewPasswordInput}
+                required 
+            />
+            <hr/>
+            
+            <label htmlFor='newPassword'> Repeat new password: </label>
+            <input 
+                type='text'
+                name='newPassword'
+                value={checkNewPassword}
+                onChange={handleCheckNewPasswordInput}
+                required 
+            />
+            <hr/>
+
+            <button type='submit'> Submit password update </button>
+            
+        </form>
+    );
+}

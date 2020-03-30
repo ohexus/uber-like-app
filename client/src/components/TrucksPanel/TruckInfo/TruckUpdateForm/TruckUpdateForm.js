@@ -1,19 +1,26 @@
 import React, { useState } from 'react';
-import './NewTruckForm.scss';
+import './TruckUpdateForm.scss';
 
 import axios from 'axios';
 const API_URL = 'http://localhost:8081';
-const CREATETRUCK_API = `${API_URL}/api/truck/create`;
+const UPDATETRUCK_API = `${API_URL}/api/truck/update`;
 
-export default function NewTruckForm(props) {
-    const [type, setType] = useState('stringer');
-    const [truckName, setTruckName] = useState('');
-    const [brand, setBrand] = useState('');
-    const [model, setModel] = useState('');
+export default function TruckUpdateForm(props) {
     
-    const createTruck = async () => {
-        await axios.post(CREATETRUCK_API, {
-            type, truckName, brand, model
+    const truck = props.truck;
+    
+    const [type, setType] = useState('stringer');
+    const [truckName, setTruckName] = useState(truck.truckName);
+    const [brand, setBrand] = useState(truck.brand);
+    const [model, setModel] = useState(truck.model);
+    
+    const updateTruck = async () => {
+        await axios.put(UPDATETRUCK_API, { 
+            truckId: truck._id,
+            type,
+            truckName,
+            brand,
+            model
         }, {
             headers: {
                 'authorization': localStorage.getItem('jwt_token')
@@ -38,29 +45,26 @@ export default function NewTruckForm(props) {
     }
 
     return (
-        <form 
-            className={`newtruck ${props.className}`} 
-            onSubmit={createTruck}
-        >
+        <form className={`updatetruck ${props.className}`} onSubmit={updateTruck}>
 
             <label htmlFor='type'> Type: </label>
             <select 
                 name='type'
-                className='newtruck__types'
+                className='updatetruck__types'
                 onChange={handleTypeSelect}
             >
                 <option 
-                    className='newtruck__type'
+                    className='updatetruck__type'
                     value='stringer'
                 > Stringer </option>
                 
                 <option 
-                    className='newtruck__type'
+                    className='updatetruck__type'
                     value='smallStraight'
                 > Small Straight </option>
 
                 <option 
-                    className='newtruck__type'
+                    className='updatetruck__type'
                     value='largeStraight'
                 > Large Straight </option>
 
@@ -93,8 +97,7 @@ export default function NewTruckForm(props) {
                 required 
             />
 
-            <button type='submit'> Create Truck </button>
-
+            <button type='submit'> Submit Update </button>
         </form>
     );
 }

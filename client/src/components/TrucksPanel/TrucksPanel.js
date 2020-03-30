@@ -37,9 +37,14 @@ export default function TrucksPanel() {
             <button 
                 type='button'
                 onClick={toggleShowNewTruckForm}
-            >Create new Truck</button>
+            >
+                {showNewTruckForm
+                    ? 'Close Truck form'
+                    : 'Create new Truck'
+                }
+            </button>
 
-            {showNewTruckForm && <NewTruckForm />}
+            {showNewTruckForm && <NewTruckForm className='trucks__newtruck' />}
 
             {trucks
                 ? <div className='trucks__panel'>

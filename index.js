@@ -31,18 +31,6 @@ app.use('/api/user', userRouter);
 app.use('/api/truck', truckRouter);
 app.use('/api/load', loadRouter);
 
-app.get('/api/users', (req, res) => {
-    User.find({})
-        .then(users => res.json({status: "ok", users}))
-        .catch(e => res.status(500).json({status: e.message}));
-});
-
-app.get('/api/user', (req, res) => {
-    User.findOne({ _id: req.user._id })
-        .then(user => res.json(user))
-        .catch(e => res.status(500).json({status: e.message}));
-});
-
 app.listen(PORT, () => {
     console.log(`server is running on port ${PORT}`)
 });

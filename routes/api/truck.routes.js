@@ -108,7 +108,7 @@ router.put('/update', async (req, res) => {
                 type: type,
                 truckName: truckName,
                 brand: brand,
-                model: model,
+                model: model
             }
         );    
 
