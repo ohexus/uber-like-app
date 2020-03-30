@@ -11,7 +11,7 @@ router.get('/userinfo', async (req, res) => {
 });
 
 // api/user/deleteuser
-router.post('/deleteuser', async (req, res) => {
+router.delete('/deleteuser', async (req, res) => {
     
     await User.deleteOne({ _id: req.user._id }, (e) => {
         if (e) return handleError(e);

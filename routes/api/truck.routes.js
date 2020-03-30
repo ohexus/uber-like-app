@@ -55,6 +55,10 @@ router.post('/create', async (req, res) => {
 // api/truck/assign
 router.put('/assign', async (req, res) => {
     try {
+        if (!req.body.truckId) {
+            return res.status(401).json({ status: 'Truck id undefined' });
+        }
+
         if (req.user.role === 'shipper') {
             return res.status(401).json({ status: 'You are not a driver' });
         }
@@ -120,6 +124,10 @@ router.put('/update', async (req, res) => {
 // api/truck/delete
 router.delete('/delete', async (req, res) => {
     try {
+        if (!req.body.truckId) {
+            return res.status(401).json({ status: 'Truck id undefined' });
+        }
+
         if (req.user.role === 'shipper') {
             return res.status(401).json({ status: 'You are not a driver' });
         }
@@ -146,7 +154,7 @@ router.get('/all', async (req, res) => {
     try {
         const trucks = await Truck.find({ created_by: req.user._id });
 
-        res.status(200).json({ trucks: trucks });
+        res.status(200).send(trucks);
 
         console.log(`trucks: ${trucks}`);
 

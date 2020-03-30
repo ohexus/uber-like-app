@@ -16,7 +16,7 @@ router.post('/signup', async (req, res) => {
         const userFound = await User.findOne({ $or: [
             { 'username': username },
             { 'email': email },
-            { 'mobile_number': mobileNumber }
+            { 'mobileNumber': mobileNumber }
         ]});
 
         if (userFound) {
@@ -28,7 +28,7 @@ router.post('/signup', async (req, res) => {
             lastName: lastName,
             username: username,
             email: email,
-            mobile_number: mobileNumber,
+            mobileNumber: mobileNumber,
             password: password,
             role: role
         });

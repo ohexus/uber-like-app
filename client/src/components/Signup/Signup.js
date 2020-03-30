@@ -56,7 +56,7 @@ export default function Signup() {
     useEffect(() => {
         const jwt_token = localStorage.getItem('jwt_token');
         setRouteRedirect(!!jwt_token);
-    },[]);
+    }, []);
 
     if(routeRedirect){
         return <Redirect to='/' />
@@ -65,8 +65,10 @@ export default function Signup() {
     return (
         <div>
             <h1> Sign Up: </h1>
+
             <form onSubmit={fetchSignup}>
-                <span> First Name: </span>
+
+                <label htmlFor='firstName'> First Name: </label>
                 <input 
                     type='text'
                     name='firstName'
@@ -76,7 +78,7 @@ export default function Signup() {
                 />
                 <hr/>
                 
-                <span> Last Name: </span>
+                <label htmlFor='lastName'> Last Name: </label>
                 <input 
                     type='text'
                     name='lastName'
@@ -86,7 +88,7 @@ export default function Signup() {
                 />
                 <hr/>
 
-                <span> Username: </span>
+                <label htmlFor='username'> Username: </label>
                 <input 
                     type='text'
                     name='username'
@@ -96,7 +98,7 @@ export default function Signup() {
                 />
                 <hr/>
 
-                <span> Email: </span>
+                <label htmlFor='email'> Email: </label>
                 <input 
                     type='email'
                     name='email'
@@ -106,7 +108,7 @@ export default function Signup() {
                 />
                 <hr/>
 
-                <span> Phone Number: </span>
+                <label htmlFor='mobileNumber'> Mobile Number: </label>
                 <input 
                     type='text'
                     name='mobileNumber'
@@ -116,7 +118,7 @@ export default function Signup() {
                 />
                 <hr/>
 
-                <span> Password: </span>
+                <label htmlFor='password'> Password: </label>
                 <input 
                     type='password'
                     name='password'
@@ -127,17 +129,30 @@ export default function Signup() {
                 <hr/>
 
                 <h4> You are: </h4>
-                <input type="radio" id="driver" name="role" value="driver" onChange={handleRadioDriver}/>
-                <label htmlFor="driver"> Driver </label>
+                <input 
+                    type='radio'
+                    id='driver'
+                    name='role'
+                    value='driver'
+                    onChange={handleRadioDriver}
+                />
+                <label htmlFor='driver'> Driver </label>
                 
-                <input type="radio" id="shipper" name="role" value="shipper" onChange={handleRadioShipper} />
-                <label htmlFor="shipper"> Shipper </label>
+                <input
+                    type='radio'
+                    id='shipper'
+                    name='role'
+                    value='shipper'
+                    onChange={handleRadioShipper}
+                />
+                <label htmlFor='shipper'> Shipper </label>
 
-                <button type="submit"> Sign Up </button>
+                <button type='submit'> Sign Up </button>
 
                 <Link to="/login"> Login </Link>
 
                 <Link to="/"> Home Page </Link>
+                
             </form>
         </div>
     );

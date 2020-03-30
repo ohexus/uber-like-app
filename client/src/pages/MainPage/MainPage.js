@@ -1,16 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import {Link} from 'react-router-dom';
-import axios from 'axios';
-const API_URL = 'http://localhost:8081';
-const USERINFO_API = `${API_URL}/api/user/userinfo`;
+import { Link, Redirect } from 'react-router-dom';
 
-export default function Main() {
+export default function MainPage() {
     const [isAuthorized, setIsAuthorized] = useState(false);
-
-    const handleLogout = async () => {
-        localStorage.removeItem('jwt_token');
-        setIsAuthorized(false);
-    }
+    const [routeRedirect, setRouteRedirect] = useState(false);
     
     useEffect(() => {
         const jwt_token = localStorage.getItem('jwt_token');
@@ -19,19 +12,13 @@ export default function Main() {
     
     useEffect(() => {
         if (isAuthorized) {
-            (async function fetchUser() {
-                const user = await axios.get(USERINFO_API, {
-                    headers: {
-                        'authorization': localStorage.getItem('jwt_token')
-                    }
-                });
-
-                (user.data.role === 'driver')
-                ? console.log('driver')
-                : console.log('shipper')
-            })();
+            setRouteRedirect(true);
         }
     }, [isAuthorized]);
+
+    if(routeRedirect){
+        return <Redirect to='/user' />
+    }
     
     return (
         <div>

@@ -5,7 +5,7 @@ module.exports = model('User', new Schema({
     lastName: String,
     username: String,
     email: String,
-    mobile_number: String,
+    mobileNumber: String,
     password: String,
     role: String
 }));

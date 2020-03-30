@@ -19,7 +19,7 @@ export default function Login() {
     useEffect(() => {
         const jwt_token = localStorage.getItem('jwt_token');
         setRouteRedirect(!!jwt_token);
-    },[]);
+    }, []);
 
     const handleLoginInput = (e) => {
         setLogin(e.target.value);
@@ -38,7 +38,7 @@ export default function Login() {
             <h1> LOGIN: </h1>
             <form onSubmit={fetchLogin}>
                 <div>
-                    <span> Email or Username: </span>
+                    <label htmlFor='login'> Email or Username: </label>
                     <input 
                         type='text'
                         name='login'
@@ -49,7 +49,7 @@ export default function Login() {
                 </div>
 
                 <div>
-                    <span> Password: </span>
+                    <label htmlFor='password'> Password: </label>
                     <input 
                         type='password'
                         name='password'

@@ -29,10 +29,6 @@ router.post('/create', async (req, res) => {
         if ( !length || !width || !height || !payload ) {
             return res.status(401).json({ status: 'Please fill in all the fields' });
         }
-
-        if (req.user.role === 'driver') {
-            return res.status(401).json({ status: 'You are not a shipper' });
-        }
         
         const load = new Load({
             created_by: req.user._id,
