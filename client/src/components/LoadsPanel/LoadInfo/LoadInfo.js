@@ -11,11 +11,12 @@ const ASSIGNLOAD_API = `${API_URL}/api/load/assign`;
 const DELETELOAD_API = `${API_URL}/api/load/delete`;
 
 export default function TruckInfo(props) {
-    const [showLoadUpdateForm, setShowLoadUpdateForm] = useState(false);
-    const [showAlertCantAssign, setShowAlertCantAssign] = useState(false);
-    
     const load = props.load;
     const dimensions = load.dimensions;
+    const isLoadFinished = load.status === 'SHIPPED';
+
+    const [showLoadUpdateForm, setShowLoadUpdateForm] = useState(false);
+    const [showAlertCantAssign, setShowAlertCantAssign] = useState(false);
     
     const postLoad = async (e) => {
         e.preventDefault()
@@ -62,21 +63,25 @@ export default function TruckInfo(props) {
     return (
         <div className="load-wrapper">
             <form className='load' onSubmit={postLoad}>
-                <h4 className='load__assigned'>{load.assigned_to
+                {!isLoadFinished && <h4 className='load__assigned'>{load.assigned_to
                     ? 'Assigned'
                     : 'Not assigned'
-                }</h4>
+                }</h4>}
 
                 {showAlertCantAssign && <h5>
                     All matched trucks is on load, try again later
                 </h5>}
                 
-                {!load.assigned_to && <button type="submit"> Post this load </button>}
+                {!isLoadFinished && <>
+                    {!load.assigned_to && <button type="submit"> Post this load </button>}
+                </>}
 
-                <InfoTile
-                    label={'Assigned to:'}
-                    info={load.assigned_to}
-                />
+                {!isLoadFinished && 
+                    <InfoTile
+                        label={'Assigned to:'}
+                        info={load.assigned_to}
+                    />
+                }
 
                 <InfoTile
                     label={'Status:'}
@@ -108,22 +113,28 @@ export default function TruckInfo(props) {
                     info={load.payload}
                 />
 
-                {!load.assigned_to && 
-                    <button type='button' onClick={deleteLoad}>
-                        Delete this load
-                    </button>
-                }
+                {!isLoadFinished && <>
+                    {!load.assigned_to && 
+                        <button type='button' onClick={deleteLoad}>
+                            Delete this load
+                        </button>
+                    }
+                </>}
             </form>
 
-            {!load.assigned_to && <button type='button' onClick={toggleShowLoadUpdateForm}>
-                    {showLoadUpdateForm
-                        ? 'Close update Load Info'
-                        : 'Update Load Info'
-                    }
-                </button>
-            }
+            {!isLoadFinished && <>
+                {!load.assigned_to && <button type='button' onClick={toggleShowLoadUpdateForm}>
+                        {showLoadUpdateForm
+                            ? 'Close update Load Info'
+                            : 'Update Load Info'
+                        }
+                    </button>
+                }
+            </>}
 
-            {showLoadUpdateForm && <LoadUpdateForm load={load} className='load-wrapper__updateload' />}
+            {!isLoadFinished && <>
+                {showLoadUpdateForm && <LoadUpdateForm load={load} className='load-wrapper__updateload' />}
+            </>}
         </div>
     );
 }

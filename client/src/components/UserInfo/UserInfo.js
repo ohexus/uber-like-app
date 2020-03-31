@@ -6,6 +6,10 @@ import InfoTile from '../InfoTile/InfoTile';
 import UserUpdateForm from './UserUpdateForm/UserUpdateForm';
 import PasswordUpdateForm from './PasswordUpdateForm/PasswordUpdateForm';
 
+import axios from 'axios';
+const API_URL = process.env.REACT_APP_API_URL;
+const DELETEUSER_API = `${API_URL}/api/user/delete`;
+
 export default function UserInfo(props) {
     const user = props.user;
 
@@ -26,6 +30,16 @@ export default function UserInfo(props) {
     const handleLogout = () => {
         localStorage.removeItem('jwt_token');
         setRouteRedirect(true);
+    }
+    
+    const deleteAccount = async () => {
+        await axios.delete(DELETEUSER_API, {
+            headers: {
+                'authorization': localStorage.getItem('jwt_token')
+            }
+        });
+
+        handleLogout();
     }
 
     if(routeRedirect){
@@ -83,7 +97,11 @@ export default function UserInfo(props) {
 
                     {showPasswordUpdateForm && <PasswordUpdateForm password={user.password} className='user__updatepassword' />}
 
-                    <button type='button' onClick={handleLogout}>Log out</button>
+                    <button type='button' onClick={handleLogout}> Log out </button>
+
+                    {user.role === 'shipper' &&
+                        <button type='button' onClick={deleteAccount}> Delete Account </button>
+                    }
                 </div>
             </div>
         </div>

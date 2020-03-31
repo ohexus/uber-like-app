@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './OrderLoad.scss';
 
 import InfoTile from '../InfoTile/InfoTile';
@@ -17,11 +17,10 @@ const FINISHLOAD_API = `${API_URL}/api/load/finish`;
 
 export default function OrderLoad() {
     const [load, setLoad] = useState(null);
-    const [dimensions, setDimensions] = useState(null);
     const [loadNextState, setLoadNextState] = useState('En route to Pick Up');
     const [showOrder, setShowOrder] = useState(true);
     
-    const fetchLoad = async () => {
+    const fetchLoad = useCallback(async () => {
         const load = await axios.get(CHECKFORLOAD_API, {
             headers: {
                 'authorization': localStorage.getItem('jwt_token')
@@ -30,8 +29,8 @@ export default function OrderLoad() {
         
         setLoadNextState(findNextState(load.state));
 
-        return load
-    }
+        return (load.status !== 'Nothing' ? load : null)
+    }, [])
     
     const updateLoadState = async (e) => {
         await axios.put(UPDATELOADSTATE_API, { 
@@ -64,7 +63,7 @@ export default function OrderLoad() {
     }
 
     const finishOrder = async () => {
-        await axios.put(FINISHLOAD_API, { 
+        const finishedLoad = await axios.put(FINISHLOAD_API, { 
             loadId: load._id,
             state: loadNextState
         }, {
@@ -72,6 +71,8 @@ export default function OrderLoad() {
                 'authorization': localStorage.getItem('jwt_token')
             }
         });
+
+        setLoad(finishedLoad);
     }
 
     const closeOrder = () => {
@@ -80,12 +81,11 @@ export default function OrderLoad() {
     
     useEffect(() => {
         (async() => setLoad(await fetchLoad()))();
-        setDimensions(load ? load.dimensions : null);
-    }, []);
+    }, [setLoad, fetchLoad]);
 
     return (
         <>
-            {load && dimensions && <>
+            {load && <>
                 {showOrder &&
                     <form 
                         className='order'
@@ -103,17 +103,17 @@ export default function OrderLoad() {
                         
                         <InfoTile 
                             label={'Length:'}
-                            info={dimensions.length}
+                            info={load.dimensions.length}
                         />
                         
                         <InfoTile 
                             label={'Width:'}
-                            info={dimensions.width}
+                            info={load.dimensions.width}
                         />
                         
                         <InfoTile 
                             label={'Height:'}
-                            info={dimensions.height}
+                            info={load.dimensions.height}
                         />
                         
                         <InfoTile 

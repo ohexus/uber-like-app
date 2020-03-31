@@ -257,7 +257,7 @@ router.put('/finish', async (req, res) => {
             return res.status(401).json({ status: 'You are not a driver' });
         }
         
-        await Load.findOneAndUpdate({ 
+        const shippedLoad = await Load.findOneAndUpdate({ 
             _id: req.body.loadId 
         }, {
             assigned_to: null,
@@ -271,7 +271,7 @@ router.put('/finish', async (req, res) => {
             status: 'IS'
         });
 
-        res.status(200).json({ state: req.body.state });
+        res.status(200).send(shippedLoad);
 
     } catch (e) {
         res.status(500).json({ status: e.message });
