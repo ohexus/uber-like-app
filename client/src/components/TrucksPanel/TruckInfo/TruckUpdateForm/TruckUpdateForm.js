@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './TruckUpdateForm.scss';
 
 import axios from 'axios';
-const API_URL = 'http://localhost:8081';
+const API_URL = process.env.REACT_APP_API_URL;
 const UPDATETRUCK_API = `${API_URL}/api/truck/update`;
 
 export default function TruckUpdateForm(props) {

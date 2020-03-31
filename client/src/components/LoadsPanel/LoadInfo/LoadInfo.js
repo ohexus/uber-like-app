@@ -5,7 +5,7 @@ import InfoTile from '../../InfoTile/InfoTile';
 import LoadUpdateForm from './LoadUpdateForm/LoadUpdateForm';
 
 import axios from 'axios';
-const API_URL = 'http://localhost:8081';
+const API_URL = process.env.REACT_APP_API_URL;
 const POSTLOAD_API = `${API_URL}/api/load/post`;
 const ASSIGNLOAD_API = `${API_URL}/api/load/assign`;
 const DELETELOAD_API = `${API_URL}/api/load/delete`;

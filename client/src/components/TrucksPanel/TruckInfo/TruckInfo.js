@@ -5,7 +5,7 @@ import InfoTile from '../../InfoTile/InfoTile';
 import TruckUpdateForm from './TruckUpdateForm/TruckUpdateForm';
 
 import axios from 'axios';
-const API_URL = 'http://localhost:8081';
+const API_URL = process.env.REACT_APP_API_URL;
 const ASSIGNTRUCK_API = `${API_URL}/api/truck/assign`;
 const DELETETRUCK_API = `${API_URL}/api/truck/delete`;
 

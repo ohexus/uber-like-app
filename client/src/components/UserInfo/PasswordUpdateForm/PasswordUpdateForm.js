@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import './PasswordUpdateForm.scss';
 
 import axios from 'axios';
-const API_URL = 'http://localhost:8081';
+const API_URL = process.env.REACT_APP_API_URL;
 const UPDATEPASSWORD_API = `${API_URL}/api/user/updatepassword`;
 
 export default function PasswordUpdateForm(props) {

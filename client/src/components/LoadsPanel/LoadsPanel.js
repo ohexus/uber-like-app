@@ -5,7 +5,7 @@ import LoadInfo from './LoadInfo/LoadInfo';
 import NewLoadForm from './NewLoadForm/NewLoadForm';
 
 import axios from 'axios';
-const API_URL = 'http://localhost:8081';
+const API_URL = process.env.REACT_APP_API_URL;
 const LOADS_API = `${API_URL}/api/load/allforuser`;
 
 export default function LoadsPanel() {

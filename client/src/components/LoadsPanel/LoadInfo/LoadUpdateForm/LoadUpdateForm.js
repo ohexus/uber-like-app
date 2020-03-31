@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './LoadUpdateForm.scss';
 
 import axios from 'axios';
-const API_URL = 'http://localhost:8081';
+const API_URL = process.env.REACT_APP_API_URL;
 const UPDATELOAD_API = `${API_URL}/api/load/update`;
 
 export default function TruckUpdateForm(props) {

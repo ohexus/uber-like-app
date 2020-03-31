@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './OrderLoad.scss';
 
-import axios from 'axios';
 import InfoTile from '../InfoTile/InfoTile';
-const API_URL = 'http://localhost:8081';
+
+import axios from 'axios';
+const API_URL = process.env.REACT_APP_API_URL;
 const CHECKFORLOAD_API = `${API_URL}/api/load/checkforload`;
 const UPDATELOADSTATE_API = `${API_URL}/api/load/updatestate`;
 const FINISHLOAD_API = `${API_URL}/api/load/finish`;

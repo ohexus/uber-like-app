@@ -5,7 +5,7 @@ import TruckInfo from './TruckInfo/TruckInfo';
 import NewTruckForm from './NewTruckForm/NewTruckForm';
 
 import axios from 'axios';
-const API_URL = 'http://localhost:8081';
+const API_URL = process.env.REACT_APP_API_URL;
 const TRUCKS_API = `${API_URL}/api/truck/allforuser`;
 
 export default function TrucksPanel() {
