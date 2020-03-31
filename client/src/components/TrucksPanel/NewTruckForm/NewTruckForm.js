@@ -6,7 +6,7 @@ const API_URL = 'http://localhost:8081';
 const CREATETRUCK_API = `${API_URL}/api/truck/create`;
 
 export default function NewTruckForm(props) {
-    const [type, setType] = useState('stringer');
+    const [type, setType] = useState('sprinter');
     const [truckName, setTruckName] = useState('');
     const [brand, setBrand] = useState('');
     const [model, setModel] = useState('');
@@ -51,8 +51,8 @@ export default function NewTruckForm(props) {
             >
                 <option 
                     className='newtruck__type'
-                    value='stringer'
-                > Stringer </option>
+                    value='sprinter'
+                > Sprinter </option>
                 
                 <option 
                     className='newtruck__type'

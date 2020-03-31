@@ -9,7 +9,7 @@ export default function TruckUpdateForm(props) {
     
     const truck = props.truck;
     
-    const [type, setType] = useState('stringer');
+    const [type, setType] = useState('sprinter');
     const [truckName, setTruckName] = useState(truck.truckName);
     const [brand, setBrand] = useState(truck.brand);
     const [model, setModel] = useState(truck.model);
@@ -45,8 +45,10 @@ export default function TruckUpdateForm(props) {
     }
 
     return (
-        <form className={`updatetruck ${props.className}`} onSubmit={updateTruck}>
-
+        <form 
+            className={`updatetruck ${props.className}`}
+            onSubmit={updateTruck}
+        >
             <label htmlFor='type'> Type: </label>
             <select 
                 name='type'
@@ -55,8 +57,8 @@ export default function TruckUpdateForm(props) {
             >
                 <option 
                     className='updatetruck__type'
-                    value='stringer'
-                > Stringer </option>
+                    value='sprinter'
+                > Sprinter </option>
                 
                 <option 
                     className='updatetruck__type'

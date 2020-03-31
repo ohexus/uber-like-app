@@ -58,8 +58,8 @@ router.put('/updatepassword', async (req, res) => {
     res.status(200).json({ status: 'successful updated password' });
 });
 
-// api/user/deleteuser
-router.delete('/deleteuser', async (req, res) => {
+// api/user/delete
+router.delete('/delete', async (req, res) => {
     
     await User.deleteOne({ _id: req.user._id }, (e) => {
         if (e) return handleError(e);

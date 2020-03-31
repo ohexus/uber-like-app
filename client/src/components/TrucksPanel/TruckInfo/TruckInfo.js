@@ -47,7 +47,7 @@ export default function TruckInfo(props) {
                     : 'Not assigned'
                 }</h4>
                 
-                <button type="submit"> Assign this truck </button>
+                {!truck.assigned_to && <button type="submit"> Assign this truck </button>}
 
                 <InfoTile
                     label={'Brand:'}
@@ -76,12 +76,13 @@ export default function TruckInfo(props) {
                 }
             </form>
 
-            <button type='button' onClick={toggleShowTruckUpdateForm}>
-                {showTruckUpdateForm
-                    ? 'Close update Truck Info'
-                    : 'Update Truck Info'
-                }
-            </button>
+            {!truck.assigned_to && <button type='button' onClick={toggleShowTruckUpdateForm}>
+                    {showTruckUpdateForm
+                        ? 'Close update Truck Info'
+                        : 'Update Truck Info'
+                    }
+                </button>
+            }
 
             {showTruckUpdateForm && <TruckUpdateForm truck={truck} className='truck-wrapper__updatetruck' />}
         </div>

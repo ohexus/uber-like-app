@@ -45,8 +45,6 @@ router.post('/create', async (req, res) => {
 
         res.status(200).send(truck);
 
-        console.log('Truck saved successfully');
-
     } catch (e) {
         res.status(500).json({ status: e.message });
     }
@@ -63,6 +61,13 @@ router.put('/assign', async (req, res) => {
             return res.status(401).json({ status: 'You are not a driver' });
         }
         
+        const truckFound = await Truck.findOne({ $and: [
+            { created_by: req.user._id },
+            { status: 'OL' }
+        ]});
+
+        if (truckFound) return res.status(401).json({ status: 'You are on load!!' });
+        
         await Truck.updateMany(
             { created_by: req.user._id },
             { assigned_to: null }
@@ -77,8 +82,6 @@ router.put('/assign', async (req, res) => {
         );
 
         res.status(200).json({ status: 'truck assigned' });
-
-        console.log('Truck assigned successfully');
 
     } catch (e) {
         res.status(500).json({ status: e.message });
@@ -113,8 +116,6 @@ router.put('/update', async (req, res) => {
         );    
 
         res.status(200).json({ status: 'truck updated' });
-
-        console.log('Truck updated successfully');
     
     } catch (e) {
         res.status(500).json({ status: e.message });
@@ -142,8 +143,6 @@ router.delete('/delete', async (req, res) => {
 
         res.status(200).json({ status: 'truck deleted' });
 
-        console.log('Truck deleted successfully');
-
     } catch (e) {
         res.status(500).json({ status: e.message });
     }
@@ -152,11 +151,36 @@ router.delete('/delete', async (req, res) => {
 // api/truck/all
 router.get('/all', async (req, res) => {
     try {
+        const trucks = await Truck.find({});
+
+        res.status(200).send(trucks);
+
+    } catch (e) {
+        res.status(500).json({ status: e.message });
+    }
+});
+
+// api/truck/allforuser
+router.get('/allforuser', async (req, res) => {
+    try {
         const trucks = await Truck.find({ created_by: req.user._id });
 
         res.status(200).send(trucks);
 
-        console.log(`trucks: ${trucks}`);
+        // console.log(`user trucks: ${trucks}`);
+
+    } catch (e) {
+        res.status(500).json({ status: e.message });
+    }
+});
+
+// api/truck/deleteall
+router.delete('/deleteall', async (req, res) => {
+    try {
+        
+        await Truck.deleteMany({});
+
+        res.status(200).json({ status: 'trucks deleted' });
 
     } catch (e) {
         res.status(500).json({ status: e.message });

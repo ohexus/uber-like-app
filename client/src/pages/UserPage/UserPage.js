@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import './UserPage.scss';
+
 import UserInfo from '../../components/UserInfo/UserInfo';
+import TrucksPanel from '../../components/TrucksPanel/TrucksPanel';
+import LoadsPanel from '../../components/LoadsPanel/LoadsPanel';
+import OrderLoad from '../../components/OrderLoad/OrderLoad';
 
 import axios from 'axios';
-import TrucksPanel from '../../components/TrucksPanel/TrucksPanel';
 const API_URL = 'http://localhost:8081';
 const USERINFO_API = `${API_URL}/api/user/userinfo`;
 
@@ -29,9 +32,14 @@ export default function UserPage() {
             {user && <div className='user'>
                 <UserInfo user={user} />
 
-                {user.role === 'driver' && <>
-                    <TrucksPanel />
-                </>}
+                {user.role === 'driver' 
+                    ? <TrucksPanel />
+                    : <LoadsPanel />
+                }
+
+                {user.role === 'driver' &&
+                    <OrderLoad />
+                }
             </div>}
         </>
     );

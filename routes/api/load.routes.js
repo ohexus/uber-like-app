@@ -11,8 +11,8 @@ const findTruckType = require('../../helpers/findTruckType');
 // status: {type: String, default: 'NEW'},
 // state: {type: String, default: null},
 // dimensions: {
-//     width: Number,
 //     length: Number,
+//     width: Number,
 //     height: Number
 // },
 // payload: Number
@@ -44,8 +44,6 @@ router.post('/create', async (req, res) => {
 
         res.status(200).send(load);
 
-        console.log('Load saved successfully');
-
     } catch (e) {
         res.status(500).json({ status: e.message });
     }
@@ -64,20 +62,15 @@ router.put('/post', async (req, res) => {
             return res.status(401).json({ status: 'Please fill in loadId' });
         }
 
-        await Load.findOneAndUpdate(
-            { $and: [
-                { created_by: req.user._id },
-                { _id: loadId },
-                { status: 'NEW' }
-            ]},
-            {
-                status: 'POSTED'
-            }
-        );    
+        await Load.findOneAndUpdate({ $and: [
+            { created_by: req.user._id },
+            { _id: loadId },
+            { status: 'NEW' }
+        ]}, {
+            status: 'POSTED'
+        });    
 
         res.status(200).json({ status: 'load posted' });
-
-        console.log('Load posted successfully');
     
     } catch (e) {
         res.status(500).json({ status: e.message });
@@ -95,46 +88,35 @@ router.put('/assign', async (req, res) => {
 
         const truckType = findTruckType(load.dimensions, load.payload);
 
-        const truckFound = await Truck.findOne(
-            { $and: [
-                { assigned_to: {$ne: null} },
-                { status: 'IS' },
-                { type: truckType }
-            ]}
-        );
+        const truckFound = await Truck.findOne({ $and: [
+            { assigned_to: {$ne: null} },
+            { status: 'IS' },
+            { type: truckType }
+        ]});
 
         if (!truckFound) {
-            await Load.findOneAndUpdate(
-                { 
-                    _id: req.body.loadId 
-                },
-                {
-                    status: 'NEW'
-                }
-            );
+            const updatedLoad = await Load.findOneAndUpdate({ 
+                _id: req.body.loadId 
+            }, {
+                status: 'NEW'
+            }, {new: true});
 
-            return res.status(401).json({ status: 'All matched trucks is on load, try again later' });
+            return res.status(200).send(updatedLoad);
         }
 
-        await Truck.findOneAndUpdate(
-            { 
-                _id: truckFound._id 
-            },
-            {
-                status: 'OL'
-            }
-        );
+        await Truck.findOneAndUpdate({ 
+            _id: truckFound._id 
+        }, {
+            status: 'OL'
+        });
 
-        await Load.findOneAndUpdate(
-            { 
-                _id: req.body.loadId
-            },
-            { 
-                assigned_to: truckFound._id,
-                status: 'ASSIGNED',
-                state: 'En route to Pick Up'
-            }
-        );
+        await Load.findOneAndUpdate({ 
+            _id: req.body.loadId
+        }, { 
+            assigned_to: truckFound._id,
+            status: 'ASSIGNED',
+            state: 'En route to Pick Up'
+        });
 
         res.status(200).json({ status: 'load assigned' });
 
@@ -158,25 +140,20 @@ router.put('/update', async (req, res) => {
             return res.status(401).json({ status: 'Please fill in all the fields' });
         }
 
-        await Load.findOneAndUpdate(
-            { $and: [
-                { created_by: req.user._id },
-                { _id: loadId },
-                { status: 'NEW' }
-            ]},
-            {
-                dimensions: {
-                    length: length,
-                    width: width,
-                    height: height
-                },
-                payload: payload
-            }
-        );    
+        await Load.findOneAndUpdate({ $and: [
+            { created_by: req.user._id },
+            { _id: loadId },
+            { status: 'NEW' }
+        ]}, {
+            dimensions: {
+                length: length,
+                width: width,
+                height: height
+            },
+            payload: payload
+        });    
 
         res.status(200).json({ status: 'load updated' });
-
-        console.log('Load updated successfully');
     
     } catch (e) {
         res.status(500).json({ status: e.message });
@@ -190,17 +167,13 @@ router.delete('/delete', async (req, res) => {
             return res.status(401).json({ status: 'You are not a shipper' });
         }
         
-        await Load.findOneAndDelete(
-            { $and: [
-                { created_by: req.user._id },
-                { _id: req.body.loadId },
-                { status: 'NEW' }
-            ]}
-        );
+        await Load.findOneAndDelete({ $and: [
+            { created_by: req.user._id },
+            { _id: req.body.loadId },
+            { status: 'NEW' }
+        ]});
 
         res.status(200).json({ status: 'load deleted' });
-
-        console.log('Load deleted successfully');
 
     } catch (e) {
         res.status(500).json({ status: e.message });
@@ -210,9 +183,9 @@ router.delete('/delete', async (req, res) => {
 // api/load/all
 router.get('/all', async (req, res) => {
     try {
-        const loads = await Load.find({ created_by: req.user._id });
+        const loads = await Load.find({});
 
-        res.status(200).json({ loads: loads });
+        res.status(200).send(loads);
 
         console.log(`loads: ${loads}`);
 
@@ -221,85 +194,97 @@ router.get('/all', async (req, res) => {
     }
 });
 
-// api/load/arrivedtopickup
-router.put('/arrivedtopickup', async (req, res) => {
+// api/load/allforuser
+router.get('/allforuser', async (req, res) => {
     try {
-        if (req.user.role === 'shipper') {
-            return res.status(401).json({ status: 'You are not a driver' });
-        }
-        
-        await Load.findOneAndUpdate(
-            { 
-                _id: req.body.loadId 
-            },
-            {
-                state: 'Arrived to Pick Up'
-            }
-        );
+        const loads = await Load.find({ created_by: req.user._id });
 
-        res.status(200).json({ state: 'Arrived to Pick Up' });
-
-        console.log('Arrived to Pick Up');
+        res.status(200).send(loads);
 
     } catch (e) {
         res.status(500).json({ status: e.message });
     }
 });
 
-// api/load/enroutetodelivery
-router.put('/enroutetodelivery', async (req, res) => {
+// api/load/checkforload
+router.get('/checkforload', async (req, res) => {
     try {
-        if (req.user.role === 'shipper') {
-            return res.status(401).json({ status: 'You are not a driver' });
+        if (req.user.role === 'driver') {
+            return res.status(401).json({ status: 'You are not a shipper' });
         }
         
-        await Load.findOneAndUpdate(
-            { 
-                _id: req.body.loadId 
-            },
-            {
-                state: 'En route to Delivery'
-            }
-        );
+        const assignedTruck = await Truck.findOne({ 
+            assigned_to: req.user._id 
+        });
+        
+        const loadFound = await Load.findOne({ 
+            assigned_to: assignedTruck._id 
+        });
 
-        res.status(200).json({ state: 'En route to Delivery' });
+        if (!loadFound) return res.status(200).json({ status: 'Nothing' });
 
-        console.log('En route to Delivery');
+        res.status(200).send(loadFound);
 
     } catch (e) {
         res.status(500).json({ status: e.message });
     }
 });
 
-// api/load/arrivedtodelivery
-router.put('/arrivedtodelivery', async (req, res) => {
+// api/load/updatestate
+router.put('/updatestate', async (req, res) => {
     try {
         if (req.user.role === 'shipper') {
             return res.status(401).json({ status: 'You are not a driver' });
         }
         
-        const load = await Load.findOneAndUpdate(
-            { 
-                _id: req.body.loadId 
-            },
-            {
-                status: 'SHIPPED',
-                state: 'Arrived to Delivery'
-            }
-        );
+        await Load.findOneAndUpdate({ 
+            _id: req.body.loadId 
+        }, {
+            state: req.body.state
+        });
 
-        await Truck.findOneAndUpdate(
-            {
-                _id: load.assigned_to
-            },
-            {
-                status: 'IS'
-            }
-        );
+        res.status(200).json({ state: req.body.state });
 
-        res.status(200).json({ state: 'Arrived to Delivery' });
+    } catch (e) {
+        res.status(500).json({ status: e.message });
+    }
+});
 
-        console.log('Arrived to Delivery');
+// api/load/finish
+router.put('/finish', async (req, res) => {
+    try {
+        if (req.user.role === 'shipper') {
+            return res.status(401).json({ status: 'You are not a driver' });
+        }
+        
+        await Load.findOneAndUpdate({ 
+            _id: req.body.loadId 
+        }, {
+            assigned_to: null,
+            state: req.body.state,
+            status: 'SHIPPED'
+        });
+        
+        await Truck.findOneAndUpdate({ 
+            assigned_to: req.user._id 
+        }, {
+            status: 'IS'
+        });
+
+        res.status(200).json({ state: req.body.state });
+
+    } catch (e) {
+        res.status(500).json({ status: e.message });
+    }
+});
+
+// api/load/deleteall
+router.delete('/deleteall', async (req, res) => {
+    try {
+        
+        await Load.deleteMany({});
+
+        res.status(200).json({ status: 'loads deleted' });
 
     } catch (e) {
         res.status(500).json({ status: e.message });

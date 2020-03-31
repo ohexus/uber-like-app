@@ -7,7 +7,11 @@ const app = express();
 app.use(cors());
 app.use(express.json({ extended: true }));
 
-mongoose.connect('mongodb://localhost:27017/uber-like-app', { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect('mongodb://localhost:27017/uber-like-app', { 
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false
+});
 
 const User = require('./models/User');
 

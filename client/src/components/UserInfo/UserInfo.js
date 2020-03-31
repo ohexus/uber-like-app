@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Redirect } from 'react-router-dom';
 import './UserInfo.scss';
 
 import InfoTile from '../InfoTile/InfoTile';
@@ -10,6 +11,7 @@ export default function UserInfo(props) {
 
     const [showUserUpdateForm, setShowUserUpdateForm] = useState(false);
     const [showPasswordUpdateForm, setShowPasswordUpdateForm] = useState(false);
+    const [routeRedirect, setRouteRedirect] = useState(false);
     
     const toggleShowUserUpdateForm = () => {
         setShowUserUpdateForm(!showUserUpdateForm);
@@ -19,6 +21,15 @@ export default function UserInfo(props) {
     const toggleShowPasswordUpdateForm = () => {
         setShowPasswordUpdateForm(!showPasswordUpdateForm);
         setShowUserUpdateForm(false);
+    }
+    
+    const handleLogout = () => {
+        localStorage.removeItem('jwt_token');
+        setRouteRedirect(true);
+    }
+
+    if(routeRedirect){
+        return <Redirect to='/' />
     }
 
     return (
@@ -53,7 +64,7 @@ export default function UserInfo(props) {
                     info={user.mobileNumber}
                 />
 
-                <div className="user__update-panel">
+                <div className="user__panel">
                     <button type='button' onClick={toggleShowUserUpdateForm}>
                         {showUserUpdateForm
                             ? 'Close update User Info'
@@ -71,6 +82,8 @@ export default function UserInfo(props) {
                     </button>
 
                     {showPasswordUpdateForm && <PasswordUpdateForm password={user.password} className='user__updatepassword' />}
+
+                    <button type='button' onClick={handleLogout}>Log out</button>
                 </div>
             </div>
         </div>
