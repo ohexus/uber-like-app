@@ -5,6 +5,7 @@ import './UserInfo.scss';
 import InfoTile from '../InfoTile/InfoTile';
 import UserUpdateForm from './UserUpdateForm/UserUpdateForm';
 import PasswordUpdateForm from './PasswordUpdateForm/PasswordUpdateForm';
+import UserAvatar from './UserAvatar/UserAvatar';
 
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
@@ -49,6 +50,8 @@ export default function UserInfo(props) {
     return (
         <div className='user__profile'>
             <h1 className='user__role'> {user.role.toUpperCase()} </h1>
+
+            <UserAvatar undecodedImg={user.avatarImg} />
             
             <div className='user__info'>
                 <h2> Info: </h2>

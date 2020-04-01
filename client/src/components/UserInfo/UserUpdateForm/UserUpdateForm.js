@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-
 import './UserUpdateForm.scss';
 
 import axios from 'axios';

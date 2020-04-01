@@ -6,6 +6,7 @@ function App() {
   return (
     <BrowserRouter>
       <div className="App">
+        <h1> Easy Breeze </h1>
         <Routes />
       </div>
     </BrowserRouter>

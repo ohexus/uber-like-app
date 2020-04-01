@@ -7,5 +7,6 @@ module.exports = model('User', new Schema({
     email: String,
     mobileNumber: String,
     password: String,
-    role: String
+    role: String,
+    avatarImg: { data: Buffer, contentType: String }
 }));

@@ -21,8 +21,7 @@ export default function MainPage() {
     }
     
     return (
-        <div>
-            <h1> Easy Breeze </h1>
+        <>
             {!isAuthorized && (
                 <div>
                     <h2> Log In or Sign Up </h2>
@@ -34,6 +33,6 @@ export default function MainPage() {
                     </div>
                 </div>
             )} 
-        </div>
+        </>
     );
 }

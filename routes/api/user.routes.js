@@ -1,78 +1,148 @@
 const router = require('express').Router();
+const fs = require('fs');
+const multer  = require('multer')
+
+const upload = multer({ dest: '../../uploads/' })
 
 const User = require('../../models/User');
 
+// User Schema
+// firstName: String,
+// lastName: String,
+// username: String,
+// email: String,
+// mobileNumber: String,
+// password: String,
+// role: String,
+// avatarImg: { data: Buffer, contentType: String }
+
 // api/user/userinfo
 router.get('/userinfo', async (req, res) => {
-    
-    const user = await User.findOne({ _id: req.user._id });
+    try {
+        const user = await User.findOne({ _id: req.user._id });
 
-    res.status(200).send(user);
+        res.status(200).send(user);
+
+    } catch (e) {
+        res.status(500).json({ status: e.message });
+    }
 });
 
 // api/user/updateuser
 router.put('/updateuser', async (req, res) => {
-    const { firstName, lastName, username, email, mobileNumber } = req.body;
+    try {
+        const { firstName, lastName, username, email, mobileNumber } = req.body;
 
-    if ( !firstName || !lastName || !username || !email || !mobileNumber ) {
-        return res.status(401).json({ status: 'Please fill in all the fields' });
+        if ( !firstName || !lastName || !username || !email || !mobileNumber ) {
+            return res.status(401).json({ status: 'Please fill in all the fields' });
+        }
+
+        const userFound = await User.findOne({ $or: [
+            { 'username': username },
+            { 'email': email },
+            { 'mobileNumber': mobileNumber }
+        ]});
+
+        if (userFound) {
+            return res.status(401).json({ status: 'This email, username or mobile number is already registered' });
+        }
+        
+        await User.findOneAndUpdate({ 
+            _id: req.user._id 
+        }, {
+            firstName: firstName,
+            lastName: lastName,
+            username: username,
+            email: email,
+            mobileNumber: mobileNumber,
+        });
+
+        res.status(200).json({ status: 'successful update' });
+
+    } catch (e) {
+        res.status(500).json({ status: e.message });
     }
-
-    const userFound = await User.findOne({ $or: [
-        { 'username': username },
-        { 'email': email },
-        { 'mobileNumber': mobileNumber }
-    ]});
-
-    if (userFound) {
-        return res.status(401).json({ status: 'This email, username or mobile number is already registered' });
-    }
-    
-    await User.findOneAndUpdate({ 
-        _id: req.user._id 
-    }, {
-        firstName: firstName,
-        lastName: lastName,
-        username: username,
-        email: email,
-        mobileNumber: mobileNumber,
-    });
-
-    res.status(200).json({ status: 'successful update' });
 });
 
 // api/user/updatepassword
 router.put('/updatepassword', async (req, res) => {
-    const { newPassword } = req.body;
+    try {
+        const { newPassword } = req.body;
 
-    if ( !newPassword ) {
-        return res.status(401).json({ status: 'Please fill in new Password' });
+        if ( !newPassword ) {
+            return res.status(401).json({ status: 'Please fill in new Password' });
+        }
+        
+        await User.findOneAndUpdate({ 
+            _id: req.user._id 
+        }, {
+            password: newPassword
+        });
+
+        res.status(200).json({ status: 'successful updated password' });
+
+    } catch (e) {
+        res.status(500).json({ status: e.message });
     }
-    
-    await User.findOneAndUpdate({ 
-        _id: req.user._id 
-    }, {
-        password: newPassword
-    });
+});
 
-    res.status(200).json({ status: 'successful updated password' });
+// api/user/updateavatar
+router.put('/updateavatar', upload.single('avatar'), async (req, res) => {  
+    try {  
+        await User.findOneAndUpdate({ 
+            _id: req.user._id 
+        }, {
+            avatarImg: {
+                data: fs.readFileSync(req.file.path),
+                contentType: req.file.mimetype
+            }
+        });
+
+        res.status(200).json({ status: 'successful updated avatar' });
+
+    } catch (e) {
+        res.status(500).json({ status: e.message });
+    }
 });
 
 // api/user/delete
 router.delete('/delete', async (req, res) => {
-    
-    await User.deleteOne({ _id: req.user._id }, (e) => {
-        if (e) return handleError(e);
-    });
+    try {
+        await User.deleteOne({ _id: req.user._id }, (e) => {
+            if (e) return handleError(e);
+        });
 
-    res.status(200).json({ status: 'successful deletion' });
+        res.status(200).json({ status: 'successful deletion' });
+
+    } catch (e) {
+        res.status(500).json({ status: e.message });
+    }
+});
+
+// api/user/deleteall
+router.delete('/deleteall', async (req, res) => {
+    try {
+        await User.deleteMany({}, (e) => {
+            if (e) return handleError(e);
+        });
+
+        res.status(200).json({ status: 'successful deletion' });
+
+    } catch (e) {
+        res.status(500).json({ status: e.message });
+    }
 });
 
 // api/user/all
-router.get('/all', (req, res) => {
-    User.find({})
-        .then(users => res.json({status: "ok", users}))
-        .catch(e => res.status(500).json({status: e.message}));
+router.get('/all', async (req, res) => {
+    try {
+        const users = await User.find({});
+
+        res.send(users);
+
+    } catch (e) {
+        res.status(500).json({ status: e.message });
+    }
 });
 
 module.exports = router;

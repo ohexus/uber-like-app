@@ -1,8 +1,20 @@
 const router = require('express').Router();
+const fs = require('fs');
+const path = require('path').join(__dirname, '../../uploads/default.jpeg');
 const jwt = require('jsonwebtoken');
 const config = require('config');
 
 const User = require('../../models/User');
+
+// User Schema
+// firstName: String,
+// lastName: String,
+// username: String,
+// email: String,
+// mobileNumber: String,
+// password: String,
+// role: String,
+// avatarImg: Buffer
 
 // api/auth/signup
 router.post('/signup', async (req, res) => {
@@ -23,6 +35,9 @@ router.post('/signup', async (req, res) => {
             return res.status(401).json({ status: 'This email, username or mobile number is already registered' });
         }
         
+        const defaultImg = fs.readFileSync(path);
+        const encode_defaultImg = defaultImg.toString('base64');
+
         const user = new User({
             firstName: firstName,
             lastName: lastName,
@@ -30,7 +45,11 @@ router.post('/signup', async (req, res) => {
             email: email,
             mobileNumber: mobileNumber,
             password: password,
-            role: role
+            role: role,
+            avatarImg: { 
+                data: Buffer.from(encode_defaultImg, 'base64'),
+                contentType: 'image/jpeg'
+            }
         });
         
         await user.save();
