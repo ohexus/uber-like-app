@@ -4,7 +4,7 @@ import './PasswordUpdateForm.scss';
 
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
-const UPDATEPASSWORD_API = `${API_URL}/api/user/updatepassword`;
+const UPDATEPASSWORD_API = `${API_URL}/api/user/updatePassword`;
 
 export default function PasswordUpdateForm(props) {
     const [oldPassword, setOldPassword] = useState('');
@@ -78,7 +78,7 @@ export default function PasswordUpdateForm(props) {
             
             <label htmlFor='newPassword'> New password: </label>
             <input 
-                type='text'
+                type='password'
                 name='newPassword'
                 value={newPassword}
                 onChange={handleNewPasswordInput}
@@ -86,10 +86,10 @@ export default function PasswordUpdateForm(props) {
             />
             <hr/>
             
-            <label htmlFor='newPassword'> Repeat new password: </label>
+            <label htmlFor='checkNewPassword'> Repeat new password: </label>
             <input 
-                type='text'
-                name='newPassword'
+                type='password'
+                name='checkNewPassword'
                 value={checkNewPassword}
                 onChange={handleCheckNewPasswordInput}
                 required 

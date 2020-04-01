@@ -5,7 +5,7 @@ import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
 const SIGNUP_API = `${API_URL}/api/auth/signup`;
 
-export default function Signup() {
+export default function SignupPage() {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [username, setUsername] = useState('');
@@ -147,13 +147,14 @@ export default function Signup() {
                     onChange={handleRadioShipper}
                 />
                 <label htmlFor='shipper'> Shipper </label>
-
+                    
                 <button type='submit'> Sign Up </button>
 
-                <Link to="/login"> Login </Link>
+                <div className='navigation-panel'>
+                    <Link to='/login'> Login </Link>
 
-                <Link to="/"> Home Page </Link>
-                
+                    <Link to='/'> Home Page </Link>
+                </div>
             </form>
         </div>
     );

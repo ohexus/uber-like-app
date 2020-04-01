@@ -5,7 +5,7 @@ import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
 const LOGIN_API = `${API_URL}/api/auth/login`;
 
-export default function Login() {
+export default function LoginPage() {
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
     const [routeRedirect, setRouteRedirect] = useState(false);
@@ -59,12 +59,16 @@ export default function Login() {
                         required
                     />
                 </div>
+                
+                <Link to="/password-recovery"> forgot password? </Link>
                     
                 <button type="submit"> Login </button><br/>
-                
-                <Link to="/signup"> Sign up </Link>
 
-                <Link to="/"> Home Page </Link>
+                <div className='navigation-panel'>
+                    <Link to='/signup'> Sign up </Link>
+
+                    <Link to='/'> Home Page </Link>
+                </div>
             </form>
         </div>
     );

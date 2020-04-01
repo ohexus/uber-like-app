@@ -5,8 +5,8 @@ import InfoTile from '../InfoTile/InfoTile';
 
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
-const CHECKFORLOAD_API = `${API_URL}/api/load/checkforload`;
-const UPDATELOADSTATE_API = `${API_URL}/api/load/updatestate`;
+const CHECKFORLOAD_API = `${API_URL}/api/load/checkForLoad`;
+const UPDATELOADSTATE_API = `${API_URL}/api/load/updateState`;
 const FINISHLOAD_API = `${API_URL}/api/load/finish`;
 
 // load state transitions

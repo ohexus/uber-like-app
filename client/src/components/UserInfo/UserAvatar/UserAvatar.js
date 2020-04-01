@@ -3,7 +3,7 @@ import './UserAvatar.scss';
 
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
-const UPDATEAVATAR_API = `${API_URL}/api/user/updateavatar`;
+const UPDATEAVATAR_API = `${API_URL}/api/user/updateAvatar`;
 
 export default function UserAvatar(props) {
     const [decodedImg, setDecodedImg] = useState('');

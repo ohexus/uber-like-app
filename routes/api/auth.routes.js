@@ -97,4 +97,46 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// api/user/recoverPassword
+router.put('/recoverPassword', async (req, res) => {  
+    try {  
+        const { userId, newPassword } = req.body;
+
+        await User.findOneAndUpdate({ 
+            _id: userId
+        }, {
+            password: newPassword
+        }, {new: true});
+
+        res.status(200).json({ status: 'successful updated password' });
+
+    } catch (e) {
+        res.status(500).json({ status: e.message });
+    }
+});
+
+// api/auth/recoverPasswordCheckUser
+router.post('/recoverPasswordCheckUser', async (req, res) => {  
+    try {  
+        const { username, email, firstName, lastName, mobileNumber } = req.body;
+
+        const user = await User.findOne({ $and: [
+            { username: username },
+            { email: email },
+            { firstName: firstName },
+            { lastName: lastName },
+            { mobileNumber: mobileNumber },
+        ]});
+
+        if (!user) {
+            return res.status(403).send('Nothing');
+        }
+
+        res.status(200).send(user);
+
+    } catch (e) {
+        res.status(500).json({ status: e.message });
+    }
+});
+
 module.exports = router;

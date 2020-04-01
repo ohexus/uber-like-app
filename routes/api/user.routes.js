@@ -17,7 +17,7 @@ const User = require('../../models/User');
 // avatarImg: { data: Buffer, contentType: String }
 
 // api/user/userinfo
-router.get('/userinfo', async (req, res) => {
+router.get('/userInfo', async (req, res) => {
     try {
         const user = await User.findOne({ _id: req.user._id });
 
@@ -29,7 +29,7 @@ router.get('/userinfo', async (req, res) => {
 });
 
 // api/user/updateuser
-router.put('/updateuser', async (req, res) => {
+router.put('/updateUser', async (req, res) => {
     try {
         const { firstName, lastName, username, email, mobileNumber } = req.body;
 
@@ -65,7 +65,7 @@ router.put('/updateuser', async (req, res) => {
 });
 
 // api/user/updatepassword
-router.put('/updatepassword', async (req, res) => {
+router.put('/updatePassword', async (req, res) => {
     try {
         const { newPassword } = req.body;
 
@@ -87,8 +87,8 @@ router.put('/updatepassword', async (req, res) => {
 });
 
 // api/user/updateavatar
-router.put('/updateavatar', upload.single('avatar'), async (req, res) => {  
-    try {  
+router.put('/updateAvatar', upload.single('avatar'), async (req, res) => {  
+    try {
         await User.findOneAndUpdate({ 
             _id: req.user._id 
         }, {
@@ -120,7 +120,7 @@ router.delete('/delete', async (req, res) => {
 });
 
 // api/user/deleteall
-router.delete('/deleteall', async (req, res) => {
+router.delete('/deleteAll', async (req, res) => {
     try {
         await User.deleteMany({}, (e) => {
             if (e) return handleError(e);

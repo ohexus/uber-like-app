@@ -26,7 +26,7 @@ export default function MainPage() {
                 <div>
                     <h2> Log In or Sign Up </h2>
                         
-                    <div>
+                    <div className='navigation-panel'>
                         <Link to="/login"> login </Link>
                                 
                         <Link to="/signup"> signup </Link>

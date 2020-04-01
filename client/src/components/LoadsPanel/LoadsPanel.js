@@ -6,7 +6,7 @@ import NewLoadForm from './NewLoadForm/NewLoadForm';
 
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
-const LOADS_API = `${API_URL}/api/load/allforuser`;
+const LOADS_API = `${API_URL}/api/load/allForUser`;
 
 export default function LoadsPanel() {
     const [loads, setLoads] = useState(null);

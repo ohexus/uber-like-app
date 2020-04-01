@@ -6,7 +6,7 @@ import NewTruckForm from './NewTruckForm/NewTruckForm';
 
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
-const TRUCKS_API = `${API_URL}/api/truck/allforuser`;
+const TRUCKS_API = `${API_URL}/api/truck/allForUser`;
 
 export default function TrucksPanel() {
     const [trucks, setTrucks] = useState(null);

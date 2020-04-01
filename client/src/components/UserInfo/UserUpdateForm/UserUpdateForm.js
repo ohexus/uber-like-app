@@ -3,7 +3,7 @@ import './UserUpdateForm.scss';
 
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
-const UPDATEUSER_API = `${API_URL}/api/user/updateuser`;
+const UPDATEUSER_API = `${API_URL}/api/user/updateUser`;
 
 export default function UserUpdateForm(props) {
     const user = props.user;

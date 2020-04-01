@@ -8,7 +8,7 @@ import OrderLoad from '../../components/OrderLoad/OrderLoad';
 
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
-const USERINFO_API = `${API_URL}/api/user/userinfo`;
+const USERINFO_API = `${API_URL}/api/user/userInfo`;
 
 export default function UserPage() {
     const [user, setUser] = useState(null);
