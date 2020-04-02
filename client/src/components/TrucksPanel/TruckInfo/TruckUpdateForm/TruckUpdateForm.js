@@ -7,7 +7,7 @@ const UPDATETRUCK_API = `${API_URL}/api/truck/update`;
 
 export default function TruckUpdateForm(props) {
     
-    const truck = props.truck;
+    const [truck] = useState(props.truck);
     
     const [type, setType] = useState('sprinter');
     const [truckName, setTruckName] = useState(truck.truckName);

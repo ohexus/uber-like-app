@@ -14,6 +14,7 @@ const USERINFO_API = `${API_URL}/api/user/userInfo`;
 
 export default function UserPage() {
     const [user, setUser] = useState(null);
+    
     const [routeRedirect, setRouteRedirect] = useState(false);
 
     const fetchUser = async() => {

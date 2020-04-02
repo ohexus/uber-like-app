@@ -6,12 +6,13 @@ const API_URL = process.env.REACT_APP_API_URL;
 const UPDATEAVATAR_API = `${API_URL}/api/user/updateAvatar`;
 
 export default function UserAvatar(props) {
+    const [contentType] = useState(props.undecodedImg.contentType);
+    const [buffer] = useState(props.undecodedImg.data.data);
+
     const [decodedImg, setDecodedImg] = useState('');
     const [newAvatar, setNewAvatar] = useState(null);
-    const [showAvatarUpdateForm, setShowAvatarUpdateForm] = useState(false);
 
-    const contentType = props.undecodedImg.contentType;
-    const buffer = props.undecodedImg.data.data;
+    const [showAvatarUpdateForm, setShowAvatarUpdateForm] = useState(false);
 
     const updateAvatar = async(e) => {
         const form = new FormData();

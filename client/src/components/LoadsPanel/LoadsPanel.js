@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './LoadsPanel.scss';
 
-import LoadInfo from './LoadInfo/LoadInfo';
 import NewLoadForm from './NewLoadForm/NewLoadForm';
+import LoadsShelf from './LoadsShelf/LoadsShelf';
+import Pagination from '../Pagination/Pagination';
 
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
@@ -11,6 +12,10 @@ const LOADS_API = `${API_URL}/api/load/allForUser`;
 export default function LoadsPanel() {
     const [loads, setLoads] = useState(null);
     const [filteredLoads, setFilteredLoads] = useState(null);
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [loadsPerPage] = useState(5);
+
     const [showNewLoadForm, setShowNewloadForm] = useState(false);
 
     const fetchLoads = async() => {
@@ -44,6 +49,12 @@ export default function LoadsPanel() {
             setFilteredLoads(loads);
         })();
     }, []);
+
+    const indexLast = currentPage * loadsPerPage;
+    const indexFirst = indexLast - loadsPerPage;
+    const currentLoads = filteredLoads ? filteredLoads.slice(indexFirst, indexLast) : [];
+
+    const paginate = (pageNum) => setCurrentPage(pageNum);
 
     return (
         <div className='loads'>
@@ -97,12 +108,13 @@ export default function LoadsPanel() {
 
             {filteredLoads
                 ? <div className='loads__panel'>
-                    {filteredLoads.map(load => {
-                        return <LoadInfo
-                                    key={load._id}
-                                    load={load} 
-                                />
-                    })}
+                    <LoadsShelf loads={currentLoads} />
+
+                    <Pagination 
+                        itemsPerPage={loadsPerPage}
+                        total={filteredLoads.length}
+                        paginate={paginate}
+                    />
                 </div>
                 : <h3> You have not added any loads </h3>
             }

@@ -3,6 +3,7 @@ import { Link, Redirect } from 'react-router-dom';
 
 export default function MainPage() {
     const [isAuthorized, setIsAuthorized] = useState(false);
+    
     const [routeRedirect, setRouteRedirect] = useState(false);
     
     useEffect(() => {

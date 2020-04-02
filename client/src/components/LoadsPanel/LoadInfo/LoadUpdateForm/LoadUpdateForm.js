@@ -6,9 +6,8 @@ const API_URL = process.env.REACT_APP_API_URL;
 const UPDATELOAD_API = `${API_URL}/api/load/updateInfo`;
 
 export default function TruckUpdateForm(props) {
-    
-    const load = props.load;
-    const dimensions = load.dimensions;
+    const [load] = useState(props.load);
+    const [dimensions] = useState(load.dimensions);
 
     const [length, setLength] = useState(dimensions.length);
     const [width, setWidth] = useState(dimensions.width);

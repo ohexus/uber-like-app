@@ -8,6 +8,7 @@ const LOGIN_API = `${API_URL}/api/auth/login`;
 export default function LoginPage() {
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
+    
     const [routeRedirect, setRouteRedirect] = useState(false);
     
     const fetchLogin = async (e) => {

@@ -14,8 +14,10 @@ export default function PasswordRecoveryPage() {
     const [mobileNumber, setMobileNumber] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [checkNewPassword, setCheckNewPassword] = useState('');
-    const [alertMessage, setAlertMessage] = useState('smth');
+
+    const [alertMessage, setAlertMessage] = useState('');
     const [showAlertMessage, setShowAlertMessage] = useState(false);
+
     const [routeRedirect, setRouteRedirect] = useState(false);
     
     const recoverPassword = async (userId) => {

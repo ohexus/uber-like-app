@@ -12,10 +12,11 @@ const API_URL = process.env.REACT_APP_API_URL;
 const DELETEUSER_API = `${API_URL}/api/user/delete`;
 
 export default function UserInfo(props) {
-    const user = props.user;
+    const [user] = useState(props.user);
 
     const [showUserUpdateForm, setShowUserUpdateForm] = useState(false);
     const [showPasswordUpdateForm, setShowPasswordUpdateForm] = useState(false);
+    
     const [routeRedirect, setRouteRedirect] = useState(false);
     
     const toggleShowUserUpdateForm = () => {

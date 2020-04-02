@@ -10,9 +10,9 @@ const ASSIGNTRUCK_API = `${API_URL}/api/truck/assign`;
 const DELETETRUCK_API = `${API_URL}/api/truck/delete`;
 
 export default function TruckInfo(props) {
+    const [truck] = useState(props.truck);
+
     const [showTruckUpdateForm, setShowTruckUpdateForm] = useState(false);
-    
-    const truck = props.truck;
     
     const assignTruck = async () => {
         await axios.put(ASSIGNTRUCK_API, { truckId: truck._id }, {

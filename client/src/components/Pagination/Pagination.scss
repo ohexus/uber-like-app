@@ -1,0 +1,9 @@
+.pagination {
+    display: flex;
+
+    list-style: none;
+
+    &__link {
+        padding: 5px;
+    }
+}

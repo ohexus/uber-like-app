@@ -6,10 +6,10 @@ const API_URL = process.env.REACT_APP_API_URL;
 const CREATELOAD_API = `${API_URL}/api/load/create`;
 
 export default function NewLoadForm(props) {
-    const [length, setLength] = useState(0);
-    const [width, setWidth] = useState(0);
-    const [height, setHeight] = useState(0);
-    const [payload, setPayload] = useState(0);
+    const [length, setLength] = useState(1);
+    const [width, setWidth] = useState(1);
+    const [height, setHeight] = useState(1);
+    const [payload, setPayload] = useState(1);
     
     const createLoad = async () => {
         await axios.post(CREATELOAD_API, {

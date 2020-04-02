@@ -6,7 +6,7 @@ const API_URL = process.env.REACT_APP_API_URL;
 const UPDATEUSER_API = `${API_URL}/api/user/updateUser`;
 
 export default function UserUpdateForm(props) {
-    const user = props.user;
+    const [user] = useState(props.user);
 
     const [firstName, setFirstName] = useState(user.firstName);
     const [lastName, setLastName] = useState(user.lastName);

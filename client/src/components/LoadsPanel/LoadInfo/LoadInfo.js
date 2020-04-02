@@ -11,9 +11,9 @@ const ASSIGNLOAD_API = `${API_URL}/api/load/assign`;
 const DELETELOAD_API = `${API_URL}/api/load/delete`;
 
 export default function TruckInfo(props) {
-    const load = props.load;
-    const dimensions = load.dimensions;
-    const isLoadFinished = load.status === 'SHIPPED';
+    const [load] = useState(props.load);
+    const [dimensions] = useState(load.dimensions);
+    const [isLoadFinished] = useState(load.status === 'SHIPPED');
 
     const [showLoadUpdateForm, setShowLoadUpdateForm] = useState(false);
     const [showAlertCantAssign, setShowAlertCantAssign] = useState(false);
