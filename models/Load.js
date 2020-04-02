@@ -18,7 +18,7 @@ module.exports = model('Load', new Schema({
         message: {type: String, default: 'Load created'},
         time: {type: Date, default: Date.now()}
     }],
-    assigned_to: {type: Types.ObjectId, ref: 'User', default: null},
+    assigned_to: {type: Types.ObjectId, ref: 'Truck', default: null},
     status: {type: String, default: 'NEW'},
     state: {type: String, default: null},
     dimensions: {

@@ -1,5 +1,6 @@
 const router = require('express').Router();
 
+const User = require('../../models/User');
 const Load = require('../../models/Load');
 const Truck = require('../../models/Truck');
 
@@ -250,6 +251,36 @@ router.put('/finish', async (req, res) => {
         });
 
         res.status(200).send(shippedLoad);
+
+    } catch (e) {
+        res.status(500).json({ status: e.message });
+    }
+});
+
+// api/load/assignedDriver
+router.post('/assignedDriver', async (req, res) => {
+    try {
+        const load = await Load.findOne({ $and: [
+            { _id: req.body.loadId },
+            { assigned_to: { $ne: null } }
+        ]});
+
+        if (!load) return
+        
+        const truck = await Truck.findOne({ $and: [
+            { _id: load.assigned_to},
+            { assigned_to: { $ne: null } }
+        ]});
+
+        if (!truck) return
+
+        const driver = await User.findOne({
+            _id: truck.assigned_to
+        })
+
+        if (!driver) return
+
+        res.status(200).send(driver);
 
     } catch (e) {
         res.status(500).json({ status: e.message });

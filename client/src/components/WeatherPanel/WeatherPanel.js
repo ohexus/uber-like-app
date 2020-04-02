@@ -40,7 +40,7 @@ export default function WeatherPanel() {
     const [showWeather, setShowWeather] = useState(false);
 
     const fetchWeather = useCallback(async() => {
-        const weatherRes = await axios.post(WEATHER_API, {
+        const weatherData = await axios.post(WEATHER_API, {
             lat: coordinates.latitude,
             lon: coordinates.longitude
         }, {
@@ -49,10 +49,10 @@ export default function WeatherPanel() {
             }
         }).then(res => res.data);
     
-        if (weatherRes) {
-            setWeatherInfo(weatherRes.weather);
-            setWeatherMainInfo(weatherRes.main);
-            setWindInfo(weatherRes.wind);
+        if (weatherData) {
+            setWeatherInfo(weatherData.weather);
+            setWeatherMainInfo(weatherData.main);
+            setWindInfo(weatherData.wind);
 
             setShowWeather(true);
         }

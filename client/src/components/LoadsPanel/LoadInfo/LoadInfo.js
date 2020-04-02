@@ -3,6 +3,7 @@ import './LoadInfo.scss';
 
 import InfoTile from '../../InfoTile/InfoTile';
 import LoadUpdateForm from './LoadUpdateForm/LoadUpdateForm';
+import DriversInfo from './DriversInfo/DriversInfo';
 
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
@@ -10,7 +11,7 @@ const POSTLOAD_API = `${API_URL}/api/load/post`;
 const ASSIGNLOAD_API = `${API_URL}/api/load/assign`;
 const DELETELOAD_API = `${API_URL}/api/load/delete`;
 
-export default function TruckInfo(props) {
+export default function LoadInfo(props) {
     const [load] = useState(props.load);
     const [dimensions] = useState(load.dimensions);
     const [isLoadFinished] = useState(load.status === 'SHIPPED');
@@ -63,10 +64,12 @@ export default function TruckInfo(props) {
     return (
         <div className="load-wrapper">
             <form className='load' onSubmit={postLoad}>
-                {!isLoadFinished && <h4 className='load__assigned'>{load.assigned_to
-                    ? 'Assigned'
-                    : 'Not assigned'
-                }</h4>}
+                {!isLoadFinished && <h4 className='load__assigned'>
+                    {load.assigned_to
+                        ? 'Assigned'
+                        : 'Not assigned'
+                    }
+                </h4>}
 
                 {showAlertCantAssign && <h5>
                     All matched trucks is on load, try again later
@@ -76,12 +79,7 @@ export default function TruckInfo(props) {
                     {!load.assigned_to && <button type="submit"> Post this load </button>}
                 </>}
 
-                {!isLoadFinished && 
-                    <InfoTile
-                        label={'Assigned to:'}
-                        info={load.assigned_to}
-                    />
-                }
+                {load.assigned_to && <DriversInfo loadId={load._id} />}
 
                 <InfoTile
                     label={'Status:'}
