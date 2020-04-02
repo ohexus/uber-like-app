@@ -23,17 +23,19 @@ const userRouter = require('./routes/api/user.routes');
 const truckRouter = require('./routes/api/truck.routes');
 const loadRouter = require('./routes/api/load.routes');
 const weatherRouter = require('./routes/api/weather.routes');
+const clearDBRouter = require('./routes/api/clearDB.routes');
 
 app.use(log);
+app.use('/api/clearDB', clearDBRouter);
 
 app.use('/api/auth', authRouter);
-app.use('/api/weather', weatherRouter);
 
 app.use(auth);
 
 app.use('/api/user', userRouter);
 app.use('/api/truck', truckRouter);
 app.use('/api/load', loadRouter);
+app.use('/api/weather', weatherRouter);
 
 app.listen(PORT, () => {
     console.log(`server is running on port ${PORT}`)

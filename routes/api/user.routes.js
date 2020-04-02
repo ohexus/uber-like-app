@@ -138,7 +138,7 @@ router.get('/all', async (req, res) => {
     try {
         const users = await User.find({});
 
-        res.send(users);
+        res.status(200).send(users);
 
     } catch (e) {
         res.status(500).json({ status: e.message });

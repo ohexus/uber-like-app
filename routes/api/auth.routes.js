@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const config = require('config');
 
 const User = require('../../models/User');
+const Weather = require('../../models/Weather');
 
 // User Schema
 // firstName: String,
@@ -53,6 +54,12 @@ router.post('/signup', async (req, res) => {
         });
         
         await user.save();
+
+        const weather = new Weather({
+            created_by: user._id
+        })
+
+        await weather.save();
 
         res.status(200).send({ _id: user._id});
 

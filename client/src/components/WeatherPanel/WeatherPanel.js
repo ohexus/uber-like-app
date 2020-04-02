@@ -6,37 +6,31 @@ import windArrow from '../../assets/images/wind-arrow.png';
 
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
-const WEATHER_API = `${API_URL}/api/weather/`;
+const WEATHER_API = `${API_URL}/api/weather/update`;     
 
-// Open Weather Map Response
-// {                                                                                
-//     coord: { lon: 34.71, lat: 50.87 },                                             
-//     weather: [{ 
-//          id: 800, 
-//          main: 'Clear', 
-//          description: 'clear sky', 
-//          icon: '01n' 
-//     }],
-//     base: 'stations',                                                              
-//     main: {                                                                        
-//         temp: -0.09,                                                                 
-//         feels_like: -5.37,                                                           
-//         temp_min: -0.09,                                                             
-//         temp_max: -0.09,                                                             
-//         pressure: 1014,                                                              
-//         humidity: 84,                                                                
-//         sea_level: 1014,                                                             
-//         grnd_level: 992                                                              
-//     },                                                                             
-//     wind: { speed: 4.23, deg: 244 },                                               
-//     clouds: { all: 9 },                                                            
-//     dt: 1585787093,                                                                
-//     sys: { country: 'UA', sunrise: 1585797248, sunset: 1585844090 },               
-//     timezone: 10800,                                                               
-//     id: 692194,                                                                    
-//     name: 'Sumy',                                                                  
-//     cod: 200                                                                       
-// }                                                                                
+// Weather Schema
+// created_by: {type: Types.ObjectId, ref: 'User'}
+// weather: {
+//     main: String,
+//     description: String,
+//     icon: String
+// },
+// main: {                                                     
+//     temp: Number,                                                                 
+//     feels_like: Number,   
+//     pressure: Number,
+//     humidity: Number
+// },
+// wind: {
+//     speed: Number,
+//     deg: Number
+// }
+
+function WeatherTempString(props) {
+    return (
+        `${parseInt(props.temp)} °C`
+    );
+}
 
 export default function WeatherPanel() {
     const [coordinates, setCoordinates] = useState(null);
@@ -49,10 +43,14 @@ export default function WeatherPanel() {
         const weatherRes = await axios.post(WEATHER_API, {
             lat: coordinates.latitude,
             lon: coordinates.longitude
+        }, {
+            headers: {
+                'authorization': localStorage.getItem('jwt_token')
+            }
         }).then(res => res.data);
     
         if (weatherRes) {
-            setWeatherInfo(weatherRes.weather[0]);
+            setWeatherInfo(weatherRes.weather);
             setWeatherMainInfo(weatherRes.main);
             setWindInfo(weatherRes.wind);
 
@@ -82,57 +80,54 @@ export default function WeatherPanel() {
 
     return (
         <div className='weather'>
-            {showWeather 
-                ? <>
-                    <div className='weather__info'>
-                        <img
-                            className='weather__icon'
-                            src={`http://openweathermap.org/img/wn/${weatherInfo.icon}@2x.png`}
-                            alt={weatherInfo.main}
-                        />
+            {showWeather && <>
+                <div className='weather__info'>
+                    <img
+                        className='weather__icon'
+                        src={`http://openweathermap.org/img/wn/${weatherInfo.icon}@2x.png`}
+                        alt={weatherInfo.main}
+                    />
 
-                        <h3> {weatherInfo.description} </h3>
-                    </div>
+                    <h3> {weatherInfo.description} </h3>
+                </div>
 
-                    <div className='weather__temperature'>
-                        <h2 className='weather__temperature-number'>
-                            {parseInt(weatherMainInfo.temp)} °C
-                        </h2>
-
-                        <InfoTile 
-                            label='Feels like:'
-                            info={parseInt(weatherMainInfo.feels_like)}
-                        />
-                    </div>
+                <div className='weather__temperature'>
+                    <h2 className='weather__temperature-number'>
+                        <WeatherTempString temp={weatherMainInfo.temp} />
+                    </h2>
 
                     <InfoTile 
-                        label='Humidity:'
-                        info={weatherMainInfo.humidity}
+                        label='Feels like:'
+                        info={<WeatherTempString temp={weatherMainInfo.feels_like} />}
                     />
+                </div>
 
+                <InfoTile 
+                    label='Humidity:'
+                    info={weatherMainInfo.humidity}
+                />
+
+                <InfoTile
+                    label='Pressure:'
+                    info={weatherMainInfo.pressure}
+                />
+
+                <div className='weather__wind'>
                     <InfoTile
-                        label='Pressure:'
-                        info={weatherMainInfo.pressure}
+                        label='Wind:'
+                        info={`${windInfo.speed} km / h`}
                     />
-
-                    <div className='weather__wind'>
-                        <InfoTile
-                            label='Wind:'
-                            info={`${windInfo.speed} km / h`}
-                        />
                         
-                        <img 
-                            className='weather__wind-arrow'
-                            src={windArrow}
-                            style={{
-                                transform: `rotate(${windInfo.deg}deg)`
-                            }}
-                            alt='wind direction'
-                        />
-                    </div>
-                </>
-                : <p> Can't get weather info, please try again later </p>
-            }
+                    <img 
+                        className='weather__wind-arrow'
+                        src={windArrow}
+                        style={{
+                            transform: `rotate(${windInfo.deg}deg)`
+                        }}
+                        alt='wind direction'
+                    />
+                </div>
+            </>}
         </div>
     );
 }

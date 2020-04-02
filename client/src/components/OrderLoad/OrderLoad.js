@@ -29,7 +29,7 @@ export default function OrderLoad() {
         
         setLoadNextState(findNextState(load.state));
 
-        return (load.status !== 'Nothing' ? load : null)
+        return ((load.status !== 'Nothing' && load.status !== 'No truck assigned') ? load : null)
     }, [])
     
     const updateLoadState = async (e) => {

@@ -120,8 +120,6 @@ router.put('/assign', async (req, res) => {
 
         res.status(200).json({ status: 'load assigned' });
 
-        console.log('Load assigned successfully');
-
     } catch (e) {
         res.status(500).json({ status: e.message });
     }
@@ -194,7 +192,7 @@ router.get('/all', async (req, res) => {
     }
 });
 
-// api/load/allforuser
+// api/load/allForUser
 router.get('/allForUser', async (req, res) => {
     try {
         const loads = await Load.find({ created_by: req.user._id });
@@ -206,7 +204,7 @@ router.get('/allForUser', async (req, res) => {
     }
 });
 
-// api/load/checkforload
+// api/load/checkForLoad
 router.get('/checkForLoad', async (req, res) => {
     try {
         if (req.user.role === 'driver') {
@@ -216,6 +214,8 @@ router.get('/checkForLoad', async (req, res) => {
         const assignedTruck = await Truck.findOne({ 
             assigned_to: req.user._id 
         });
+
+        if (!assignedTruck) return res.status(200).json({ status: 'No truck assigned' });
         
         const loadFound = await Load.findOne({ 
             assigned_to: assignedTruck._id 
@@ -230,7 +230,7 @@ router.get('/checkForLoad', async (req, res) => {
     }
 });
 
-// api/load/updatestate
+// api/load/updateState
 router.put('/updateState', async (req, res) => {
     try {
         if (req.user.role === 'shipper') {
@@ -278,10 +278,9 @@ router.put('/finish', async (req, res) => {
     }
 });
 
-// api/load/deleteall
+// api/load/deleteAll
 router.delete('/deleteAll', async (req, res) => {
     try {
-        
         await Load.deleteMany({});
 
         res.status(200).json({ status: 'loads deleted' });

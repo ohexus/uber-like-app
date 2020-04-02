@@ -162,8 +162,6 @@ router.get('/allForUser', async (req, res) => {
 
         res.status(200).send(trucks);
 
-        // console.log(`user trucks: ${trucks}`);
-
     } catch (e) {
         res.status(500).json({ status: e.message });
     }
@@ -172,7 +170,6 @@ router.get('/allForUser', async (req, res) => {
 // api/truck/deleteall
 router.delete('/deleteAll', async (req, res) => {
     try {
-        
         await Truck.deleteMany({});
 
         res.status(200).json({ status: 'trucks deleted' });
