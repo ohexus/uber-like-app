@@ -37,6 +37,7 @@ export default function WeatherPanel() {
     const [weatherInfo, setWeatherInfo] = useState(null);
     const [weatherMainInfo, setWeatherMainInfo] = useState(null);
     const [windInfo, setWindInfo] = useState(null);
+
     const [showWeather, setShowWeather] = useState(false);
 
     const fetchWeather = useCallback(async() => {
@@ -83,9 +84,13 @@ export default function WeatherPanel() {
             <h1> Weather for now: </h1>
             {showWeather && <>
                 <div className='weather__info'>
+                    <h2 className='weather__city'>
+                        {weatherMainInfo.city}
+                    </h2>
+
                     <img
                         className='weather__icon'
-                        src={`http://openweathermap.org/img/wn/${weatherInfo.icon}@2x.png`}
+                        src={weatherInfo.iconUrl}
                         alt={weatherInfo.main}
                     />
 

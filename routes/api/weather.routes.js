@@ -5,17 +5,22 @@ const config = require('config');
 const Weather = require('../../models/Weather');
 
 // Weather Schema
-// created_by: {type: Types.ObjectId, ref: 'User'}
+// created_by: {type: Types.ObjectId, ref: 'User'},
+// coord: {
+//     lat: {type: Number, default: 0},
+//     lon: {type: Number, default: 0}
+// },
 // weather: {
 //     main: {type: String, default: ''},
 //     description: {type: String, default: ''},
-//     icon: {type: String, default: ''}
+//     iconUrl: {type: String, default: ''}
 // },
 // main: {                                                     
 //     temp: {type: Number, default: 0},                                                                 
 //     feels_like: {type: Number, default: 0},   
 //     pressure: {type: Number, default: 0},
-//     humidity: {type: Number, default: 0}
+//     humidity: {type: Number, default: 0},
+//     city: {type: String, default: ''}
 // },
 // wind: {
 //     speed: {type: Number, default: 0},
@@ -31,19 +36,26 @@ router.post('/update', async (req, res) => {
 
         const weatherResponse = await axios.get(openWeatherUrl).then(res => res.data);
 
+        const weatherIconUrl = `http://openweathermap.org/img/wn/${weatherResponse.weather[0].icon}@2x.png`
+
         const weather = await Weather.findOneAndUpdate({
             created_by: req.user._id
         }, {
+            coord: {
+                lat: weatherResponse.coord.lat,
+                lon: weatherResponse.coord.lon
+            },
             weather: {
                 main: weatherResponse.weather[0].main,
                 description: weatherResponse.weather[0].description,
-                icon: weatherResponse.weather[0].icon
+                iconUrl: weatherIconUrl
             },
             main: {                                                     
                 temp: weatherResponse.main.temp,                                                                 
                 feels_like: weatherResponse.main.feels_like,   
                 pressure: weatherResponse.main.pressure,
-                humidity: weatherResponse.main.humidity
+                humidity: weatherResponse.main.humidity,
+                city: weatherResponse.name
             },
             wind: {
                 speed: weatherResponse.wind.speed,
