@@ -55,6 +55,9 @@ router.put('/updateUser', async (req, res) => {
             username: username,
             email: email,
             mobileNumber: mobileNumber,
+            $push: { logs: {
+                message: 'user updated'
+            }}
         });
 
         res.status(200).json({ status: 'successful update' });
@@ -76,7 +79,10 @@ router.put('/updatePassword', async (req, res) => {
         await User.findOneAndUpdate({ 
             _id: req.user._id 
         }, {
-            password: newPassword
+            password: newPassword,
+            $push: { logs: {
+                message: 'password updated'
+            }}
         });
 
         res.status(200).json({ status: 'successful updated password' });
@@ -95,10 +101,25 @@ router.put('/updateAvatar', upload.single('avatar'), async (req, res) => {
             avatarImg: {
                 data: fs.readFileSync(req.file.path),
                 contentType: req.file.mimetype
-            }
+            },
+            $push: { logs: {
+                message: 'avatar updated'
+            }}
         });
 
         res.status(200).json({ status: 'successful updated avatar' });
+
+    } catch (e) {
+        res.status(500).json({ status: e.message });
+    }
+});
+
+// api/user/all
+router.get('/all', async (req, res) => {
+    try {
+        const users = await User.find({});
+
+        res.status(200).send(users);
 
     } catch (e) {
         res.status(500).json({ status: e.message });
@@ -127,18 +148,6 @@ router.delete('/deleteAll', async (req, res) => {
         });
 
         res.status(200).json({ status: 'successful deletion' });
-
-    } catch (e) {
-        res.status(500).json({ status: e.message });
-    }
-});
-
-// api/user/all
-router.get('/all', async (req, res) => {
-    try {
-        const users = await User.find({});
-
-        res.status(200).send(users);
 
     } catch (e) {
         res.status(500).json({ status: e.message });

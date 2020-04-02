@@ -80,6 +80,7 @@ export default function WeatherPanel() {
 
     return (
         <div className='weather'>
+            <h1> Weather for now: </h1>
             {showWeather && <>
                 <div className='weather__info'>
                     <img

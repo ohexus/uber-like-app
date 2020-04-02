@@ -16,19 +16,6 @@ export default function MainPage() {
         }
     }, [isAuthorized]);
 
-    useEffect(() => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(displayLocationInfo);
-        }
-          
-        function displayLocationInfo(position) {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-          
-            console.log(`latitude: ${ lat } | longitude: ${ lng }`);
-        }
-    }, []);
-
     if(routeRedirect){
         return <Redirect to='/user' />
     }

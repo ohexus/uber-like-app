@@ -68,7 +68,7 @@ export default function PasswordUpdateForm(props) {
 
             <label htmlFor='oldPassword'> Old password: </label>
             <input 
-                type='text'
+                type='password'
                 name='oldPassword'
                 value={oldPassword}
                 onChange={handleOldPasswordInput}

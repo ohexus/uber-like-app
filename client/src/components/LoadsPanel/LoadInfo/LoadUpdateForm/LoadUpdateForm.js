@@ -3,7 +3,7 @@ import './LoadUpdateForm.scss';
 
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
-const UPDATELOAD_API = `${API_URL}/api/load/update`;
+const UPDATELOAD_API = `${API_URL}/api/load/updateInfo`;
 
 export default function TruckUpdateForm(props) {
     
