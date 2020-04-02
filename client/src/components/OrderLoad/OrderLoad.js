@@ -85,7 +85,8 @@ export default function OrderLoad() {
 
     return (
         <>
-            {load && <>
+            {load 
+                ? <>
                 {showOrder &&
                     <form 
                         className='order'
@@ -126,8 +127,11 @@ export default function OrderLoad() {
                             : <button type='submit'> {loadNextState} </button>
                         }
                     </form>
-                }
-            </>}
+                }</>
+                : <>
+                    <h2> You have no order, just chill :) </h2>
+                </>
+            }
         </>
     );
 }

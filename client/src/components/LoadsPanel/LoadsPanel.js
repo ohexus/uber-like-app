@@ -10,6 +10,7 @@ const LOADS_API = `${API_URL}/api/load/allForUser`;
 
 export default function LoadsPanel() {
     const [loads, setLoads] = useState(null);
+    const [filteredLoads, setFilteredLoads] = useState(null);
     const [showNewLoadForm, setShowNewloadForm] = useState(false);
 
     const fetchLoads = async() => {
@@ -26,8 +27,22 @@ export default function LoadsPanel() {
         setShowNewloadForm(!showNewLoadForm);
     }
     
+    const handleFilterSelect = (e) => {
+        if (loads) {
+            if (e.target.value !== '') {
+                setFilteredLoads(loads.filter(load => load.status === e.target.value));
+            } else {
+                setFilteredLoads(loads);
+            }
+        }
+    }
+    
     useEffect(() => {
-        (async() => setLoads(await fetchLoads()))();
+        (async() => {
+            const loads = await fetchLoads();
+            setLoads(loads);
+            setFilteredLoads(loads);
+        })();
     }, []);
 
     return (
@@ -46,16 +61,50 @@ export default function LoadsPanel() {
 
             {showNewLoadForm && <NewLoadForm className='loads__newload' />}
 
-            {loads
+            <div className='loads__filter'>
+                <label htmlFor='type'> Filter: </label>
+                <select 
+                    name='type'
+                    className='loads__select'
+                    onChange={handleFilterSelect}
+                >
+                    <option 
+                        className='loads__option'
+                        value=''
+                    > All </option>
+
+                    <option 
+                        className='loads__option'
+                        value='NEW'
+                    > NEW </option>
+                    
+                    <option 
+                        className='loads__option'
+                        value='POSTED'
+                    > POSTED </option>
+
+                    <option 
+                        className='loads__option'
+                        value='ASSIGNED'
+                    > ASSIGNED </option>
+
+                    <option 
+                        className='loads__option'
+                        value='SHIPPED'
+                    > SHIPPED </option>
+                </select>
+            </div>
+
+            {filteredLoads
                 ? <div className='loads__panel'>
-                    {loads.map(load => {
+                    {filteredLoads.map(load => {
                         return <LoadInfo
                                     key={load._id}
                                     load={load} 
                                 />
                     })}
                 </div>
-                : <h3>You have not added any loads</h3>
+                : <h3> You have not added any loads </h3>
             }
         </div>
     );

@@ -30,7 +30,7 @@ export default function LoginPage() {
         setPassword(e.target.value);
     }
 
-    if(routeRedirect){
+    if (routeRedirect) {
         return <Redirect to='/' />
     }
 
