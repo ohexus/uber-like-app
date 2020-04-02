@@ -16,23 +16,34 @@ export default function MainPage() {
         }
     }, [isAuthorized]);
 
+    useEffect(() => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(displayLocationInfo);
+        }
+          
+        function displayLocationInfo(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+          
+            console.log(`latitude: ${ lat } | longitude: ${ lng }`);
+        }
+    }, []);
+
     if(routeRedirect){
         return <Redirect to='/user' />
     }
     
     return (
         <>
-            {!isAuthorized && (
-                <div>
-                    <h2> Log In or Sign Up </h2>
+            {!isAuthorized && <>
+                <h2> Log In or Sign Up </h2>
                         
-                    <div className='navigation-panel'>
-                        <Link to="/login"> login </Link>
+                <div className='navigation-panel'>
+                    <Link to="/login"> login </Link>
                                 
-                        <Link to="/signup"> signup </Link>
-                    </div>
+                    <Link to="/signup"> signup </Link>
                 </div>
-            )} 
+            </>} 
         </>
     );
 }

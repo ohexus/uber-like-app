@@ -1,5 +1,6 @@
 {
     "port": 8081,
     "mongoUri": "mongodb://localhost:27017/uber-like-app",
-    "jwtSecret": "The quick brown fox jumps over the lazy dog."
+    "jwtSecret": "The quick brown fox jumps over the lazy dog.",
+    "openWeatherAPIkey": "bf437daf89cb57fd842a855be308e052"
 }

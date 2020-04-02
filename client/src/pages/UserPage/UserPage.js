@@ -5,6 +5,7 @@ import UserInfo from '../../components/UserInfo/UserInfo';
 import TrucksPanel from '../../components/TrucksPanel/TrucksPanel';
 import LoadsPanel from '../../components/LoadsPanel/LoadsPanel';
 import OrderLoad from '../../components/OrderLoad/OrderLoad';
+import WeatherPanel from '../../components/WeatherPanel/WeatherPanel';
 
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
@@ -40,6 +41,8 @@ export default function UserPage() {
                 {user.role === 'driver' &&
                     <OrderLoad />
                 }
+
+                <WeatherPanel />
             </div>}
         </>
     );

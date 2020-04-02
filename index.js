@@ -22,10 +22,12 @@ const authRouter = require('./routes/api/auth.routes');
 const userRouter = require('./routes/api/user.routes');
 const truckRouter = require('./routes/api/truck.routes');
 const loadRouter = require('./routes/api/load.routes');
+const weatherRouter = require('./routes/api/weather.routes');
 
 app.use(log);
 
 app.use('/api/auth', authRouter);
+app.use('/api/weather', weatherRouter);
 
 app.use(auth);
 
