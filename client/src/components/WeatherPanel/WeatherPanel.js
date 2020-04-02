@@ -87,7 +87,8 @@ export default function WeatherPanel() {
                     <div className='weather__info'>
                         <img
                             className='weather__icon'
-                            src={`http://openweathermap.org/img/wn/${weatherInfo.icon}@2x.png`}     
+                            src={`http://openweathermap.org/img/wn/${weatherInfo.icon}@2x.png`}
+                            alt={weatherInfo.main}
                         />
 
                         <h3> {weatherInfo.description} </h3>
@@ -126,6 +127,7 @@ export default function WeatherPanel() {
                             style={{
                                 transform: `rotate(${windInfo.deg}deg)`
                             }}
+                            alt='wind direction'
                         />
                     </div>
                 </>
