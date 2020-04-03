@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './WeatherPanel.scss';
 
+import findUsersCoordinates from '../../helpers/findLocationInfo';
+
 import InfoTile from '../InfoTile/InfoTile';
 import windArrow from '../../assets/images/wind-arrow.png';
 
@@ -33,7 +35,7 @@ function WeatherTempString(props) {
 }
 
 export default function WeatherPanel() {
-    const [coordinates, setCoordinates] = useState(null);
+    const [userLocation, setUserLocation] = useState(null);
     const [weatherInfo, setWeatherInfo] = useState(null);
     const [weatherMainInfo, setWeatherMainInfo] = useState(null);
     const [windInfo, setWindInfo] = useState(null);
@@ -42,8 +44,8 @@ export default function WeatherPanel() {
 
     const fetchWeather = useCallback(async() => {
         const weatherData = await axios.post(WEATHER_API, {
-            lat: coordinates.latitude,
-            lon: coordinates.longitude
+            lat: userLocation.latitude,
+            lon: userLocation.longitude
         }, {
             headers: {
                 'authorization': localStorage.getItem('jwt_token')
@@ -57,27 +59,21 @@ export default function WeatherPanel() {
 
             setShowWeather(true);
         }
-    }, [coordinates, setWeatherInfo])
+    }, [userLocation, setWeatherInfo])
 
-    const displayLocationInfo = useCallback((position) => {
-        const coords = position.coords;
-        
-        setCoordinates(coords);
-    }, [])
+    const handleUserLocation = (position) => {
+        setUserLocation(position.coords);
+    }
 
     useEffect(() => {
-        if (!coordinates) {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(displayLocationInfo);
-            }
-        }
-    }, [coordinates, displayLocationInfo]);
+        findUsersCoordinates(handleUserLocation)
+    }, []);
 
     useEffect(() => {
-        if (!showWeather && coordinates) {
+        if (!showWeather && userLocation) {
             (async() => await fetchWeather())();
         }
-    }, [showWeather, coordinates, fetchWeather]);
+    }, [showWeather, userLocation, fetchWeather]);
 
     return (
         <div className='weather'>

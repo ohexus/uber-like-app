@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Map.scss';
+
+import findUsersCoordinates from '../../helpers/findLocationInfo';
 
 import MapGL, { NavigationControl, Marker, Popup } from 'react-map-gl';
 
@@ -23,6 +25,7 @@ export default function Map() {
         longitude: 34.7075792,
         zoom: 8
     });
+    const [userLocation, setUserLocation] = useState(null);
 
     const [showPopupInfo, setShowPopupInfo] = useState(false);
 
@@ -55,20 +58,23 @@ export default function Map() {
             </Popup>
         );
     }
-  
-    return (
-        <MapGL
-            {...viewport}
-            onViewportChange={setViewport}
-            mapStyle='mapbox://styles/mapbox/streets-v11'
-            mapboxApiAccessToken={MAPBOX_TOKEN}
-        >
-            <div className='nav' style={navStyle}>
-                <NavigationControl 
-                    onViewportChange={setViewport}
-                    showCompass={false}
-                />
 
+    const handleUserLocation = (position) => {
+        setUserLocation(position.coords);
+    }
+
+    useEffect(() => {
+        findUsersCoordinates(handleUserLocation)
+    }, []);
+
+    return (<>
+        {userLocation
+            ? <MapGL
+                {...viewport}
+                onViewportChange={setViewport}
+                mapStyle='mapbox://styles/mapbox/streets-v11'
+                mapboxApiAccessToken={MAPBOX_TOKEN}
+            >
                 {markerList.map((marker, index) => {
                     return (
                         <div key={index}>
@@ -87,7 +93,15 @@ export default function Map() {
                         </div>
                     );
                 })}
-            </div>
-        </MapGL>
-    );
+
+                <div className='nav' style={navStyle}>
+                    <NavigationControl 
+                        onViewportChange={setViewport}
+                        showCompass={false}
+                    />
+                </div>
+            </MapGL>
+            : 'Map loading'
+        }
+    </>);
 }
