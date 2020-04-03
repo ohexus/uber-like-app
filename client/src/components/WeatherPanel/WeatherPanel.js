@@ -8,7 +8,7 @@ import windArrow from '../../assets/images/wind-arrow.png';
 
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
-const WEATHER_API = `${API_URL}/api/weather/update`;     
+const WEATHER_API = `${API_URL}/api/weather/update`;
 
 // Weather Schema
 // created_by: {type: Types.ObjectId, ref: 'User'}
@@ -42,7 +42,7 @@ export default function WeatherPanel() {
 
     const [showWeather, setShowWeather] = useState(false);
 
-    const fetchWeather = useCallback(async() => {
+    const fetchWeather = useCallback(async () => {
         const weatherData = await axios.post(WEATHER_API, {
             lat: userLocation.latitude,
             lon: userLocation.longitude
@@ -51,7 +51,7 @@ export default function WeatherPanel() {
                 'authorization': localStorage.getItem('jwt_token')
             }
         }).then(res => res.data);
-    
+
         if (weatherData) {
             setWeatherInfo(weatherData.weather);
             setWeatherMainInfo(weatherData.main);
@@ -71,7 +71,7 @@ export default function WeatherPanel() {
 
     useEffect(() => {
         if (!showWeather && userLocation) {
-            (async() => await fetchWeather())();
+            (async () => await fetchWeather())();
         }
     }, [showWeather, userLocation, fetchWeather]);
 
@@ -98,13 +98,13 @@ export default function WeatherPanel() {
                         <WeatherTempString temp={weatherMainInfo.temp} />
                     </h2>
 
-                    <InfoTile 
+                    <InfoTile
                         label='Feels like:'
                         info={<WeatherTempString temp={weatherMainInfo.feels_like} />}
                     />
                 </div>
 
-                <InfoTile 
+                <InfoTile
                     label='Humidity:'
                     info={weatherMainInfo.humidity}
                 />
@@ -119,15 +119,17 @@ export default function WeatherPanel() {
                         label='Wind:'
                         info={`${windInfo.speed} km / h`}
                     />
-                        
-                    <img 
-                        className='weather__wind-arrow'
-                        src={windArrow}
-                        style={{
-                            transform: `rotate(${windInfo.deg}deg)`
-                        }}
-                        alt='wind direction'
-                    />
+
+                    <div className='weather__wind-arrow-wrapper'>
+                        <img
+                            className='weather__wind-arrow'
+                            src={windArrow}
+                            style={{
+                                transform: `rotate(${windInfo.deg}deg)`
+                            }}
+                            alt='wind direction'
+                        />
+                    </div>
                 </div>
             </>}
         </div>

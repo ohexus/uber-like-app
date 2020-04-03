@@ -4,6 +4,10 @@
 
     background-color: skyblue;
 
+    &__info * {
+        margin: 0;
+    }
+
     &__info,
     &__wind {
         display: flex;
@@ -26,6 +30,8 @@
         height: 25px;
         border-radius: 50%;
 
-        margin-left: 5px;
+        &-wrapper {
+            margin-left: 5px;
+        }
     }
 }
