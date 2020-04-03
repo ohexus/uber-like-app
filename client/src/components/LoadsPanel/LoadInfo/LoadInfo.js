@@ -65,6 +65,11 @@ export default function LoadInfo(props) {
     return (
         <div className="load-wrapper">
             <form className='load' onSubmit={postLoad}>
+            <InfoTile
+                    label={'Load name:'}
+                    info={load.name}
+                />
+
                 {!isLoadFinished && <h4 className='load__assigned'>
                     {load.assigned_to
                         ? 'Assigned'

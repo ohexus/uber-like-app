@@ -26,5 +26,6 @@ module.exports = model('Load', new Schema({
         width: Number,
         height: Number
     },
-    payload: Number
+    payload: Number,
+    name: String
 }));
