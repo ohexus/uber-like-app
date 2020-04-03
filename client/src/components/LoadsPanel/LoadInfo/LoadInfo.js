@@ -6,6 +6,7 @@ import LoadUpdateForm from './LoadUpdateForm/LoadUpdateForm';
 import DriversInfo from './DriversInfo/DriversInfo';
 
 import axios from 'axios';
+import ReportDownloadPanel from './ReportDownloadPanel/ReportDownloadPanel';
 const API_URL = process.env.REACT_APP_API_URL;
 const POSTLOAD_API = `${API_URL}/api/load/post`;
 const ASSIGNLOAD_API = `${API_URL}/api/load/assign`;
@@ -133,6 +134,8 @@ export default function LoadInfo(props) {
             {!isLoadFinished && <>
                 {showLoadUpdateForm && <LoadUpdateForm load={load} className='load-wrapper__updateload' />}
             </>}
+
+            {isLoadFinished && <ReportDownloadPanel load={load} />}
         </div>
     );
 }
