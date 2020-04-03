@@ -9,6 +9,7 @@ import WeatherPanel from '../../components/WeatherPanel/WeatherPanel';
 
 import axios from 'axios';
 import { Redirect } from 'react-router-dom';
+import Map from '../../components/Map/Map';
 const API_URL = process.env.REACT_APP_API_URL;
 const USERINFO_API = `${API_URL}/api/user/userInfo`;
 
@@ -42,6 +43,8 @@ export default function UserPage() {
     return (
         <>
             {user && <div className='user'>
+                <Map />
+
                 <UserInfo user={user} />
 
                 {user.role === 'driver' 
