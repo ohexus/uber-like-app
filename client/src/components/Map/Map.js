@@ -150,9 +150,6 @@ export default function Map(props) {
         const loads = await fetchLoads();
         const filteredLoads = loads.filter(l => l.status === 'NEW')
         setLoadsData(filteredLoads);
-
-        setShowPickUpLocation(true);
-        setShowDeliveryLocation(true);
       } else {
         const load = await fetchLoad();
 
@@ -175,16 +172,19 @@ export default function Map(props) {
   }, [user]);
 
   useEffect(() => {
-    if (loadsData) {
+    if (loadsData !== null && loadsData !== undefined) {
       setPickUpLocation({
-        latitude: loadsData[0].coord.pickUp.lat,
-        longitude: loadsData[0].coord.pickUp.lon
+        latitude: loadsData[0] ? loadsData[0].coord.pickUp.lat : viewport.latitude,
+        longitude: loadsData[0] ? loadsData[0].coord.pickUp.lon : viewport.longitude
       });
 
       setDeliveryLocation({
-        latitude: loadsData[0].coord.delivery.lat,
-        longitude: loadsData[0].coord.delivery.lon
+        latitude: loadsData[0] ? loadsData[0].coord.delivery.lat : viewport.latitude,
+        longitude: loadsData[0] ? loadsData[0].coord.delivery.lon : viewport.longitude
       });
+
+      setShowPickUpLocation(loadsData[0] ? true : false);
+      setShowDeliveryLocation(loadsData[0] ? true : false);
     }
   }, [loadsData]);
 
