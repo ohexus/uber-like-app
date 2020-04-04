@@ -27,5 +27,15 @@ module.exports = model('Load', new Schema({
         height: Number
     },
     payload: Number,
-    name: String
+    name: String,
+    coord: {
+        pickUp: {
+            lat: {type: Number, default: 0},
+            lon: {type: Number, default: 0}
+        },
+        delivery: {
+            lat: {type: Number, default: 0},
+            lon: {type: Number, default: 0}
+        }
+    }
 }));

@@ -19,7 +19,7 @@ export default function LoadInfo(props) {
 
     const [showLoadUpdateForm, setShowLoadUpdateForm] = useState(false);
     const [showAlertCantAssign, setShowAlertCantAssign] = useState(false);
-    
+
     const postLoad = async (e) => {
         e.preventDefault()
 
@@ -31,7 +31,7 @@ export default function LoadInfo(props) {
 
         await assignLoad();
     }
-    
+
     const assignLoad = async () => {
         const updatedLoad = await axios.put(ASSIGNLOAD_API, { loadId: load._id }, {
             headers: {
@@ -45,7 +45,7 @@ export default function LoadInfo(props) {
             window.location.reload(false);
         }
     }
-    
+
     const deleteLoad = async () => {
         await axios.delete(DELETELOAD_API, {
             data: {
@@ -57,7 +57,7 @@ export default function LoadInfo(props) {
         });
         window.location.reload(false);
     }
-    
+
     const toggleShowLoadUpdateForm = () => {
         setShowLoadUpdateForm(!showLoadUpdateForm);
     }
@@ -65,7 +65,7 @@ export default function LoadInfo(props) {
     return (
         <div className="load-wrapper">
             <form className='load' onSubmit={postLoad}>
-            <InfoTile
+                <InfoTile
                     label={'Load name:'}
                     info={load.name}
                 />
@@ -80,7 +80,7 @@ export default function LoadInfo(props) {
                 {showAlertCantAssign && <h5>
                     All matched trucks is on load, try again later
                 </h5>}
-                
+
                 {!isLoadFinished && <>
                     {!load.assigned_to && <button type="submit"> Post this load </button>}
                 </>}
@@ -118,7 +118,7 @@ export default function LoadInfo(props) {
                 />
 
                 {!isLoadFinished && <>
-                    {!load.assigned_to && 
+                    {!load.assigned_to &&
                         <button type='button' onClick={deleteLoad}>
                             Delete this load
                         </button>
@@ -128,11 +128,11 @@ export default function LoadInfo(props) {
 
             {!isLoadFinished && <>
                 {!load.assigned_to && <button type='button' onClick={toggleShowLoadUpdateForm}>
-                        {showLoadUpdateForm
-                            ? 'Close update Load Info'
-                            : 'Update Load Info'
-                        }
-                    </button>
+                    {showLoadUpdateForm
+                        ? 'Close update Load Info'
+                        : 'Update Load Info'
+                    }
+                </button>
                 }
             </>}
 

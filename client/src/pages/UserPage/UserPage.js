@@ -49,7 +49,7 @@ export default function UserPage() {
     return (
         <>
             {user && <div className='user'>
-                <Map role={user.role}/>
+                <Map user={user}/>
 
                 <UserInfo user={user} />
 

@@ -14,7 +14,7 @@ export default function NewLoadForm(props) {
 
     const createLoad = async () => {
         await axios.post(CREATELOAD_API, {
-            length, width, height, payload
+            name, length, width, height, payload
         }, {
             headers: {
                 'authorization': localStorage.getItem('jwt_token')
@@ -48,7 +48,7 @@ export default function NewLoadForm(props) {
             onSubmit={createLoad}
         >
 
-            <label htmlFor='name'> Length: </label>
+            <label htmlFor='name'> Name: </label>
             <input
                 type='text'
                 name='name'

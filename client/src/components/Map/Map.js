@@ -7,53 +7,92 @@ import findUsersCoordinates from '../../helpers/findLocationInfo';
 import { NavigationControl, Marker, Popup, InteractiveMap } from 'react-map-gl';
 import Geocoder from 'react-map-gl-geocoder'
 
+import axios from 'axios';
+const API_URL = process.env.REACT_APP_API_URL;
+const LOADS_API = `${API_URL}/api/load/allForUser`;
+const UPDATELOADCOORDS_API = `${API_URL}/api/load/updateCoords`;
+const CHECKFORLOAD_API = `${API_URL}/api/load/checkForLoad`;
+
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiZWFzeWJyZWV6ZSIsImEiOiJjazhqczkydmEwM3ByM3Jub2E5MjV3aWFyIn0.PZM-0d_B-QKbR4TxTRhvug';
 
-  // const renderPopup = (index) => {
-  //   return (showPopupInfo &&
-  //     <Popup tipSize={5}
-  //       anchor='bottom-right'
-  //       longitude={markerList[index].lon}
-  //       latitude={markerList[index].lat}
-  //       onMouseLeave={() => setShowPopupInfo(false)}
-  //       closeOnClick={true}
-  //     >
-  //       <p>
-  //         <strong>{markerList[index].name}</strong>
-  //         <br />
-  //         {markerList[index].info}
-  //       </p>
-  //     </Popup>
-  //   );
-  // }
+// const renderPopup = (index) => {
+//   return (showPopupInfo &&
+//     <Popup tipSize={5}
+//       anchor='bottom-right'
+//       longitude={markerList[index].lon}
+//       latitude={markerList[index].lat}
+//       onMouseLeave={() => setShowPopupInfo(false)}
+//       closeOnClick={true}
+//     >
+//       <p>
+//         <strong>{markerList[index].name}</strong>
+//         <br />
+//         {markerList[index].info}
+//       </p>
+//     </Popup>
+//   );
+// }
 
 export default function Map(props) {
-  const [role] = useState(props.role)
+  const [user] = useState(props.user);
+
+  const [loadsData, setLoadsData] = useState(null);
+
+  const [activeLoadIndex, setActiveLoadIndex] = useState(0);
 
   const [viewport, setViewport] = useState({
     width: '100%',
-    height: 400,
+    height: 600,
     latitude: 0,
     longitude: 0,
     zoom: 8
   });
-  const [events, setEvents] = useState({});
 
   const [userLocation, setUserLocation] = useState(null);
-  const [pickUpLocation, setPickUpLocation] = useState({
-    latitude: 0,
-    longitude: 0
-  });
-  const [deliveryLocation, setDeliveryLocation] = useState({
-    latitude: 0,
-    longitude: 0
-  });
+  const [pickUpLocation, setPickUpLocation] = useState(null);
+  const [deliveryLocation, setDeliveryLocation] = useState(null);
 
   const [showPickUpLocation, setShowPickUpLocation] = useState(false);
   const [showDeliveryLocation, setShowDeliveryLocation] = useState(false);
-  const [showPopupInfo, setShowPopupInfo] = useState(false);
+  // const [showPopupInfo, setShowPopupInfo] = useState(false);
 
   const mapRef = useRef();
+
+  const fetchLoads = async () => {
+    const loads = await axios.get(LOADS_API, {
+      headers: {
+        'authorization': localStorage.getItem('jwt_token')
+      }
+    });
+
+    return loads.data;
+  }
+
+  const fetchLoad = async () => {
+    const load = await axios.get(CHECKFORLOAD_API, {
+      headers: {
+        'authorization': localStorage.getItem('jwt_token')
+      }
+    }).then(res => res.data);
+
+    return ((load.status !== 'Nothing' && load.status !== 'No truck assigned') ? load : null)
+  }
+
+  const updateLoadCoords = async (e) => {
+    e.preventDefault();
+
+    await axios.put(UPDATELOADCOORDS_API, {
+      loadId: loadsData[activeLoadIndex]._id,
+      pickUpCoords: pickUpLocation,
+      deliveryCoords: deliveryLocation
+    }, {
+      headers: {
+        'authorization': localStorage.getItem('jwt_token')
+      }
+    });
+
+    alert('coordinates updated');
+  }
 
   const onMarkerDragEnd = (event, funcSet) => {
     funcSet({
@@ -63,6 +102,35 @@ export default function Map(props) {
     console.log(event.lngLat)
   };
 
+  const toggleShowLocationButton = (show, showSet, locationSet) => {
+    locationSet({
+      latitude: viewport.latitude,
+      longitude: viewport.longitude
+    });
+    showSet(!show);
+  }
+
+  const handleSelectChange = (e) => {
+    setActiveLoadIndex(e.target.value);
+
+    const pickUpLat = loadsData[e.target.value].coord.pickUp.lat;
+    const pickUpLon = loadsData[e.target.value].coord.pickUp.lon;
+    setPickUpLocation({
+      latitude: pickUpLat !== 0 ? pickUpLat : viewport.latitude,
+      longitude: pickUpLon !== 0 ? pickUpLon : viewport.longitude
+    });
+
+    const deliveryLat = loadsData[e.target.value].coord.delivery.lat;
+    const deliveryLon = loadsData[e.target.value].coord.delivery.lon;
+    setDeliveryLocation({
+      latitude: deliveryLat !== 0 ? deliveryLat : viewport.latitude,
+      longitude: deliveryLon !== 0 ? deliveryLon : viewport.longitude
+    });
+
+    setShowPickUpLocation(true);
+    setShowDeliveryLocation(true);
+  }
+
   const handleUserLocation = useCallback((position) => {
     setViewport({
       ...viewport,
@@ -70,13 +138,57 @@ export default function Map(props) {
       longitude: position.coords.longitude
     })
     setUserLocation(position.coords);
-    setPickUpLocation(position.coords);
-    setDeliveryLocation(position.coords);
   }, [viewport])
 
   useEffect(() => {
     findUsersCoordinates(handleUserLocation)
   }, [handleUserLocation]);
+
+  useEffect(() => {
+    (async () => {
+      if (user.role === 'shipper') {
+        const loads = await fetchLoads();
+        const filteredLoads = loads.filter(l => l.status === 'NEW')
+        setLoadsData(filteredLoads);
+
+        setShowPickUpLocation(true);
+        setShowDeliveryLocation(true);
+      } else {
+        const load = await fetchLoad();
+
+        if (load) {
+          setPickUpLocation({
+            latitude: load.coord.pickUp.lat,
+            longitude: load.coord.pickUp.lon
+          });
+
+          setDeliveryLocation({
+            latitude: load.coord.delivery.lat,
+            longitude: load.coord.delivery.lon
+          });
+
+          setShowPickUpLocation(true);
+          setShowDeliveryLocation(true);
+        }
+      }
+    })();
+  }, [user]);
+
+  useEffect(() => {
+    if (loadsData) {
+      setPickUpLocation({
+        latitude: loadsData[0].coord.pickUp.lat,
+        longitude: loadsData[0].coord.pickUp.lon
+      });
+
+      setDeliveryLocation({
+        latitude: loadsData[0].coord.delivery.lat,
+        longitude: loadsData[0].coord.delivery.lon
+      });
+    }
+  }, [loadsData]);
+
+  // TODO window resize
 
   return (<>
     {userLocation
@@ -85,11 +197,6 @@ export default function Map(props) {
         onViewportChange={setViewport}
         mapStyle='mapbox://styles/mapbox/streets-v11'
         mapboxApiAccessToken={MAPBOX_TOKEN}
-        onClick={(e) => {
-          let [longitude, latitude] = e.lngLat;
-          console.log(longitude);
-          console.log(latitude);
-        }}
         ref={mapRef}
       >
         <Marker
@@ -98,7 +205,7 @@ export default function Map(props) {
           latitude={userLocation.latitude}
         >
           <div
-            className={`custom-marker__icon custom-marker__icon custom-marker__icon${ role === 'driver' ? '--driver' : '--shipper'}`}
+            className={`custom-marker__icon custom-marker__icon custom-marker__icon${user.role === 'driver' ? '--driver' : '--shipper'}`}
             alt=''
           // onMouseEnter={() => setShowPopupInfo(true)}
           // onMouseLeave={() => setShowPopupInfo(false)}
@@ -117,7 +224,7 @@ export default function Map(props) {
             alt=''
           ></div>
         </Marker>}
-        
+
         {showDeliveryLocation && <Marker
           className='custom-marker'
           longitude={deliveryLocation.longitude}
@@ -138,14 +245,26 @@ export default function Map(props) {
           />
         </div>
 
-        <div className='pad'>
-          <button type='button' onClick={() => setShowPickUpLocation(!showPickUpLocation)}>
-            {showPickUpLocation ? 'Delete Pick Up Mark' : 'Set Pick Up Mark'}
-          </button>
-          <button type='button' onClick={() => setShowDeliveryLocation(!showDeliveryLocation)}>
-            {showDeliveryLocation ? 'Delete Delivery Mark' : 'Set Delivery Mark'}
-          </button>
-        </div>
+        {user.role === 'shipper' && <form onSubmit={updateLoadCoords} className='pad'>
+          <button
+            type='button'
+            onClick={() => toggleShowLocationButton(showPickUpLocation, setShowPickUpLocation, setPickUpLocation)}
+          > {showPickUpLocation ? 'Delete Pick Up Mark' : 'Set Pick Up Mark'} </button>
+          <button
+            type='button'
+            onClick={() => toggleShowLocationButton(showDeliveryLocation, setShowDeliveryLocation, setDeliveryLocation)}
+          > {showDeliveryLocation ? 'Delete Delivery Mark' : 'Set Delivery Mark'} </button>
+          <select onChange={handleSelectChange}>
+            <option disabled>select load</option>
+            {loadsData && loadsData.map((load, index) => {
+              return <option
+                key={index}
+                value={index}
+              >{load.name}</option>
+            })}
+          </select>
+          <button type='submit'>Update Coordinates</button>
+        </form>}
 
         <Geocoder
           mapRef={mapRef}
