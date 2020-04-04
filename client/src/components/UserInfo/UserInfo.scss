@@ -5,14 +5,12 @@
         align-items: stretch;
 
         width: 100%;
+        
+        position: relative;
     }
 
     &__role {
         text-align: center;
-    }
-
-    &__info {
-        position: relative;
     }
 
     &__updateuser,
@@ -22,7 +20,7 @@
         left: 0;
 
         width: 100%;
-        height: 90%;
+        height: 94%;
 
         background-color: lightgray;
     }
