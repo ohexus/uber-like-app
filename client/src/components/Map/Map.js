@@ -55,23 +55,7 @@ export default function Map(props) {
 
   const mapRef = useRef();
 
-  const logDragEvent = (name, event) => {
-    setEvents({
-      ...events,
-      [name]: event.lngLat
-    });
-  }
-
-  const onMarkerDragStart = (event) => {
-    logDragEvent('onDragStart', event);
-  };
-
-  const onMarkerDrag = (event) => {
-    logDragEvent('onDrag', event);
-  };
-
   const onMarkerDragEnd = (event, funcSet) => {
-    logDragEvent('onDragEnd', event);
     funcSet({
       longitude: event.lngLat[0],
       latitude: event.lngLat[1]
@@ -126,8 +110,6 @@ export default function Map(props) {
           longitude={pickUpLocation.longitude}
           latitude={pickUpLocation.latitude}
           draggable
-          onDragStart={onMarkerDragStart}
-          onDrag={onMarkerDrag}
           onDragEnd={(event) => onMarkerDragEnd(event, setPickUpLocation)}
         >
           <div
@@ -141,8 +123,6 @@ export default function Map(props) {
           longitude={deliveryLocation.longitude}
           latitude={deliveryLocation.latitude}
           draggable
-          onDragStart={onMarkerDragStart}
-          onDrag={onMarkerDrag}
           onDragEnd={(event) => onMarkerDragEnd(event, setDeliveryLocation)}
         >
           <div
