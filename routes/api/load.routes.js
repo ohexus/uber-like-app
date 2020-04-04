@@ -27,7 +27,7 @@ router.post('/create', async (req, res) => {
 
         const { name, length, width, height, payload } = req.body;
 
-        if (!length || !width || !height || !payload) {
+        if (!name || !length || !width || !height || !payload) {
             return res.status(403).json({ status: 'Please fill in all the fields' });
         }
 

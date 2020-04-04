@@ -30,12 +30,12 @@ module.exports = model('Load', new Schema({
     name: String,
     coord: {
         pickUp: {
-            lat: {type: Number, default: 0},
-            lon: {type: Number, default: 0}
+            lat: {type: Number, default: null},
+            lon: {type: Number, default: null}
         },
         delivery: {
-            lat: {type: Number, default: 0},
-            lon: {type: Number, default: 0}
+            lat: {type: Number, default: null},
+            lon: {type: Number, default: null}
         }
     }
 }));

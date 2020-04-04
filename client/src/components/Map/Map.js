@@ -79,8 +79,6 @@ export default function Map(props) {
   }
 
   const updateLoadCoords = async (e) => {
-    e.preventDefault();
-
     await axios.put(UPDATELOADCOORDS_API, {
       loadId: loadsData[activeLoadIndex]._id,
       pickUpCoords: pickUpLocation,
@@ -116,15 +114,15 @@ export default function Map(props) {
     const pickUpLat = loadsData[e.target.value].coord.pickUp.lat;
     const pickUpLon = loadsData[e.target.value].coord.pickUp.lon;
     setPickUpLocation({
-      latitude: pickUpLat !== 0 ? pickUpLat : viewport.latitude,
-      longitude: pickUpLon !== 0 ? pickUpLon : viewport.longitude
+      latitude: pickUpLat !== null ? pickUpLat : viewport.latitude,
+      longitude: pickUpLon !== null ? pickUpLon : viewport.longitude
     });
 
     const deliveryLat = loadsData[e.target.value].coord.delivery.lat;
     const deliveryLon = loadsData[e.target.value].coord.delivery.lon;
     setDeliveryLocation({
-      latitude: deliveryLat !== 0 ? deliveryLat : viewport.latitude,
-      longitude: deliveryLon !== 0 ? deliveryLon : viewport.longitude
+      latitude: deliveryLat !== null ? deliveryLat : viewport.latitude,
+      longitude: deliveryLon !== null ? deliveryLon : viewport.longitude
     });
 
     setShowPickUpLocation(true);
@@ -147,9 +145,27 @@ export default function Map(props) {
   useEffect(() => {
     (async () => {
       if (user.role === 'shipper') {
-        const loads = await fetchLoads();
-        const filteredLoads = loads.filter(l => l.status === 'NEW')
-        setLoadsData(filteredLoads);
+        if (!pickUpLocation && !deliveryLocation) {
+          const loads = await fetchLoads();
+          const filteredLoads = loads.filter(l => l.status === 'NEW')
+
+          if (filteredLoads.length) {
+            setLoadsData(filteredLoads);
+
+            setPickUpLocation({
+              latitude: filteredLoads[0].coord.pickUp.lat || viewport.latitude,
+              longitude: filteredLoads[0].coord.pickUp.lon || viewport.longitude
+            });
+
+            setDeliveryLocation({
+              latitude: filteredLoads[0].coord.delivery.lat || viewport.latitude,
+              longitude: filteredLoads[0].coord.delivery.lon || viewport.longitude
+            });
+
+            setShowPickUpLocation(filteredLoads[0].coord.pickUp.lat ? true : false);
+            setShowDeliveryLocation(filteredLoads[0].coord.delivery.lat ? true : false);
+          }
+        }
       } else {
         const load = await fetchLoad();
 
@@ -169,24 +185,7 @@ export default function Map(props) {
         }
       }
     })();
-  }, [user]);
-
-  useEffect(() => {
-    if (loadsData !== null && loadsData !== undefined) {
-      setPickUpLocation({
-        latitude: loadsData[0] ? loadsData[0].coord.pickUp.lat : viewport.latitude,
-        longitude: loadsData[0] ? loadsData[0].coord.pickUp.lon : viewport.longitude
-      });
-
-      setDeliveryLocation({
-        latitude: loadsData[0] ? loadsData[0].coord.delivery.lat : viewport.latitude,
-        longitude: loadsData[0] ? loadsData[0].coord.delivery.lon : viewport.longitude
-      });
-
-      setShowPickUpLocation(loadsData[0] ? true : false);
-      setShowDeliveryLocation(loadsData[0] ? true : false);
-    }
-  }, [loadsData]);
+  }, [user, viewport.latitude, viewport.longitude]);
 
   // TODO window resize
 
@@ -255,7 +254,7 @@ export default function Map(props) {
             onClick={() => toggleShowLocationButton(showDeliveryLocation, setShowDeliveryLocation, setDeliveryLocation)}
           > {showDeliveryLocation ? 'Delete Delivery Mark' : 'Set Delivery Mark'} </button>
           <select onChange={handleSelectChange}>
-            <option disabled>select load</option>
+            <option disabled value={null}> {loadsData ? 'select load' : 'create new load first'}</option>
             {loadsData && loadsData.map((load, index) => {
               return <option
                 key={index}
@@ -263,7 +262,10 @@ export default function Map(props) {
               >{load.name}</option>
             })}
           </select>
-          <button type='submit'>Update Coordinates</button>
+          <button
+            type='submit'
+            disabled={(loadsData && showPickUpLocation && showDeliveryLocation) ? false : true}
+          >Update Coordinates</button>
         </form>}
 
         <Geocoder
