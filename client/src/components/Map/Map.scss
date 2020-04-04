@@ -12,3 +12,37 @@
     transform: translateX(-50%);
     padding: 10px;
 }
+
+$size: 2em;
+.custom-marker {
+    width: 0;
+    height: 0;
+
+    &__icon {
+        width: $size;
+        height: $size;
+        
+        background-size: cover;
+
+        z-index: -1;
+
+        transform: translate(-50%, -100%);
+
+        &--centered {
+            transform: translate(-50%, -50%);
+        }
+
+        &--shipper {
+            background-image: url('../../assets/images/shipper.svg');
+        }
+        &--driver {
+            background-image: url('../../assets/images/driver.svg');
+        }
+        &--pick-up {
+            background-image: url('../../assets/images/pick-up.svg');
+        }
+        &--delivery {
+            background-image: url('../../assets/images/delivery.svg');
+        }
+    }
+}

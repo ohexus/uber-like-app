@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './Map.scss';
 import 'react-map-gl-geocoder/dist/mapbox-gl-geocoder.css'
 
@@ -7,28 +7,7 @@ import findUsersCoordinates from '../../helpers/findLocationInfo';
 import { NavigationControl, Marker, Popup, InteractiveMap } from 'react-map-gl';
 import Geocoder from 'react-map-gl-geocoder'
 
-import { Icon } from 'semantic-ui-react';
-import 'semantic-ui-css/semantic.min.css'
-
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiZWFzeWJyZWV6ZSIsImEiOiJjazhqczkydmEwM3ByM3Jub2E5MjV3aWFyIn0.PZM-0d_B-QKbR4TxTRhvug';
-
-export default function Map(props) {
-  const [role] = useState(props.role)
-
-  const [viewport, setViewport] = useState({
-    width: '100%',
-    height: 400,
-    latitude: 50.874331,
-    longitude: 34.7075792,
-    zoom: 8
-  });
-  const [userLocation, setUserLocation] = useState(null);
-  const [pickUpLocation, setPickUpLocation] = useState(null);
-  const [deliveryLocation, setDeliveryLocation] = useState(null);
-
-  const [showPopupInfo, setShowPopupInfo] = useState(false);
-
-  const mapRef = useRef()
 
   // const renderPopup = (index) => {
   //   return (showPopupInfo &&
@@ -48,35 +27,72 @@ export default function Map(props) {
   //   );
   // }
 
-  const handlePickUpLocation = () => {
-    setPickUpLocation({
-      longitude: viewport.longitude,
-      latitude: viewport.latitude
+export default function Map(props) {
+  const [role] = useState(props.role)
+
+  const [viewport, setViewport] = useState({
+    width: '100%',
+    height: 400,
+    latitude: 0,
+    longitude: 0,
+    zoom: 8
+  });
+  const [events, setEvents] = useState({});
+
+  const [userLocation, setUserLocation] = useState(null);
+  const [pickUpLocation, setPickUpLocation] = useState({
+    latitude: 0,
+    longitude: 0
+  });
+  const [deliveryLocation, setDeliveryLocation] = useState({
+    latitude: 0,
+    longitude: 0
+  });
+
+  const [showPickUpLocation, setShowPickUpLocation] = useState(false);
+  const [showDeliveryLocation, setShowDeliveryLocation] = useState(false);
+  const [showPopupInfo, setShowPopupInfo] = useState(false);
+
+  const mapRef = useRef();
+
+  const logDragEvent = (name, event) => {
+    setEvents({
+      ...events,
+      [name]: event.lngLat
     });
   }
 
-  const handleDeliveryLocation = () => {
-    setDeliveryLocation({
-      longitude: viewport.longitude,
-      latitude: viewport.latitude
+  const onMarkerDragStart = (event) => {
+    logDragEvent('onDragStart', event);
+  };
+
+  const onMarkerDrag = (event) => {
+    logDragEvent('onDrag', event);
+  };
+
+  const onMarkerDragEnd = (event, funcSet) => {
+    logDragEvent('onDragEnd', event);
+    funcSet({
+      longitude: event.lngLat[0],
+      latitude: event.lngLat[1]
     });
-  }
+    console.log(event.lngLat)
+  };
 
-  const deletePickUpLocation = () => {
-    setPickUpLocation(null);
-  }
-
-  const deleteDeliveryLocation = () => {
-    setDeliveryLocation(null);
-  }
-
-  const handleUserLocation = (position) => {
+  const handleUserLocation = useCallback((position) => {
+    setViewport({
+      ...viewport,
+      latitude: position.coords.latitude,
+      longitude: position.coords.longitude
+    })
     setUserLocation(position.coords);
-  }
+    setPickUpLocation(position.coords);
+    setDeliveryLocation(position.coords);
+  }, [viewport])
 
   useEffect(() => {
     findUsersCoordinates(handleUserLocation)
-  }, []);
+  }, [handleUserLocation]);
 
   return (<>
     {userLocation
@@ -93,39 +109,46 @@ export default function Map(props) {
         ref={mapRef}
       >
         <Marker
+          className='custom-marker'
           longitude={userLocation.longitude}
           latitude={userLocation.latitude}
         >
-          <Icon
-            name={role === 'driver' ? 'car' : 'user'}
-            size='large'
+          <div
+            className={`custom-marker__icon custom-marker__icon custom-marker__icon${ role === 'driver' ? '--driver' : '--shipper'}`}
+            alt=''
           // onMouseEnter={() => setShowPopupInfo(true)}
           // onMouseLeave={() => setShowPopupInfo(false)}
-          />
+          ></div>
         </Marker>
 
-        {pickUpLocation && <Marker
+        {showPickUpLocation && <Marker
+          className='custom-marker'
           longitude={pickUpLocation.longitude}
           latitude={pickUpLocation.latitude}
+          draggable
+          onDragStart={onMarkerDragStart}
+          onDrag={onMarkerDrag}
+          onDragEnd={(event) => onMarkerDragEnd(event, setPickUpLocation)}
         >
-          <Icon
-            name='point'
-            size='large'
-          // onMouseEnter={() => setShowPopupInfo(true)}
-          // onMouseLeave={() => setShowPopupInfo(false)}
-          />
+          <div
+            className='custom-marker__icon custom-marker__icon--pick-up'
+            alt=''
+          ></div>
         </Marker>}
-
-        {deliveryLocation && <Marker
+        
+        {showDeliveryLocation && <Marker
+          className='custom-marker'
           longitude={deliveryLocation.longitude}
           latitude={deliveryLocation.latitude}
+          draggable
+          onDragStart={onMarkerDragStart}
+          onDrag={onMarkerDrag}
+          onDragEnd={(event) => onMarkerDragEnd(event, setDeliveryLocation)}
         >
-          <Icon
-            name='point'
-            size='large'
-          // onMouseEnter={() => setShowPopupInfo(true)}
-          // onMouseLeave={() => setShowPopupInfo(false)}
-          />
+          <div
+            className='custom-marker__icon custom-marker__icon--delivery'
+            alt=''
+          ></div>
         </Marker>}
 
         <div className='nav'>
@@ -136,14 +159,12 @@ export default function Map(props) {
         </div>
 
         <div className='pad'>
-          {pickUpLocation
-            ? <button type='button' onClick={deletePickUpLocation}>delete pick up</button>
-            : <button type='button' onClick={handlePickUpLocation}>set pick up</button>
-          }
-          {deliveryLocation
-            ? <button type='button' onClick={deleteDeliveryLocation}>delete delivery</button>
-            : <button type='button' onClick={handleDeliveryLocation}>set delivery</button>
-          }
+          <button type='button' onClick={() => setShowPickUpLocation(!showPickUpLocation)}>
+            {showPickUpLocation ? 'Delete Pick Up Mark' : 'Set Pick Up Mark'}
+          </button>
+          <button type='button' onClick={() => setShowDeliveryLocation(!showDeliveryLocation)}>
+            {showDeliveryLocation ? 'Delete Delivery Mark' : 'Set Delivery Mark'}
+          </button>
         </div>
 
         <Geocoder
@@ -153,7 +174,7 @@ export default function Map(props) {
         />
 
       </InteractiveMap>
-      : 'Map loading'
+      : 'Map is loading...'
     }
   </>);
 }

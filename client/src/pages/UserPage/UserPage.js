@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Redirect } from 'react-router-dom';
 import './UserPage.scss';
 
 import UserInfo from '../../components/UserInfo/UserInfo';
@@ -6,10 +7,9 @@ import TrucksPanel from '../../components/TrucksPanel/TrucksPanel';
 import LoadsPanel from '../../components/LoadsPanel/LoadsPanel';
 import OrderLoad from '../../components/OrderLoad/OrderLoad';
 import WeatherPanel from '../../components/WeatherPanel/WeatherPanel';
+import Map from '../../components/Map/Map';
 
 import axios from 'axios';
-import { Redirect } from 'react-router-dom';
-import Map from '../../components/Map/Map';
 const API_URL = process.env.REACT_APP_API_URL;
 const USERINFO_API = `${API_URL}/api/user/userInfo`;
 
@@ -24,6 +24,12 @@ export default function UserPage() {
                 'authorization': localStorage.getItem('jwt_token')
             }
         });
+
+        if (user.data === 'User not found') {
+            localStorage.removeItem('jwt_token')
+            setRouteRedirect(true)
+            return null
+        }
     
         return user.data;
     }

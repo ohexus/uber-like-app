@@ -20,6 +20,8 @@ const User = require('../../models/User');
 router.get('/userInfo', async (req, res) => {
     try {
         const user = await User.findOne({ _id: req.user._id });
+        
+        if (!user) return res.status(200).send('User not found');
 
         res.status(200).send(user);
 

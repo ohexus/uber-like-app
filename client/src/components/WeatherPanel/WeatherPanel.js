@@ -117,7 +117,7 @@ export default function WeatherPanel() {
                 <div className='weather__wind'>
                     <InfoTile
                         label='Wind:'
-                        info={`${windInfo.speed} km / h`}
+                        info={`${windInfo.speed} km/h`}
                     />
 
                     <div className='weather__wind-arrow-wrapper'>
