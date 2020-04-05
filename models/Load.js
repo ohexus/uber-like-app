@@ -28,6 +28,10 @@ module.exports = model('Load', new Schema({
     },
     payload: Number,
     loadName: String,
+    address: {
+        pickUp: { type: String, default: null },
+        delivery: { type: String, default: null }
+    },
     coord: {
         pickUp: {
             lat: { type: Number, default: null },

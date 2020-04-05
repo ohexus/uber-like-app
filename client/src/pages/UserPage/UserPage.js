@@ -17,25 +17,25 @@ export default function UserPage() {
     const [user, setUser] = useState(null);
     
     const [routeRedirect, setRouteRedirect] = useState(false);
-
-    const fetchUser = async() => {
-        const user = await axios.get(USERINFO_API, {
-            headers: {
-                'authorization': localStorage.getItem('jwt_token')
-            }
-        });
-
-        if (user.data === 'User not found') {
-            localStorage.removeItem('jwt_token')
-            setRouteRedirect(true)
-            return null
-        }
-    
-        return user.data;
-    }
     
     useEffect(() => {
-        (async() => setUser(await fetchUser()))();
+        const fetchUser = async() => {
+            const user = await axios.get(USERINFO_API, {
+                headers: {
+                    'authorization': localStorage.getItem('jwt_token')
+                }
+            });
+    
+            if (user.data === 'User not found') {
+                localStorage.removeItem('jwt_token')
+                setRouteRedirect(true)
+                return null
+            }
+        
+            setUser(user.data)
+        }
+
+        fetchUser()
     }, []);
     
     useEffect(() => {

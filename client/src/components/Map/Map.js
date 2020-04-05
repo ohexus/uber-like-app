@@ -33,6 +33,8 @@ const MAPBOX_TOKEN = 'pk.eyJ1IjoiZWFzeWJyZWV6ZSIsImEiOiJjazhqczkydmEwM3ByM3Jub2E
 //   );
 // }
 
+// http://api.mapbox.com/geocoding/v5/mapbox.places/${lon},${lat}.json?access_token=${MAPBOX_TOKEN}
+
 export default function Map(props) {
   const [user] = useState(props.user);
 
@@ -56,33 +58,29 @@ export default function Map(props) {
   const [showDeliveryLocation, setShowDeliveryLocation] = useState(false);
   // const [showPopupInfo, setShowPopupInfo] = useState(false);
 
+  const [reloadPage, setReloadPage] = useState(false);
+
   const mapRef = useRef();
 
-  const fetchLoads = async () => {
-    const loads = await axios.get(LOADS_API, {
-      headers: {
-        'authorization': localStorage.getItem('jwt_token')
-      }
-    });
+  const getAddressFromCoords = async (lon, lat) => {
+    const address = await axios.get(`http://api.mapbox.com/geocoding/v5/mapbox.places/${lon},${lat}.json?access_token=${MAPBOX_TOKEN}`)
+      .then(res => res.data.features[0].place_name)
 
-    return loads.data;
-  }
-
-  const fetchLoad = async () => {
-    const load = await axios.get(CHECKFORLOAD_API, {
-      headers: {
-        'authorization': localStorage.getItem('jwt_token')
-      }
-    }).then(res => res.data);
-
-    return ((load.status !== 'Nothing' && load.status !== 'No truck assigned') ? load : null)
+    return address
   }
 
   const updateLoadCoords = async (e) => {
+    e.preventDefault();
+
+    const pickUpAddress = await getAddressFromCoords(pickUpLocation.longitude, pickUpLocation.latitude);
+    const deliveryAddress = await getAddressFromCoords(deliveryLocation.longitude, deliveryLocation.latitude);
+
     await axios.put(UPDATELOADCOORDS_API, {
       loadId: loadsData[activeLoadIndex]._id,
       pickUpCoords: pickUpLocation,
-      deliveryCoords: deliveryLocation
+      deliveryCoords: deliveryLocation,
+      pickUpAddress,
+      deliveryAddress
     }, {
       headers: {
         'authorization': localStorage.getItem('jwt_token')
@@ -90,6 +88,7 @@ export default function Map(props) {
     });
 
     alert('coordinates updated');
+    setReloadPage(true);
   }
 
   const onMarkerDragEnd = (event, funcSet) => {
@@ -139,53 +138,74 @@ export default function Map(props) {
   }, [viewport])
 
   useEffect(() => {
-    findUsersCoordinates(handleUserLocation)
-  }, [handleUserLocation]);
-
-  useEffect(() => {
-    (async () => {
-      if (user.role === 'shipper') {
-        if (!pickUpLocation && !deliveryLocation) {
-          const loads = await fetchLoads();
-          const filteredLoads = loads.filter(l => l.status === 'NEW')
-
-          if (filteredLoads.length) {
-            setLoadsData(filteredLoads);
-
-            setPickUpLocation({
-              latitude: filteredLoads[0].coord.pickUp.lat || viewport.latitude,
-              longitude: filteredLoads[0].coord.pickUp.lon || viewport.longitude
-            });
-
-            setDeliveryLocation({
-              latitude: filteredLoads[0].coord.delivery.lat || viewport.latitude,
-              longitude: filteredLoads[0].coord.delivery.lon || viewport.longitude
-            });
-
-            setShowPickUpLocation(filteredLoads[0].coord.pickUp.lat ? true : false);
-            setShowDeliveryLocation(filteredLoads[0].coord.delivery.lat ? true : false);
+    if (user.role === 'shipper') {
+      const fetchLoads = async () => {
+        const loads = await axios.get(LOADS_API, {
+          headers: {
+            'authorization': localStorage.getItem('jwt_token')
           }
-        }
-      } else {
-        const load = await fetchLoad();
+        }).then(res => res.data);
 
-        if (load) {
+        const filteredLoads = loads.filter(l => l.status === 'NEW')
+
+        if (filteredLoads.length) {
+          setLoadsData(filteredLoads);
+
           setPickUpLocation({
-            latitude: load.coord.pickUp.lat,
-            longitude: load.coord.pickUp.lon
+            latitude: filteredLoads[0].coord.pickUp.lat || viewport.latitude,
+            longitude: filteredLoads[0].coord.pickUp.lon || viewport.longitude
           });
 
           setDeliveryLocation({
-            latitude: load.coord.delivery.lat,
-            longitude: load.coord.delivery.lon
+            latitude: filteredLoads[0].coord.delivery.lat || viewport.latitude,
+            longitude: filteredLoads[0].coord.delivery.lon || viewport.longitude
           });
 
-          setShowPickUpLocation(true);
-          setShowDeliveryLocation(true);
+          setShowPickUpLocation(filteredLoads[0].coord.pickUp.lat ? true : false);
+          setShowDeliveryLocation(filteredLoads[0].coord.delivery.lat ? true : false);
         }
       }
-    })();
-  }, [user, viewport.latitude, viewport.longitude, pickUpLocation, deliveryLocation]);
+
+      fetchLoads();
+    }
+  }, [user.role, viewport.latitude, viewport.longitude]);
+
+  useEffect(() => {
+    if (user.role === 'driver') {
+      const fetchLoad = async () => {
+        const load = await axios.get(CHECKFORLOAD_API, {
+          headers: {
+            'authorization': localStorage.getItem('jwt_token')
+          }
+        }).then(res => res.data);
+
+        if (load.status === 'Nothing' || load.status === 'No truck assigned') return
+
+        setPickUpLocation({
+          latitude: load.coord.pickUp.lat,
+          longitude: load.coord.pickUp.lon
+        });
+
+        setDeliveryLocation({
+          latitude: load.coord.delivery.lat,
+          longitude: load.coord.delivery.lon
+        });
+
+        setShowPickUpLocation(true);
+        setShowDeliveryLocation(true);
+      }
+
+      fetchLoad();
+    }
+  }, [user.role]);
+
+  useEffect(() => {
+    findUsersCoordinates(handleUserLocation)
+  }, [handleUserLocation]);
+
+  if (reloadPage) {
+    window.location.reload()
+  }
 
   // TODO window resize
 
@@ -197,6 +217,7 @@ export default function Map(props) {
         mapStyle='mapbox://styles/mapbox/streets-v11'
         mapboxApiAccessToken={MAPBOX_TOKEN}
         ref={mapRef}
+        onClick={(e) => getAddressFromCoords(e.lngLat[0], e.lngLat[1])}
       >
         <Marker
           className='custom-marker'

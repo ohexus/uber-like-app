@@ -91,11 +91,29 @@ export default function LoadInfo(props) {
                     All matched trucks is on load, try again later
                 </h5>}
 
-                {!isLoadFinished && <>
+                {!isLoadFinished && !showWarningHasNoCoords && <>
                     {!load.assigned_to && <button type="submit"> Post this load </button>}
                 </>}
 
                 {load.assigned_to && <DriversInfo loadId={load._id} />}
+
+                <div className='load__address'>
+                    <h3> Addresses: </h3>
+                    {load.address.pickUp && load.address.delivery
+                        ? <>
+                            <InfoTile
+                                label={'Pick Up address:'}
+                                info={load.address.pickUp}
+                            />
+
+                            <InfoTile
+                                label={'Delivery address:'}
+                                info={load.address.delivery}
+                            />
+                        </>
+                        : 'update coordinates'
+                    }
+                </div>
 
                 <InfoTile
                     label={'Status:'}

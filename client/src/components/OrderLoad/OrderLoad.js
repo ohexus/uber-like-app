@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import './OrderLoad.scss';
 
 import InfoTile from '../InfoTile/InfoTile';
@@ -19,21 +19,9 @@ export default function OrderLoad() {
     const [load, setLoad] = useState(null);
     const [loadNextState, setLoadNextState] = useState('En route to Pick Up');
     const [showOrder, setShowOrder] = useState(true);
-    
-    const fetchLoad = useCallback(async () => {
-        const load = await axios.get(CHECKFORLOAD_API, {
-            headers: {
-                'authorization': localStorage.getItem('jwt_token')
-            }
-        }).then(res => res.data);
-        
-        setLoadNextState(findNextState(load.state));
 
-        return ((load.status !== 'Nothing' && load.status !== 'No truck assigned') ? load : null)
-    }, [])
-    
     const updateLoadState = async (e) => {
-        await axios.put(UPDATELOADSTATE_API, { 
+        await axios.put(UPDATELOADSTATE_API, {
             loadId: load._id,
             state: loadNextState
         }, {
@@ -63,7 +51,7 @@ export default function OrderLoad() {
     }
 
     const finishOrder = async () => {
-        const finishedLoad = await axios.put(FINISHLOAD_API, { 
+        const finishedLoad = await axios.put(FINISHLOAD_API, {
             loadId: load._id,
             state: loadNextState
         }, {
@@ -78,56 +66,78 @@ export default function OrderLoad() {
     const closeOrder = () => {
         setShowOrder(false);
     }
-    
+
     useEffect(() => {
-        (async() => setLoad(await fetchLoad()))();
-    }, [setLoad, fetchLoad]);
+        const fetchLoad = async () => {
+            const load = await axios.get(CHECKFORLOAD_API, {
+                headers: {
+                    'authorization': localStorage.getItem('jwt_token')
+                }
+            }).then(res => res.data);
+
+            setLoadNextState(findNextState(load.state));
+
+            setLoad((load.status !== 'Nothing' && load.status !== 'No truck assigned') ? load : null)
+        }
+
+        fetchLoad();
+    }, []);
 
     return (
         <>
-            {load 
+            {load
                 ? <>
-                {showOrder &&
-                    <form 
-                        className='order'
-                        onSubmit={loadNextState === 'Arrived to Delivery'
-                            ? finishOrder
-                            : updateLoadState
-                        }
-                    >
-                        <h2> Your order: </h2>
+                    {showOrder &&
+                        <form
+                            className='order'
+                            onSubmit={loadNextState === 'Arrived to Delivery'
+                                ? finishOrder
+                                : updateLoadState
+                            }
+                        >
+                            <h2> Your order: </h2>
 
-                        <InfoTile 
-                            label={'State:'}
-                            info={load.state}
-                        />
-                        
-                        <InfoTile 
-                            label={'Length:'}
-                            info={load.dimensions.length}
-                        />
-                        
-                        <InfoTile 
-                            label={'Width:'}
-                            info={load.dimensions.width}
-                        />
-                        
-                        <InfoTile 
-                            label={'Height:'}
-                            info={load.dimensions.height}
-                        />
-                        
-                        <InfoTile 
-                            label={'Payload:'}
-                            info={load.payload}
-                        />
+                            <InfoTile
+                                label={'Pick Up address:'}
+                                info={load.address.pickUp}
+                            />
 
-                        {loadNextState === 'Finish Order'
-                            ? <button type='button' onClick={closeOrder}> {loadNextState} </button>
-                            : <button type='submit'> {loadNextState} </button>
-                        }
-                    </form>
-                }</>
+                            <InfoTile
+                                label={'Delivery address:'}
+                                info={load.address.delivery}
+                            />
+
+                            <InfoTile
+                                label={'State:'}
+                                info={load.state}
+                            />
+
+                            <InfoTile
+                                label={'Length:'}
+                                info={load.dimensions.length}
+                            />
+
+                            <InfoTile
+                                label={'Width:'}
+                                info={load.dimensions.width}
+                            />
+
+                            <InfoTile
+                                label={'Height:'}
+                                info={load.dimensions.height}
+                            />
+
+                            <InfoTile
+                                label={'Payload:'}
+                                info={load.payload}
+                            />
+
+                            {loadNextState === 'Finish Order'
+                                ? <button type='button' onClick={closeOrder}> {loadNextState} </button>
+                                : <button type='submit'> {loadNextState} </button>
+                            }
+                        </form>
+                    }</>
                 : <>
                     <h2> You have no order, just chill :) </h2>
                 </>

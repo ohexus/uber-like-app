@@ -22,6 +22,10 @@ const findTruckType = require('../../helpers/findTruckType');
 // },
 // payload: Number,
 // loadName: String,
+// address: {
+//     pickUp: String,
+//     delivery: String
+// },
 // coord: {
 //     pickUp: {
 //         lat: { type: Number, default: null },
@@ -73,7 +77,7 @@ router.put('/updateCoords', async (req, res) => {
             return res.status(403).json({ status: 'You are not a shipper' });
         }
 
-        const { loadId, pickUpCoords, deliveryCoords } = req.body;
+        const { loadId, pickUpCoords, deliveryCoords, pickUpAddress, deliveryAddress } = req.body;
 
         if (!loadId || !pickUpCoords || !deliveryCoords) {
             return res.status(403).json({ status: 'Please fill in all fields' });
@@ -86,6 +90,10 @@ router.put('/updateCoords', async (req, res) => {
                 { status: 'NEW' }
             ]
         }, {
+            address: {
+                pickUp: pickUpAddress,
+                delivery: deliveryAddress
+            },
             coord: {
                 pickUp: {
                     lat: pickUpCoords.latitude,
