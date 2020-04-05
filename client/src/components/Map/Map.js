@@ -185,7 +185,7 @@ export default function Map(props) {
         }
       }
     })();
-  }, [user, viewport.latitude, viewport.longitude]);
+  }, [user, viewport.latitude, viewport.longitude, pickUpLocation, deliveryLocation]);
 
   // TODO window resize
 

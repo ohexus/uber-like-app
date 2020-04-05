@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import './NewTruckForm.scss';
 
+import checkBeforePostToServer from '../../../helpers/checkBeforePostToServer';
+
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
 const CREATETRUCK_API = `${API_URL}/api/truck/create`;
@@ -10,56 +12,68 @@ export default function NewTruckForm(props) {
     const [truckName, setTruckName] = useState('');
     const [brand, setBrand] = useState('');
     const [model, setModel] = useState('');
-    
-    const createTruck = async () => {
-        await axios.post(CREATETRUCK_API, {
-            type, truckName, brand, model
-        }, {
-            headers: {
-                'authorization': localStorage.getItem('jwt_token')
-            }
-        });
+
+    const [warningMessage] = useState('Please input all forms!');
+    const [showWarning, setShowWarning] = useState(false);
+
+    const createTruck = async (e) => {
+        e.preventDefault()
+
+        checkBeforePostToServer([truckName, brand, model], setShowWarning);
+
+        if (!showWarning) {
+            await axios.post(CREATETRUCK_API, {
+                type, truckName, brand, model
+            }, {
+                headers: {
+                    'authorization': localStorage.getItem('jwt_token')
+                }
+            });
+
+            window.location.reload()
+        }
     }
-    
+
     const handleTypeSelect = (e) => {
         setType(e.target.value);
     }
-    
+
     const handleTruckNameInput = (e) => {
         setTruckName(e.target.value);
     }
-    
+
     const handleBrandInput = (e) => {
         setBrand(e.target.value);
     }
-    
+
     const handleModelInput = (e) => {
         setModel(e.target.value);
     }
 
     return (
-        <form 
-            className={`newtruck ${props.className}`} 
+        <form
+            className={`newtruck ${props.className}`}
             onSubmit={createTruck}
         >
+            {showWarning && <h3>{warningMessage}</h3>}
 
             <label htmlFor='type'> Type: </label>
-            <select 
+            <select
                 name='type'
                 className='newtruck__types'
                 onChange={handleTypeSelect}
             >
-                <option 
+                <option
                     className='newtruck__type'
                     value='sprinter'
                 > Sprinter </option>
-                
-                <option 
+
+                <option
                     className='newtruck__type'
                     value='smallStraight'
                 > Small Straight </option>
 
-                <option 
+                <option
                     className='newtruck__type'
                     value='largeStraight'
                 > Large Straight </option>
@@ -67,30 +81,30 @@ export default function NewTruckForm(props) {
             </select>
 
             <label htmlFor='truckName'> Name: </label>
-            <input 
+            <input
                 type='text'
                 name='truckName'
                 value={truckName}
                 onChange={handleTruckNameInput}
-                required 
+                required
             />
-            
+
             <label htmlFor='brand'> Brand: </label>
-            <input 
+            <input
                 type='text'
                 name='brand'
                 value={brand}
                 onChange={handleBrandInput}
-                required 
+                required
             />
-            
+
             <label htmlFor='model'> Model: </label>
-            <input 
+            <input
                 type='text'
                 name='model'
                 value={model}
                 onChange={handleModelInput}
-                required 
+                required
             />
 
             <button type='submit'> Create Truck </button>

@@ -1,29 +1,42 @@
 import React, { useState } from 'react';
 import './NewLoadForm.scss';
 
+import checkBeforePostToServer from '../../../helpers/checkBeforePostToServer';
+
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
 const CREATELOAD_API = `${API_URL}/api/load/create`;
 
 export default function NewLoadForm(props) {
-    const [name, setName] = useState('');
+    const [loadName, setLoadName] = useState('');
     const [length, setLength] = useState(1);
     const [width, setWidth] = useState(1);
     const [height, setHeight] = useState(1);
     const [payload, setPayload] = useState(1);
 
-    const createLoad = async () => {
-        await axios.post(CREATELOAD_API, {
-            name, length, width, height, payload
-        }, {
-            headers: {
-                'authorization': localStorage.getItem('jwt_token')
-            }
-        });
+    const [warningMessage] = useState('Please input all forms!');
+    const [showWarning, setShowWarning] = useState(false);
+
+    const createLoad = async (e) => {
+        e.preventDefault()
+
+        checkBeforePostToServer([loadName], setShowWarning);
+
+        if (!showWarning && length !== 0 && width !== 0 && height !== 0 && payload !== 0) {
+            await axios.post(CREATELOAD_API, {
+                loadName, length, width, height, payload
+            }, {
+                headers: {
+                    'authorization': localStorage.getItem('jwt_token')
+                }
+            });
+
+            window.location.reload()
+        }
     }
 
-    const handleNameInput = (e) => {
-        setName(e.target.value);
+    const handleLoadNameInput = (e) => {
+        setLoadName(e.target.value);
     }
 
     const handleLengthInput = (e) => {
@@ -47,13 +60,14 @@ export default function NewLoadForm(props) {
             className={`newload ${props.className}`}
             onSubmit={createLoad}
         >
+            {showWarning && <h3>{warningMessage}</h3>}
 
-            <label htmlFor='name'> Name: </label>
+            <label htmlFor='loadName'> Name: </label>
             <input
                 type='text'
-                name='name'
-                value={name}
-                onChange={handleNameInput}
+                name='loadName'
+                value={loadName}
+                onChange={handleLoadNameInput}
                 required
             />
 

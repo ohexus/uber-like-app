@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Redirect, Link } from 'react-router-dom';
 
+import checkBeforePostToServer from '../../helpers/checkBeforePostToServer';
+
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
 const SIGNUP_API = `${API_URL}/api/auth/signup`;
@@ -12,21 +14,29 @@ export default function SignupPage() {
     const [email, setEmail] = useState('');
     const [mobileNumber, setMobileNumber] = useState('');
     const [password, setPassword] = useState('');
-    const [role, setRole] = useState('');
-    
+    const [role, setRole] = useState(null);
+
     const [routeRedirect, setRouteRedirect] = useState(false);
-    
+
+    const [warningMessage] = useState('Please input all forms!');
+    const [showWarning, setShowWarning] = useState(false);
+
     const fetchSignup = async (e) => {
         e.preventDefault();
-        await axios.post(SIGNUP_API, { firstName, lastName, username, email, mobileNumber, password, role });
-        alert('Signed up successfully!');
-        setRouteRedirect(true);
+
+        checkBeforePostToServer([firstName, lastName, username, email, mobileNumber, password], setShowWarning);
+
+        if (!showWarning && role !== null) {
+            await axios.post(SIGNUP_API, { firstName, lastName, username, email, mobileNumber, password, role });
+            alert('Signed up successfully!');
+            setRouteRedirect(true);
+        }
     }
-    
+
     const handleFirstNameInput = (e) => {
         setFirstName(e.target.value);
     }
-    
+
     const handleLastNameInput = (e) => {
         setLastName(e.target.value);
     }
@@ -60,7 +70,7 @@ export default function SignupPage() {
         setRouteRedirect(!!jwt_token);
     }, []);
 
-    if(routeRedirect){
+    if (routeRedirect) {
         return <Redirect to='/' />
     }
 
@@ -69,69 +79,70 @@ export default function SignupPage() {
             <h1> Sign Up: </h1>
 
             <form onSubmit={fetchSignup}>
+                {showWarning && <h3>{warningMessage}</h3>}
 
                 <label htmlFor='firstName'> First Name: </label>
-                <input 
+                <input
                     type='text'
                     name='firstName'
                     value={firstName}
                     onChange={handleFirstNameInput}
-                    required 
+                    required
                 />
-                <hr/>
-                
+                <hr />
+
                 <label htmlFor='lastName'> Last Name: </label>
-                <input 
+                <input
                     type='text'
                     name='lastName'
                     value={lastName}
                     onChange={handleLastNameInput}
-                    required 
+                    required
                 />
-                <hr/>
+                <hr />
 
                 <label htmlFor='username'> Username: </label>
-                <input 
+                <input
                     type='text'
                     name='username'
                     value={username}
                     onChange={handleUsernameInput}
                     required
                 />
-                <hr/>
+                <hr />
 
                 <label htmlFor='email'> Email: </label>
-                <input 
+                <input
                     type='email'
                     name='email'
                     value={email}
                     onChange={handleEmailInput}
                     required
                 />
-                <hr/>
+                <hr />
 
                 <label htmlFor='mobileNumber'> Mobile Number: </label>
-                <input 
+                <input
                     type='text'
                     name='mobileNumber'
                     value={mobileNumber}
                     onChange={handleMobileNumberInput}
                     required
                 />
-                <hr/>
+                <hr />
 
                 <label htmlFor='password'> Password: </label>
-                <input 
+                <input
                     type='password'
                     name='password'
                     value={password}
                     onChange={handlePasswordInput}
                     required
                 />
-                <hr/>
+                <hr />
 
                 <h4> You are: </h4>
-                <input 
+                <input
                     type='radio'
                     id='driver'
                     name='role'
@@ -139,7 +150,7 @@ export default function SignupPage() {
                     onChange={handleRadioDriver}
                 />
                 <label htmlFor='driver'> Driver </label>
-                
+
                 <input
                     type='radio'
                     id='shipper'
@@ -148,7 +159,7 @@ export default function SignupPage() {
                     onChange={handleRadioShipper}
                 />
                 <label htmlFor='shipper'> Shipper </label>
-                    
+
                 <button type='submit'> Sign Up </button>
 
                 <div className='navigation-panel'>

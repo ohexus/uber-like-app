@@ -6,17 +6,32 @@ const Truck = require('../../models/Truck');
 
 const findTruckType = require('../../helpers/findTruckType');
 
-// Load Schema
-// created_by: {type: Types.ObjectId, ref: 'User'},
-// assigned_to: {type: Types.ObjectId, ref: 'User', default: null},
-// status: {type: String, default: 'NEW'},
-// state: {type: String, default: null},
+// Load Schema {
+// created_by: { type: Types.ObjectId, ref: 'User' },
+// logs: [{
+//     message: { type: String, default: 'Load created' },
+//     time: { type: Date, default: Date.now() }
+// }],
+// assigned_to: { type: Types.ObjectId, ref: 'Truck', default: null },
+// status: { type: String, default: 'NEW' },
+// state: { type: String, default: null },
 // dimensions: {
 //     length: Number,
 //     width: Number,
 //     height: Number
 // },
-// payload: Number
+// payload: Number,
+// loadName: String,
+// coord: {
+//     pickUp: {
+//         lat: { type: Number, default: null },
+//         lon: { type: Number, default: null }
+//     },
+//     delivery: {
+//         lat: { type: Number, default: null },
+//         lon: { type: Number, default: null }
+//     }
+// }
 
 // api/load/create
 router.post('/create', async (req, res) => {
@@ -25,9 +40,9 @@ router.post('/create', async (req, res) => {
             return res.status(403).json({ status: 'You are not a shipper' });
         }
 
-        const { name, length, width, height, payload } = req.body;
+        const { loadName, length, width, height, payload } = req.body;
 
-        if (!name || !length || !width || !height || !payload) {
+        if (!loadName || !length || !width || !height || !payload) {
             return res.status(403).json({ status: 'Please fill in all the fields' });
         }
 
@@ -39,7 +54,7 @@ router.post('/create', async (req, res) => {
                 height: height
             },
             payload: payload,
-            name: name
+            loadName: loadName
         });
 
         await load.save();
