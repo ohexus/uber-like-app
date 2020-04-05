@@ -26,7 +26,7 @@ export default function NewLoadForm(props) {
 
         if (isValid) {
             if (length !== 0 && width !== 0 && height !== 0 && payload !== 0) {
-                await axios.put(CREATELOAD_API, {
+                await axios.post(CREATELOAD_API, {
                     loadName, length, width, height, payload
                 }, {
                     headers: {
