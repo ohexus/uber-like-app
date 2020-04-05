@@ -14,24 +14,35 @@ export default function NewLoadForm(props) {
     const [height, setHeight] = useState(1);
     const [payload, setPayload] = useState(1);
 
-    const [warningMessage] = useState('Please input all forms!');
+    const [warningMessage, setWarningMessage] = useState('Please input all forms!');
     const [showWarning, setShowWarning] = useState(false);
 
     const createLoad = async (e) => {
         e.preventDefault()
 
+        setShowWarning(false);
+        setWarningMessage('Please input all forms!');
         checkBeforePostToServer([loadName], setShowWarning);
 
-        if (!showWarning && length !== 0 && width !== 0 && height !== 0 && payload !== 0) {
-            await axios.post(CREATELOAD_API, {
-                loadName, length, width, height, payload
-            }, {
-                headers: {
-                    'authorization': localStorage.getItem('jwt_token')
-                }
-            });
+        if (!showWarning) {
+            if (length !== 0 && width !== 0 && height !== 0 && payload !== 0) {
+                await axios.put(UPDATELOAD_API, {
+                    loadId: load._id,
+                    length,
+                    width,
+                    height,
+                    payload
+                }, {
+                    headers: {
+                        'authorization': localStorage.getItem('jwt_token')
+                    }
+                });
 
-            window.location.reload()
+                window.location.reload()
+            } else {
+                setWarningMessage('Dimensions and payload cant be 0!');
+                setShowWarning(true);
+            }
         }
     }
 

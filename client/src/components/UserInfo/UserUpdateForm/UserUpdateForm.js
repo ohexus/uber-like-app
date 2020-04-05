@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import './UserUpdateForm.scss';
 
+import checkBeforePostToServer from '../../../helpers/checkBeforePostToServer';
+
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
 const UPDATEUSER_API = `${API_URL}/api/user/updateUser`;
@@ -13,21 +15,32 @@ export default function UserUpdateForm(props) {
     const [username, setUsername] = useState(user.username);
     const [email, setEmail] = useState(user.email);
     const [mobileNumber, setMobileNumber] = useState(user.mobileNumber);
-    
+
+    const [warningMessage] = useState('Please input all forms!');
+    const [showWarning, setShowWarning] = useState(false);
+
     const updateUser = async (e) => {
-        await axios.put(UPDATEUSER_API, { 
-            firstName, lastName, username, email, mobileNumber 
-        }, {
-            headers: {
-                'authorization': localStorage.getItem('jwt_token')
-            }
-        });
+        e.preventDefault();
+
+        checkBeforePostToServer([firstName, lastName, username, email, mobileNumber], setShowWarning);
+
+        if (!showWarning) {
+            await axios.put(UPDATEUSER_API, {
+                firstName, lastName, username, email, mobileNumber
+            }, {
+                headers: {
+                    'authorization': localStorage.getItem('jwt_token')
+                }
+            });
+
+            window.location.reload()
+        }
     }
-    
+
     const handleFirstNameInput = (e) => {
         setFirstName(e.target.value);
     }
-    
+
     const handleLastNameInput = (e) => {
         setLastName(e.target.value);
     }
@@ -49,58 +62,60 @@ export default function UserUpdateForm(props) {
         <form className={`updateuser ${props.className}`} onSubmit={updateUser}>
             <h1> Update info: </h1>
 
+            {showWarning && <h3>{warningMessage}</h3>}
+
             <label htmlFor='firstName'> First Name: </label>
-            <input 
+            <input
                 type='text'
                 name='firstName'
                 value={firstName}
                 onChange={handleFirstNameInput}
-                required 
+                required
             />
-            <hr/>
-            
+            <hr />
+
             <label htmlFor='lastName'> Last Name: </label>
-            <input 
+            <input
                 type='text'
                 name='lastName'
                 value={lastName}
                 onChange={handleLastNameInput}
-                required 
+                required
             />
-            <hr/>
+            <hr />
 
             <label htmlFor='username'> Username: </label>
-            <input 
+            <input
                 type='text'
                 name='username'
                 value={username}
                 onChange={handleUsernameInput}
                 required
             />
-            <hr/>
+            <hr />
 
             <label htmlFor='email'> Email: </label>
-            <input 
+            <input
                 type='email'
                 name='email'
                 value={email}
                 onChange={handleEmailInput}
                 required
             />
-            <hr/>
+            <hr />
 
             <label htmlFor='mobileNumber'> Mobile Number: </label>
-            <input 
+            <input
                 type='text'
                 name='mobileNumber'
                 value={mobileNumber}
                 onChange={handleMobileNumberInput}
                 required
             />
-            <hr/>
+            <hr />
 
             <button type='submit'> Submit update </button>
-            
+
         </form>
     );
 }
