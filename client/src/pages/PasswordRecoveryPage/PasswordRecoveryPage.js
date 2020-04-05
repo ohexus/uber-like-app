@@ -3,8 +3,8 @@ import { Redirect, Link } from 'react-router-dom';
 
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
-const CHECKUSER_API = `${API_URL}/api/auth/recoverPasswordCheckUser`;
-const RECOVERPASSWORD_API = `${API_URL}/api/auth/recoverPassword`;
+const CHECKUSER_API = `${API_URL}/api/recoverPassword/checkUser`;
+const RECOVERPASSWORD_API = `${API_URL}/api/recoverPassword/recover`;
 
 export default function PasswordRecoveryPage() {
     const [username, setUsername] = useState('');

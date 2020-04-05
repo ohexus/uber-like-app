@@ -9,7 +9,7 @@ module.exports = model('User', new Schema({
     lastName: String,
     username: String,
     email: String,
-    mobileNumber: String,
+    mobileNumber: Number,
     password: String,
     role: String,
     avatarImg: { data: Buffer, contentType: String }

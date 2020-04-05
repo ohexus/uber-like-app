@@ -123,7 +123,7 @@ export default function SignupPage() {
 
                 <label htmlFor='mobileNumber'> Mobile Number: </label>
                 <input
-                    type='text'
+                    type='number'
                     name='mobileNumber'
                     value={mobileNumber}
                     onChange={handleMobileNumberInput}

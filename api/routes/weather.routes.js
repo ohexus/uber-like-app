@@ -2,6 +2,9 @@ const router = require('express').Router();
 const axios = require('axios');
 const config = require('config');
 
+const valid = require('../middleware/valid.middleware');
+const weatherValid = require('../validation/weather.validation');
+
 const Weather = require('../../models/Weather');
 
 // Weather Schema
@@ -28,7 +31,7 @@ const Weather = require('../../models/Weather');
 // }
 
 // api/weather/update
-router.post('/update', async (req, res) => {
+router.post('/update', valid(weatherValid.update, 'body'), async (req, res) => {
     try {
         const { lat, lon } = req.body;
 
@@ -50,9 +53,9 @@ router.post('/update', async (req, res) => {
                 description: weatherResponse.weather[0].description,
                 iconUrl: weatherIconUrl
             },
-            main: {                                                     
-                temp: weatherResponse.main.temp,                                                                 
-                feels_like: weatherResponse.main.feels_like,   
+            main: {
+                temp: weatherResponse.main.temp,
+                feels_like: weatherResponse.main.feels_like,
                 pressure: weatherResponse.main.pressure,
                 humidity: weatherResponse.main.humidity,
                 city: weatherResponse.name
@@ -61,7 +64,7 @@ router.post('/update', async (req, res) => {
                 speed: weatherResponse.wind.speed,
                 deg: weatherResponse.wind.deg
             }
-        }, {new: true});
+        }, { new: true });
 
         res.status(200).send(weather);
 

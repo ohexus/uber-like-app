@@ -17,40 +17,34 @@ mongoose.connect(config.get('mongoUri'), {
 
 const PORT = config.get('port') || 8081;
 
-const auth = require('./routes/middleware/auth.middleware');
-const consoleLog = require('./routes/middleware/consoleLog.middleware');
-const requestLog = require('./routes/middleware/requestLog.middleware');
+const consoleLog = require('./api/middleware/consoleLog.middleware');
+const requestLog = require('./api/middleware/requestLog.middleware');
+const auth = require('./api/middleware/auth.middleware');
 
-const authRouter = require('./routes/api/auth.routes');
-const userRouter = require('./routes/api/user.routes');
-const truckRouter = require('./routes/api/truck.routes');
-const loadRouter = require('./routes/api/load.routes');
-const weatherRouter = require('./routes/api/weather.routes');
-const clearDBRouter = require('./routes/api/clearDB.routes');
+const clearDBRouter = require('./api/routes/clearDB.routes');
+const allRequestLogsRouter = require('./api/routes/allRequestLogs.routes');
+const authRouter = require('./api/routes/auth.routes');
+const recoverPasswordRouter = require('./api/routes/recoverPassword.routes');
+const userRouter = require('./api/routes/user.routes');
+const truckRouter = require('./api/routes/truck.routes');
+const loadRouter = require('./api/routes/load.routes');
+const weatherRouter = require('./api/routes/weather.routes');
 
 app.use(consoleLog);
 app.use(requestLog);
 
 app.use('/api/clearDB', clearDBRouter);
+app.use('/api/allRequestLogs', allRequestLogsRouter);
+
 app.use('/api/auth', authRouter);
 
 app.use(auth);
 
+app.use('/api/recoverPassword', recoverPasswordRouter);
 app.use('/api/user', userRouter);
 app.use('/api/truck', truckRouter);
 app.use('/api/load', loadRouter);
 app.use('/api/weather', weatherRouter);
-
-app.get('/api/allRequestLogs', async (req, res) => {
-    try {
-        const logs = await RequestLog.find({});
-
-        res.status(200).send(logs);
-
-    } catch (e) {
-        res.status(500).json({ status: e.message });
-    }
-});
 
 app.listen(PORT, () => {
     console.log(`server is running on port ${PORT}`)

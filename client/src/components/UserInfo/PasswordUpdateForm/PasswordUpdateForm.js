@@ -14,21 +14,25 @@ export default function PasswordUpdateForm(props) {
     const [showAlertMessage, setShowAlertMessage] = useState(false);
 
     const updatePassword = async () => {
-        await axios.put(UPDATEPASSWORD_API, {
+        const validMessage = await axios.put(UPDATEPASSWORD_API, {
+            oldPassword,
             newPassword
         }, {
             headers: {
                 'authorization': localStorage.getItem('jwt_token')
             }
         });
+
+        if (validMessage === 'Wrong old password') {
+            setAlertMessage(validMessage);
+            setShowAlertMessage(true);
+        } else {
+            window.location.reload(false)
+        }
     }
 
     const checkUpdatePassword = (e) => {
         e.preventDefault();
-
-        if (oldPassword !== props.password) {
-            return handleAlert('Wrong old password!');
-        }
 
         if (newPassword === oldPassword) {
             return handleAlert('The new password must be different!');
@@ -36,7 +40,6 @@ export default function PasswordUpdateForm(props) {
 
         if (newPassword === checkNewPassword) {
             updatePassword();
-            window.location.reload(false);
         } else {
             return handleAlert('New passwords does not match!');
         }

@@ -1,5 +1,8 @@
 const router = require('express').Router();
 
+const valid = require('../middleware/valid.middleware');
+const truckValid = require('../validation/truck.validation');
+
 const Truck = require('../../models/Truck');
 
 // Truck Schema
@@ -16,35 +19,37 @@ const Truck = require('../../models/Truck');
 // model: String
 
 // api/truck/create
-router.post('/create', async (req, res) => {
+router.post('/create', valid(truckValid.create, 'body'), async (req, res) => {
     try {
         if (req.user.role === 'shipper') {
             return res.status(403).json({ status: 'You are not a driver' });
         }
-        
+
         const { type, truckName, brand, model } = req.body;
 
-        if ( !type || !truckName || !brand || !model ) {
+        if (!type || !truckName || !brand || !model) {
             return res.status(403).json({ status: 'Please fill in all the fields' });
         }
 
-        const truckNameFound = await Truck.findOne({ $and: [
-            { created_by: req.user._id },
-            { truckName: truckName }
-        ]});
+        const truckNameFound = await Truck.findOne({
+            $and: [
+                { created_by: req.user._id },
+                { truckName }
+            ]
+        });
 
         if (truckNameFound) {
             return res.status(403).json({ status: 'This truck name is already exist' });
         }
-        
+
         const truck = new Truck({
             created_by: req.user._id,
-            type: type,
-            truckName: truckName,
-            brand: brand,
-            model: model
+            type,
+            truckName,
+            brand,
+            model
         });
-        
+
         await truck.save();
 
         res.status(200).send(truck);
@@ -55,75 +60,91 @@ router.post('/create', async (req, res) => {
 });
 
 // api/truck/update
-router.put('/update', async (req, res) => {
+router.put('/update', valid(truckValid.update, 'body'), async (req, res) => {
     try {
         if (req.user.role === 'shipper') {
             return res.status(403).json({ status: 'You are not a driver' });
         }
-        
+
         const { truckId, type, truckName, brand, model } = req.body;
 
-        if ( !truckId || !type || !truckName || !brand || !model ) {
+        if (!truckId || !type || !truckName || !brand || !model) {
             return res.status(403).json({ status: 'Please fill in all the fields' });
         }
 
-        await Truck.findOneAndUpdate({ $and: [
-            { created_by: req.user._id },
-            { _id: truckId },
-            { assigned_to: null }
-        ]}, {
-            type: type,
-            truckName: truckName,
-            brand: brand,
-            model: model,
-            $push: { logs: {
-                message: 'truck updated'
-            }}
-        });    
+        await Truck.findOneAndUpdate({
+            $and: [
+                { created_by: req.user._id },
+                { _id: truckId },
+                { assigned_to: null }
+            ]
+        }, {
+            type,
+            truckName,
+            brand,
+            model,
+            $push: {
+                logs: {
+                    message: 'truck updated'
+                }
+            }
+        });
 
         res.status(200).json({ status: 'truck updated' });
-    
+
     } catch (e) {
         res.status(500).json({ status: e.message });
     }
 });
 
 // api/truck/assign
-router.put('/assign', async (req, res) => {
+router.put('/assign', valid(truckValid.assign, 'body'), async (req, res) => {
     try {
-        if (!req.body.truckId) {
+        const { truckId } = req.body;
+
+        if (!truckId) {
             return res.status(403).json({ status: 'Truck id undefined' });
         }
 
         if (req.user.role === 'shipper') {
             return res.status(403).json({ status: 'You are not a driver' });
         }
-        
-        const truckFound = await Truck.findOne({ $and: [
-            { created_by: req.user._id },
-            { status: 'OL' }
-        ]});
+
+        const truckFound = await Truck.findOne({
+            $and: [
+                { created_by: req.user._id },
+                { status: 'OL' }
+            ]
+        });
 
         if (truckFound) return res.status(403).json({ status: 'You are on load!!' });
 
-        await Truck.findOneAndUpdate({ $and: [
-            { created_by: req.user._id },
-            { assigned_to: { $ne: null }}
-        ]}, {
+        await Truck.findOneAndUpdate({
+            $and: [
+                { created_by: req.user._id },
+                { assigned_to: { $ne: null } }
+            ]
+        }, {
             assigned_to: null,
-            $push: { logs: {
-                message: 'truck dismissed'
-            }}
+            $push: {
+                logs: {
+                    message: 'truck dismissed'
+                }
+            }
         });
 
-        await Truck.findOneAndUpdate({ $and: [
-            { created_by: req.user._id },
-            { _id: req.body.truckId }
-        ]}, {
+        await Truck.findOneAndUpdate({
+            $and: [
+                { created_by: req.user._id },
+                { _id: truckId }
+            ]
+        }, {
             assigned_to: req.user._id,
-            $push: { logs: {
-                message: 'truck assigned'
-            }}
+            $push: {
+                logs: {
+                    message: 'truck assigned'
+                }
+            }
         });
 
         res.status(200).json({ status: 'truck assigned' });
@@ -158,21 +179,25 @@ router.get('/allForUser', async (req, res) => {
 });
 
 // api/truck/delete
-router.delete('/delete', async (req, res) => {
+router.delete('/delete', valid(truckValid.delete, 'body'), async (req, res) => {
     try {
-        if (!req.body.truckId) {
+        const { truckId } = req.body;
+
+        if (!truckId) {
             return res.status(403).json({ status: 'Truck id undefined' });
         }
 
         if (req.user.role === 'shipper') {
             return res.status(403).json({ status: 'You are not a driver' });
         }
-        
-        await Truck.findOneAndDelete({ $and: [
-            { created_by: req.user._id },
-            { _id: req.body.truckId },
-            { assigned_to: null }
-        ]});
+
+        await Truck.findOneAndDelete({
+            $and: [
+                { created_by: req.user._id },
+                { _id: truckId },
+                { assigned_to: null }
+            ]
+        });
 
         res.status(200).json({ status: 'truck deleted' });
 

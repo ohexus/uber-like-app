@@ -25,7 +25,7 @@ export default function UserPage() {
                     'authorization': localStorage.getItem('jwt_token')
                 }
             }).then(res => res.data);
-
+            
             if (user === 'User not found') {
                 localStorage.removeItem('jwt_token')
                 setRouteRedirect(true)
