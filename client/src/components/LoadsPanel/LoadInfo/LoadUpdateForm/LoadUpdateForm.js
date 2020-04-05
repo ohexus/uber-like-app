@@ -17,7 +17,7 @@ export default function TruckUpdateForm(props) {
     const [warningMessage] = useState('Dimensions and payload cant be 0!');
     const [showWarning, setShowWarning] = useState(false);
 
-    const updateLoad = async () => {
+    const updateLoad = async (e) => {
         e.preventDefault()
 
         if (length !== 0 && width !== 0 && height !== 0 && payload !== 0) {

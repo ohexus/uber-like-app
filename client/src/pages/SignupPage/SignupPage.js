@@ -24,9 +24,9 @@ export default function SignupPage() {
     const fetchSignup = async (e) => {
         e.preventDefault();
 
-        checkBeforePostToServer([firstName, lastName, username, email, mobileNumber, password], setShowWarning);
+        const isValid = checkBeforePostToServer([firstName, lastName, username, email, mobileNumber, password], setShowWarning);
 
-        if (!showWarning && role !== null) {
+        if (isValid && role !== null) {
             await axios.post(SIGNUP_API, { firstName, lastName, username, email, mobileNumber, password, role });
             alert('Signed up successfully!');
             setRouteRedirect(true);

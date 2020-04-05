@@ -19,12 +19,12 @@ export default function TruckUpdateForm(props) {
     const [warningMessage] = useState('Please input all forms!');
     const [showWarning, setShowWarning] = useState(false);
 
-    const updateTruck = async () => {
+    const updateTruck = async (e) => {
         e.preventDefault()
 
-        checkBeforePostToServer([truckName, brand, model], setShowWarning);
+        const isValid = checkBeforePostToServer([truckName, brand, model], setShowWarning);
 
-        if (!showWarning) {
+        if (isValid) {
             await axios.put(UPDATETRUCK_API, {
                 truckId: truck._id,
                 type,

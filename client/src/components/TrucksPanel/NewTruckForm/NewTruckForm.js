@@ -19,9 +19,9 @@ export default function NewTruckForm(props) {
     const createTruck = async (e) => {
         e.preventDefault()
 
-        checkBeforePostToServer([truckName, brand, model], setShowWarning);
+        const isValid = checkBeforePostToServer([truckName, brand, model], setShowWarning);
 
-        if (!showWarning) {
+        if (isValid) {
             await axios.post(CREATETRUCK_API, {
                 type, truckName, brand, model
             }, {

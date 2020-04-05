@@ -22,16 +22,12 @@ export default function NewLoadForm(props) {
 
         setShowWarning(false);
         setWarningMessage('Please input all forms!');
-        checkBeforePostToServer([loadName], setShowWarning);
+        const isValid = checkBeforePostToServer([loadName], setShowWarning);
 
-        if (!showWarning) {
+        if (isValid) {
             if (length !== 0 && width !== 0 && height !== 0 && payload !== 0) {
-                await axios.put(UPDATELOAD_API, {
-                    loadId: load._id,
-                    length,
-                    width,
-                    height,
-                    payload
+                await axios.put(CREATELOAD_API, {
+                    loadName, length, width, height, payload
                 }, {
                     headers: {
                         'authorization': localStorage.getItem('jwt_token')

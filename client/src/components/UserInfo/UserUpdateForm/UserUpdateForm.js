@@ -22,9 +22,9 @@ export default function UserUpdateForm(props) {
     const updateUser = async (e) => {
         e.preventDefault();
 
-        checkBeforePostToServer([firstName, lastName, username, email, mobileNumber], setShowWarning);
+        const isValid = checkBeforePostToServer([firstName, lastName, username, email, mobileNumber], setShowWarning);
 
-        if (!showWarning) {
+        if (isValid) {
             await axios.put(UPDATEUSER_API, {
                 firstName, lastName, username, email, mobileNumber
             }, {
