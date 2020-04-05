@@ -35,7 +35,6 @@ const findTruckType = require('../../helpers/findTruckType');
 
 // api/load/create
 router.post('/create', async (req, res) => {
-    console.log('create')
     try {
         if (req.user.role === 'driver') {
             return res.status(403).json({ status: 'You are not a shipper' });

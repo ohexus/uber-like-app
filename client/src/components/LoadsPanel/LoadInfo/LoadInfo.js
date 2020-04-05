@@ -16,20 +16,26 @@ export default function LoadInfo(props) {
     const [load] = useState(props.load);
     const [dimensions] = useState(load.dimensions);
     const [isLoadFinished] = useState(load.status === 'SHIPPED');
+    const [hasCooords] = useState(props.load.coord.pickUp.lat !== null && props.load.coord.delivery.lat !== null);
 
     const [showLoadUpdateForm, setShowLoadUpdateForm] = useState(false);
-    const [showAlertCantAssign, setShowAlertCantAssign] = useState(false);
+    const [showWarningCantAssign, setShowWarningCantAssign] = useState(false);
+    const [showWarningHasNoCoords, setShowWarningHasNoCoords] = useState(false);
 
     const postLoad = async (e) => {
         e.preventDefault()
 
-        await axios.put(POSTLOAD_API, { loadId: load._id }, {
-            headers: {
-                'authorization': localStorage.getItem('jwt_token')
-            }
-        });
+        if (hasCooords) {
+            await axios.put(POSTLOAD_API, { loadId: load._id }, {
+                headers: {
+                    'authorization': localStorage.getItem('jwt_token')
+                }
+            });
 
-        await assignLoad();
+            await assignLoad();
+        } else {
+            setShowWarningHasNoCoords(true)
+        }
     }
 
     const assignLoad = async () => {
@@ -40,9 +46,9 @@ export default function LoadInfo(props) {
         }).then(res => res.data);
 
         if (updatedLoad.status === 'NEW') {
-            setShowAlertCantAssign(true)
+            setShowWarningCantAssign(true)
         } else {
-            window.location.reload(false);
+            window.location.reload();
         }
     }
 
@@ -77,7 +83,11 @@ export default function LoadInfo(props) {
                     }
                 </h4>}
 
-                {showAlertCantAssign && <h5>
+                {showWarningHasNoCoords && <h5>
+                    This load has no Pick Up and Delivery coordinates
+                </h5>}
+
+                {showWarningCantAssign && <h5>
                     All matched trucks is on load, try again later
                 </h5>}
 

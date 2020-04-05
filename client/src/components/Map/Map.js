@@ -125,8 +125,8 @@ export default function Map(props) {
       longitude: deliveryLon !== null ? deliveryLon : viewport.longitude
     });
 
-    setShowPickUpLocation(true);
-    setShowDeliveryLocation(true);
+    setShowPickUpLocation(pickUpLat && pickUpLon ? true : false);
+    setShowDeliveryLocation(deliveryLat && deliveryLon ? true : false);
   }
 
   const handleUserLocation = useCallback((position) => {
@@ -259,7 +259,7 @@ export default function Map(props) {
               return <option
                 key={index}
                 value={index}
-              >{load.name}</option>
+              >{load.loadName}</option>
             })}
           </select>
           <button
