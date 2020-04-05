@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import './WeatherPanel.scss';
 
 import findUsersCoordinates from '../../helpers/findLocationInfo';
@@ -42,25 +42,6 @@ export default function WeatherPanel() {
 
     const [showWeather, setShowWeather] = useState(false);
 
-    const fetchWeather = useCallback(async () => {
-        const weatherData = await axios.post(WEATHER_API, {
-            lat: userLocation.latitude,
-            lon: userLocation.longitude
-        }, {
-            headers: {
-                'authorization': localStorage.getItem('jwt_token')
-            }
-        }).then(res => res.data);
-
-        if (weatherData) {
-            setWeatherInfo(weatherData.weather);
-            setWeatherMainInfo(weatherData.main);
-            setWindInfo(weatherData.wind);
-
-            setShowWeather(true);
-        }
-    }, [userLocation, setWeatherInfo])
-
     const handleUserLocation = (position) => {
         setUserLocation(position.coords);
     }
@@ -70,10 +51,27 @@ export default function WeatherPanel() {
     }, []);
 
     useEffect(() => {
-        if (!showWeather && userLocation) {
-            (async () => await fetchWeather())();
+        const fetchWeather = async () => {
+            const weatherData = await axios.post(WEATHER_API, {
+                lat: userLocation.latitude,
+                lon: userLocation.longitude
+            }, {
+                headers: {
+                    'authorization': localStorage.getItem('jwt_token')
+                }
+            }).then(res => res.data);
+
+            if (weatherData) {
+                setWeatherInfo(weatherData.weather);
+                setWeatherMainInfo(weatherData.main);
+                setWindInfo(weatherData.wind);
+
+                setShowWeather(true);
+            }
         }
-    }, [showWeather, userLocation, fetchWeather]);
+
+        fetchWeather();
+    }, [userLocation.latitude, userLocation.longitude]);
 
     return (
         <div className='weather'>

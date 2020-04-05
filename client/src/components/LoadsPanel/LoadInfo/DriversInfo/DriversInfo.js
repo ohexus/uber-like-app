@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import './DriversInfo.scss';
 
 import InfoTile from '../../../InfoTile/InfoTile';
@@ -11,21 +11,19 @@ export default function DriversInfo(props) {
     const [loadId] = useState(props.loadId)
     const [driver, setDriver] = useState(null);
 
-    const fetchDriver = useCallback(async () => {
-        const assignedDriver = await axios.post(GETASSIGNEDDRIVER_API, { loadId: loadId }, {
-            headers: {
-                'authorization': localStorage.getItem('jwt_token')
-            }
-        });
-
-        setDriver(assignedDriver.data);
-    }, [loadId, setDriver])
-    
     useEffect(() => {
-        if (!driver) {
-            (async() => await fetchDriver())();
+        const fetchDriver = async () => {
+            const assignedDriver = await axios.post(GETASSIGNEDDRIVER_API, { loadId: loadId }, {
+                headers: {
+                    'authorization': localStorage.getItem('jwt_token')
+                }
+            }).then(res => res.data);
+
+            setDriver(assignedDriver);
         }
-    }, [driver, fetchDriver]);
+
+        fetchDriver();
+    }, [loadId]);
 
     return (
         <>
@@ -36,17 +34,17 @@ export default function DriversInfo(props) {
                     label={'First Name:'}
                     info={driver.firstName}
                 />
-                
+
                 <InfoTile
                     label={'Last Name:'}
                     info={driver.lastName}
                 />
-                
+
                 <InfoTile
                     label={'Email:'}
                     info={driver.email}
                 />
-                
+
                 <InfoTile
                     label={'Mobile Number:'}
                     info={driver.mobileNumber}

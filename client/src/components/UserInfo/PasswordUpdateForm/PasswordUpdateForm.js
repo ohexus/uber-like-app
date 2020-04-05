@@ -12,17 +12,17 @@ export default function PasswordUpdateForm(props) {
     const [checkNewPassword, setCheckNewPassword] = useState('');
     const [alertMessage, setAlertMessage] = useState('');
     const [showAlertMessage, setShowAlertMessage] = useState(false);
-    
+
     const updatePassword = async () => {
-        await axios.put(UPDATEPASSWORD_API, { 
-            newPassword 
+        await axios.put(UPDATEPASSWORD_API, {
+            newPassword
         }, {
             headers: {
                 'authorization': localStorage.getItem('jwt_token')
             }
         });
     }
-    
+
     const checkUpdatePassword = (e) => {
         e.preventDefault();
 
@@ -46,58 +46,57 @@ export default function PasswordUpdateForm(props) {
         setAlertMessage(message);
         setShowAlertMessage(true);
     }
-    
+
     const handleOldPasswordInput = (e) => {
         setOldPassword(e.target.value);
     }
-    
+
     const handleNewPasswordInput = (e) => {
         setNewPassword(e.target.value);
     }
-    
+
     const handleCheckNewPasswordInput = (e) => {
         setCheckNewPassword(e.target.value);
     }
 
     return (
-
         <form className={`updatepassword ${props.className}`} onSubmit={checkUpdatePassword}>
             <h1> Password Update: </h1>
 
             {showAlertMessage && <span className='updatepassword__alert'> {alertMessage} </span>}
 
             <label htmlFor='oldPassword'> Old password: </label>
-            <input 
+            <input
                 type='password'
                 name='oldPassword'
                 value={oldPassword}
                 onChange={handleOldPasswordInput}
-                required 
+                required
             />
-            <hr/>
-            
+            <hr />
+
             <label htmlFor='newPassword'> New password: </label>
-            <input 
+            <input
                 type='password'
                 name='newPassword'
                 value={newPassword}
                 onChange={handleNewPasswordInput}
-                required 
+                required
             />
-            <hr/>
-            
+            <hr />
+
             <label htmlFor='checkNewPassword'> Repeat new password: </label>
-            <input 
+            <input
                 type='password'
                 name='checkNewPassword'
                 value={checkNewPassword}
                 onChange={handleCheckNewPasswordInput}
-                required 
+                required
             />
-            <hr/>
+            <hr />
 
             <button type='submit'> Submit password update </button>
-            
+
         </form>
     );
 }

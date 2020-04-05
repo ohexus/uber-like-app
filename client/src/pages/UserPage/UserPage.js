@@ -15,29 +15,29 @@ const USERINFO_API = `${API_URL}/api/user/userInfo`;
 
 export default function UserPage() {
     const [user, setUser] = useState(null);
-    
+
     const [routeRedirect, setRouteRedirect] = useState(false);
-    
+
     useEffect(() => {
-        const fetchUser = async() => {
+        const fetchUser = async () => {
             const user = await axios.get(USERINFO_API, {
                 headers: {
                     'authorization': localStorage.getItem('jwt_token')
                 }
-            });
-    
-            if (user.data === 'User not found') {
+            }).then(res => res.data);
+
+            if (user === 'User not found') {
                 localStorage.removeItem('jwt_token')
                 setRouteRedirect(true)
                 return null
             }
-        
-            setUser(user.data)
+
+            setUser(user);
         }
 
-        fetchUser()
+        fetchUser();
     }, []);
-    
+
     useEffect(() => {
         if (!localStorage.getItem('jwt_token')) setRouteRedirect(true)
     }, []);
@@ -49,11 +49,11 @@ export default function UserPage() {
     return (
         <>
             {user && <div className='user'>
-                <Map user={user}/>
+                <Map user={user} />
 
                 <UserInfo user={user} />
 
-                {user.role === 'driver' 
+                {user.role === 'driver'
                     ? <TrucksPanel />
                     : <LoadsPanel />
                 }

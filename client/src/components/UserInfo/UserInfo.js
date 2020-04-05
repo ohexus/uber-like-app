@@ -16,24 +16,24 @@ export default function UserInfo(props) {
 
     const [showUserUpdateForm, setShowUserUpdateForm] = useState(false);
     const [showPasswordUpdateForm, setShowPasswordUpdateForm] = useState(false);
-    
+
     const [routeRedirect, setRouteRedirect] = useState(false);
-    
+
     const toggleShowUserUpdateForm = () => {
         setShowUserUpdateForm(!showUserUpdateForm);
         setShowPasswordUpdateForm(false);
     }
-    
+
     const toggleShowPasswordUpdateForm = () => {
         setShowPasswordUpdateForm(!showPasswordUpdateForm);
         setShowUserUpdateForm(false);
     }
-    
+
     const handleLogout = () => {
         localStorage.removeItem('jwt_token');
         setRouteRedirect(true);
     }
-    
+
     const deleteAccount = async () => {
         await axios.delete(DELETEUSER_API, {
             headers: {
@@ -44,7 +44,7 @@ export default function UserInfo(props) {
         handleLogout();
     }
 
-    if(routeRedirect){
+    if (routeRedirect) {
         return <Redirect to='/' />
     }
 
@@ -53,30 +53,30 @@ export default function UserInfo(props) {
             <h1 className='user__role'> {user.role.toUpperCase()} </h1>
 
             <UserAvatar undecodedImg={user.avatarImg} />
-            
+
             <div className='user__info'>
                 <h2> Info: </h2>
-                
+
                 <InfoTile
                     label={'Username:'}
                     info={user.username}
                 />
-                
+
                 <InfoTile
                     label={'First Name:'}
                     info={user.firstName}
                 />
-                
+
                 <InfoTile
                     label={'Last Name:'}
                     info={user.lastName}
                 />
-                
+
                 <InfoTile
                     label={'Email:'}
                     info={user.email}
                 />
-                
+
                 <InfoTile
                     label={'Mobile number:'}
                     info={user.mobileNumber}
@@ -91,7 +91,7 @@ export default function UserInfo(props) {
                     </button>
 
                     {showUserUpdateForm && <UserUpdateForm user={user} className='user__updateuser' />}
-                    
+
                     <button type='button' onClick={toggleShowPasswordUpdateForm}>
                         {showPasswordUpdateForm
                             ? 'Close update Password Info'

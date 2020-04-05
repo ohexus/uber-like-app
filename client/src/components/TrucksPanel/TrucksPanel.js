@@ -12,29 +12,29 @@ export default function TrucksPanel() {
     const [trucks, setTrucks] = useState(null);
     const [showNewTruckForm, setShowNewTruckForm] = useState(false);
 
-    const fetchTrucks = async() => {
-        const trucks = await axios.get(TRUCKS_API, {
-            headers: {
-                'authorization': localStorage.getItem('jwt_token')
-            }
-        });
-    
-        return trucks.data;
-    }
-    
     const toggleShowNewTruckForm = () => {
         setShowNewTruckForm(!showNewTruckForm);
     }
-    
+
     useEffect(() => {
-        (async() => setTrucks(await fetchTrucks()))();
+        const fetchTrucks = async () => {
+            const trucks = await axios.get(TRUCKS_API, {
+                headers: {
+                    'authorization': localStorage.getItem('jwt_token')
+                }
+            }).then(res => res.data);
+
+            setTrucks(trucks);
+        }
+
+        fetchTrucks();
     }, []);
 
     return (
         <div className='trucks'>
             <h2 className='trucks__header'> Your Trucks: </h2>
 
-            <button 
+            <button
                 type='button'
                 onClick={toggleShowNewTruckForm}
             >
@@ -50,9 +50,9 @@ export default function TrucksPanel() {
                 ? <div className='trucks__panel'>
                     {trucks.map(truck => {
                         return <TruckInfo
-                                    key={truck._id}
-                                    truck={truck} 
-                                />
+                            key={truck._id}
+                            truck={truck}
+                        />
                     })}
                 </div>
                 : <h3>You have not added any trucks</h3>

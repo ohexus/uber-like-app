@@ -18,20 +18,10 @@ export default function LoadsPanel() {
 
     const [showNewLoadForm, setShowNewloadForm] = useState(false);
 
-    const fetchLoads = async() => {
-        const loads = await axios.get(LOADS_API, {
-            headers: {
-                'authorization': localStorage.getItem('jwt_token')
-            }
-        });
-    
-        return loads.data;
-    }
-    
     const toggleShowNewLoadForm = () => {
         setShowNewloadForm(!showNewLoadForm);
     }
-    
+
     const handleFilterSelect = (e) => {
         if (loads) {
             if (e.target.value !== '') {
@@ -41,13 +31,20 @@ export default function LoadsPanel() {
             }
         }
     }
-    
+
     useEffect(() => {
-        (async() => {
-            const loads = await fetchLoads();
+        const fetchLoads = async () => {
+            const loads = await axios.get(LOADS_API, {
+                headers: {
+                    'authorization': localStorage.getItem('jwt_token')
+                }
+            }).then(res => res.data);
+
             setLoads(loads);
             setFilteredLoads(loads);
-        })();
+        }
+
+        fetchLoads();
     }, []);
 
     const indexLast = currentPage * loadsPerPage;
@@ -60,7 +57,7 @@ export default function LoadsPanel() {
         <div className='loads'>
             <h2 className='loads__header'> Your Loads: </h2>
 
-            <button 
+            <button
                 type='button'
                 onClick={toggleShowNewLoadForm}
             >
@@ -74,32 +71,32 @@ export default function LoadsPanel() {
 
             <div className='loads__filter'>
                 <label htmlFor='type'> Filter: </label>
-                <select 
+                <select
                     name='type'
                     className='loads__select'
                     onChange={handleFilterSelect}
                 >
-                    <option 
+                    <option
                         className='loads__option'
                         value=''
                     > All </option>
 
-                    <option 
+                    <option
                         className='loads__option'
                         value='NEW'
                     > NEW </option>
-                    
-                    <option 
+
+                    <option
                         className='loads__option'
                         value='POSTED'
                     > POSTED </option>
 
-                    <option 
+                    <option
                         className='loads__option'
                         value='ASSIGNED'
                     > ASSIGNED </option>
 
-                    <option 
+                    <option
                         className='loads__option'
                         value='SHIPPED'
                     > SHIPPED </option>
@@ -110,7 +107,7 @@ export default function LoadsPanel() {
                 ? <div className='loads__panel'>
                     <LoadsShelf loads={currentLoads} />
 
-                    <Pagination 
+                    <Pagination
                         itemsPerPage={loadsPerPage}
                         total={filteredLoads.length}
                         paginate={paginate}
