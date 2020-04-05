@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './Map.scss';
 import 'react-map-gl-geocoder/dist/mapbox-gl-geocoder.css'
 
@@ -14,26 +14,6 @@ const UPDATELOADCOORDS_API = `${API_URL}/api/load/updateCoords`;
 const CHECKFORLOAD_API = `${API_URL}/api/load/checkForLoad`;
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiZWFzeWJyZWV6ZSIsImEiOiJjazhqczkydmEwM3ByM3Jub2E5MjV3aWFyIn0.PZM-0d_B-QKbR4TxTRhvug';
-
-// const renderPopup = (index) => {
-//   return (showPopupInfo &&
-//     <Popup tipSize={5}
-//       anchor='bottom-right'
-//       longitude={markerList[index].lon}
-//       latitude={markerList[index].lat}
-//       onMouseLeave={() => setShowPopupInfo(false)}
-//       closeOnClick={true}
-//     >
-//       <p>
-//         <strong>{markerList[index].name}</strong>
-//         <br />
-//         {markerList[index].info}
-//       </p>
-//     </Popup>
-//   );
-// }
-
-// http://api.mapbox.com/geocoding/v5/mapbox.places/${lon},${lat}.json?access_token=${MAPBOX_TOKEN}
 
 export default function Map(props) {
   const [user] = useState(props.user);
@@ -51,12 +31,16 @@ export default function Map(props) {
   });
 
   const [userLocation, setUserLocation] = useState(null);
-  const [pickUpLocation, setPickUpLocation] = useState(null);
-  const [deliveryLocation, setDeliveryLocation] = useState(null);
+  const [pickUpCoords, setPickUpCoords] = useState(null);
+  const [pickUpAddress, setPickUpAddress] = useState(null);
+  const [deliveryCoords, setDeliveryCoords] = useState(null);
+  const [deliveryAddress, setDeliveryAddress] = useState(null);
 
-  const [showPickUpLocation, setShowPickUpLocation] = useState(false);
-  const [showDeliveryLocation, setShowDeliveryLocation] = useState(false);
-  // const [showPopupInfo, setShowPopupInfo] = useState(false);
+  const [showPickUpCoords, setShowPickUpCoords] = useState(false);
+  const [showDeliveryCoords, setShowDeliveryCoords] = useState(false);
+
+  const [popupInfo, setPopupInfo] = useState(false);
+  const [showPopupInfo, setShowPopupInfo] = useState(false);
 
   const [reloadPage, setReloadPage] = useState(false);
 
@@ -64,7 +48,7 @@ export default function Map(props) {
 
   const getAddressFromCoords = async (lon, lat) => {
     const address = await axios.get(`http://api.mapbox.com/geocoding/v5/mapbox.places/${lon},${lat}.json?access_token=${MAPBOX_TOKEN}`)
-      .then(res => res.data.features[0].place_name)
+      .then(res => res.data.features[0].place_name);
 
     return address
   }
@@ -72,13 +56,10 @@ export default function Map(props) {
   const updateLoadCoords = async (e) => {
     e.preventDefault();
 
-    const pickUpAddress = await getAddressFromCoords(pickUpLocation.longitude, pickUpLocation.latitude);
-    const deliveryAddress = await getAddressFromCoords(deliveryLocation.longitude, deliveryLocation.latitude);
-
     await axios.put(UPDATELOADCOORDS_API, {
       loadId: loadsData[activeLoadIndex]._id,
-      pickUpCoords: pickUpLocation,
-      deliveryCoords: deliveryLocation,
+      pickUpCoords,
+      deliveryCoords,
       pickUpAddress,
       deliveryAddress
     }, {
@@ -91,12 +72,16 @@ export default function Map(props) {
     setReloadPage(true);
   }
 
-  const onMarkerDragEnd = (event, funcSet) => {
-    funcSet({
-      longitude: event.lngLat[0],
-      latitude: event.lngLat[1]
+  const onMarkerDragEnd = async (event, funcCoordSet, funcAddressSet) => {
+    const lon = event.lngLat[0];
+    const lat = event.lngLat[1];
+
+    funcAddressSet(await getAddressFromCoords(lon, lat));
+
+    funcCoordSet({
+      longitude: lon,
+      latitude: lat
     });
-    console.log(event.lngLat)
   };
 
   const toggleShowLocationButton = (show, showSet, locationSet) => {
@@ -112,30 +97,46 @@ export default function Map(props) {
 
     const pickUpLat = loadsData[e.target.value].coord.pickUp.lat;
     const pickUpLon = loadsData[e.target.value].coord.pickUp.lon;
-    setPickUpLocation({
+    setPickUpCoords({
       latitude: pickUpLat !== null ? pickUpLat : viewport.latitude,
       longitude: pickUpLon !== null ? pickUpLon : viewport.longitude
     });
 
     const deliveryLat = loadsData[e.target.value].coord.delivery.lat;
     const deliveryLon = loadsData[e.target.value].coord.delivery.lon;
-    setDeliveryLocation({
+    setDeliveryCoords({
       latitude: deliveryLat !== null ? deliveryLat : viewport.latitude,
       longitude: deliveryLon !== null ? deliveryLon : viewport.longitude
     });
 
-    setShowPickUpLocation(pickUpLat && pickUpLon ? true : false);
-    setShowDeliveryLocation(deliveryLat && deliveryLon ? true : false);
+    setShowPickUpCoords(pickUpLat && pickUpLon ? true : false);
+    setShowDeliveryCoords(deliveryLat && deliveryLon ? true : false);
   }
 
-  const handleUserLocation = useCallback((position) => {
-    setViewport({
-      ...viewport,
-      latitude: position.coords.latitude,
-      longitude: position.coords.longitude
-    })
-    setUserLocation(position.coords);
-  }, [viewport])
+  const renderPopup = () => {
+    return (showPopupInfo &&
+      <Popup tipSize={5}
+        anchor='bottom-right'
+        longitude={popupInfo.longitude}
+        latitude={popupInfo.latitude}
+        closeButton={false}
+        className='popup'
+      >
+        <h3>{popupInfo.title}</h3>
+        <p>{popupInfo.info}</p>
+      </Popup>
+    );
+  }
+
+  const handleShowPopup = (title, coord, info) => {
+    setPopupInfo({
+      latitude: coord.latitude,
+      longitude: coord.longitude,
+      title,
+      info
+    });
+    setShowPopupInfo(true);
+  }
 
   useEffect(() => {
     if (user.role === 'shipper') {
@@ -151,18 +152,23 @@ export default function Map(props) {
         if (filteredLoads.length) {
           setLoadsData(filteredLoads);
 
-          setPickUpLocation({
-            latitude: filteredLoads[0].coord.pickUp.lat || viewport.latitude,
-            longitude: filteredLoads[0].coord.pickUp.lon || viewport.longitude
+          const load = filteredLoads[0];
+
+          setPickUpCoords({
+            latitude: load.coord.pickUp.lat || viewport.latitude,
+            longitude: load.coord.pickUp.lon || viewport.longitude
           });
 
-          setDeliveryLocation({
-            latitude: filteredLoads[0].coord.delivery.lat || viewport.latitude,
-            longitude: filteredLoads[0].coord.delivery.lon || viewport.longitude
+          setDeliveryCoords({
+            latitude: load.coord.delivery.lat || viewport.latitude,
+            longitude: load.coord.delivery.lon || viewport.longitude
           });
 
-          setShowPickUpLocation(filteredLoads[0].coord.pickUp.lat ? true : false);
-          setShowDeliveryLocation(filteredLoads[0].coord.delivery.lat ? true : false);
+          setPickUpAddress(load.address.pickUp);
+          setDeliveryAddress(load.address.delivery);
+
+          setShowPickUpCoords(load.coord.pickUp.lat ? true : false);
+          setShowDeliveryCoords(load.coord.delivery.lat ? true : false);
         }
       }
 
@@ -181,18 +187,21 @@ export default function Map(props) {
 
         if (load.status === 'Nothing' || load.status === 'No truck assigned') return
 
-        setPickUpLocation({
+        setPickUpCoords({
           latitude: load.coord.pickUp.lat,
           longitude: load.coord.pickUp.lon
         });
 
-        setDeliveryLocation({
+        setDeliveryCoords({
           latitude: load.coord.delivery.lat,
           longitude: load.coord.delivery.lon
         });
 
-        setShowPickUpLocation(true);
-        setShowDeliveryLocation(true);
+        setPickUpAddress(load.address.pickUp);
+        setDeliveryAddress(load.address.delivery);
+
+        setShowPickUpCoords(true);
+        setShowDeliveryCoords(true);
       }
 
       fetchLoad();
@@ -200,8 +209,17 @@ export default function Map(props) {
   }, [user.role]);
 
   useEffect(() => {
-    findUsersCoordinates(handleUserLocation)
-  }, [handleUserLocation]);
+    const handleUserLocation = (position) => {
+      setViewport({
+        ...viewport,
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude
+      })
+      setUserLocation(position.coords);
+    }
+
+    findUsersCoordinates(handleUserLocation);
+  }, [viewport]);
 
   if (reloadPage) {
     window.location.reload()
@@ -217,8 +235,8 @@ export default function Map(props) {
         mapStyle='mapbox://styles/mapbox/streets-v11'
         mapboxApiAccessToken={MAPBOX_TOKEN}
         ref={mapRef}
-        onClick={(e) => getAddressFromCoords(e.lngLat[0], e.lngLat[1])}
       >
+        {renderPopup()}
         <Marker
           className='custom-marker'
           longitude={userLocation.longitude}
@@ -227,34 +245,36 @@ export default function Map(props) {
           <div
             className={`custom-marker__icon custom-marker__icon custom-marker__icon${user.role === 'driver' ? '--driver' : '--shipper'}`}
             alt=''
-          // onMouseEnter={() => setShowPopupInfo(true)}
-          // onMouseLeave={() => setShowPopupInfo(false)}
           ></div>
         </Marker>
 
-        {showPickUpLocation && <Marker
+        {showPickUpCoords && <Marker
           className='custom-marker'
-          longitude={pickUpLocation.longitude}
-          latitude={pickUpLocation.latitude}
+          longitude={pickUpCoords.longitude}
+          latitude={pickUpCoords.latitude}
           draggable
-          onDragEnd={(event) => onMarkerDragEnd(event, setPickUpLocation)}
+          onDragEnd={(event) => onMarkerDragEnd(event, setPickUpCoords, setPickUpAddress)}
         >
           <div
             className='custom-marker__icon custom-marker__icon--pick-up'
             alt=''
+            onMouseEnter={() => handleShowPopup('Pick Up Address:', pickUpCoords, pickUpAddress)}
+            onMouseLeave={() => setShowPopupInfo(false)}
           ></div>
         </Marker>}
 
-        {showDeliveryLocation && <Marker
+        {showDeliveryCoords && <Marker
           className='custom-marker'
-          longitude={deliveryLocation.longitude}
-          latitude={deliveryLocation.latitude}
+          longitude={deliveryCoords.longitude}
+          latitude={deliveryCoords.latitude}
           draggable
-          onDragEnd={(event) => onMarkerDragEnd(event, setDeliveryLocation)}
+          onDragEnd={(event) => onMarkerDragEnd(event, setDeliveryCoords, setDeliveryAddress)}
         >
           <div
             className='custom-marker__icon custom-marker__icon--delivery'
             alt=''
+            onMouseEnter={() => handleShowPopup('Delivery Address:', deliveryCoords, deliveryAddress)}
+            onMouseLeave={() => setShowPopupInfo(false)}
           ></div>
         </Marker>}
 
@@ -268,12 +288,12 @@ export default function Map(props) {
         {user.role === 'shipper' && <form onSubmit={updateLoadCoords} className='pad'>
           <button
             type='button'
-            onClick={() => toggleShowLocationButton(showPickUpLocation, setShowPickUpLocation, setPickUpLocation)}
-          > {showPickUpLocation ? 'Delete Pick Up Mark' : 'Set Pick Up Mark'} </button>
+            onClick={() => toggleShowLocationButton(showPickUpCoords, setShowPickUpCoords, setPickUpCoords)}
+          > {showPickUpCoords ? 'Delete Pick Up Mark' : 'Set Pick Up Mark'} </button>
           <button
             type='button'
-            onClick={() => toggleShowLocationButton(showDeliveryLocation, setShowDeliveryLocation, setDeliveryLocation)}
-          > {showDeliveryLocation ? 'Delete Delivery Mark' : 'Set Delivery Mark'} </button>
+            onClick={() => toggleShowLocationButton(showDeliveryCoords, setShowDeliveryCoords, setDeliveryCoords)}
+          > {showDeliveryCoords ? 'Delete Delivery Mark' : 'Set Delivery Mark'} </button>
           <select onChange={handleSelectChange}>
             <option disabled value={null}> {loadsData ? 'select load' : 'create new load first'}</option>
             {loadsData && loadsData.map((load, index) => {
@@ -285,7 +305,7 @@ export default function Map(props) {
           </select>
           <button
             type='submit'
-            disabled={(loadsData && showPickUpLocation && showDeliveryLocation) ? false : true}
+            disabled={(loadsData && showPickUpCoords && showDeliveryCoords) ? false : true}
           >Update Coordinates</button>
         </form>}
 

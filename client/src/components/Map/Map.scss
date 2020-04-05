@@ -24,6 +24,10 @@
     padding: 10px;
 }
 
+.popup {
+    z-index: 100;
+}
+
 $size: 2em;
 .custom-marker {
     width: 0;

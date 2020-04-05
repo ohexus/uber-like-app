@@ -51,27 +51,29 @@ export default function WeatherPanel() {
     }, []);
 
     useEffect(() => {
-        const fetchWeather = async () => {
-            const weatherData = await axios.post(WEATHER_API, {
-                lat: userLocation.latitude,
-                lon: userLocation.longitude
-            }, {
-                headers: {
-                    'authorization': localStorage.getItem('jwt_token')
+        if (userLocation) {
+            const fetchWeather = async () => {
+                const weatherData = await axios.post(WEATHER_API, {
+                    lat: userLocation.latitude,
+                    lon: userLocation.longitude
+                }, {
+                    headers: {
+                        'authorization': localStorage.getItem('jwt_token')
+                    }
+                }).then(res => res.data);
+
+                if (weatherData) {
+                    setWeatherInfo(weatherData.weather);
+                    setWeatherMainInfo(weatherData.main);
+                    setWindInfo(weatherData.wind);
+
+                    setShowWeather(true);
                 }
-            }).then(res => res.data);
-
-            if (weatherData) {
-                setWeatherInfo(weatherData.weather);
-                setWeatherMainInfo(weatherData.main);
-                setWindInfo(weatherData.wind);
-
-                setShowWeather(true);
             }
-        }
 
-        fetchWeather();
-    }, [userLocation.latitude, userLocation.longitude]);
+            fetchWeather();
+        }
+    }, [userLocation]);
 
     return (
         <div className='weather'>
