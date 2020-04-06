@@ -4,8 +4,6 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const app = express();
 
-const RequestLog = require('./models/RequestLog');
-
 app.use(cors());
 app.use(express.json({ extended: true }));
 

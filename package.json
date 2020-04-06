@@ -1,31 +1,25 @@
 {
-    "name": "uber-like-app",
-    "version": "0.1.0",
-    "description": "",
-    "main": "index.js",
-    "scripts": {
-        "start": "node index.js",
-        "server": "nodemon index.js",
-        "client": "npm run start --prefix client",
-        "dev": "concurrently \"npm run server\" \"npm run client\""
-    },
-    "author": "",
-    "license": "ISC",
-    "dependencies": {
-        "@hapi/joi": "^17.1.1",
-        "axios": "^0.19.2",
-        "bcryptjs": "^2.4.3",
-        "body-parser": "^1.19.0",
-        "concurrently": "^5.1.0",
-        "config": "^3.3.0",
-        "cookie-parser": "^1.4.5",
-        "cors": "^2.8.5",
-        "express": "^4.17.1",
-        "fs": "0.0.1-security",
-        "geoip-lite": "^1.4.1",
-        "jsonwebtoken": "^8.5.1",
-        "mongoose": "^5.9.6",
-        "multer": "^1.4.2",
-        "nodemon": "^2.0.2"
-    }
+  "name": "uber-like-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "server": "npm run server --prefix server",
+    "client": "npm run start --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ohexus/uber-like-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ohexus/uber-like-app/issues"
+  },
+  "homepage": "https://github.com/ohexus/uber-like-app#readme",
+  "dependencies": {
+    "concurrently": "^5.1.0"
+  }
 }
