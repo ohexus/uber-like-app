@@ -3,6 +3,8 @@ const config = require('config');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const app = express();
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
 
 app.use(cors());
 app.use(express.json({ extended: true }));
@@ -28,6 +30,11 @@ const truckRouter = require('./api/routes/truck.routes');
 const loadRouter = require('./api/routes/load.routes');
 const weatherRouter = require('./api/routes/weather.routes');
 
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
 app.use(consoleLog);
 app.use(requestLog);
 
@@ -44,6 +51,10 @@ app.use('/api/truck', truckRouter);
 app.use('/api/load', loadRouter);
 app.use('/api/weather', weatherRouter);
 
-app.listen(PORT, () => {
+io.on('connection', () => {
+  console.log('io connected');
+});
+
+server.listen(PORT, () => {
   console.log(`server is running on port ${PORT}`);
 });
