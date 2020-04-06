@@ -14,56 +14,56 @@ const API_URL = process.env.REACT_APP_API_URL;
 const USERINFO_API = `${API_URL}/api/user/userInfo`;
 
 export default function UserPage() {
-    const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null);
 
-    const [routeRedirect, setRouteRedirect] = useState(false);
+  const [routeRedirect, setRouteRedirect] = useState(false);
 
-    useEffect(() => {
-        const fetchUser = async () => {
-            const user = await axios.get(USERINFO_API, {
-                headers: {
-                    'authorization': localStorage.getItem('jwt_token')
-                }
-            }).then(res => res.data);
-            
-            if (user === 'User not found') {
-                localStorage.removeItem('jwt_token')
-                setRouteRedirect(true)
-                return null
-            }
+  useEffect(() => {
+    const fetchUser = async () => {
+      const user = await axios.get(USERINFO_API, {
+        headers: {
+          authorization: localStorage.getItem('jwt_token'),
+        },
+      }).then((res) => res.data);
 
-            setUser(user);
+      if (user === 'User not found') {
+        localStorage.removeItem('jwt_token');
+        setRouteRedirect(true);
+        return null;
+      }
+
+      setUser(user);
+    };
+
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    if (!localStorage.getItem('jwt_token')) setRouteRedirect(true);
+  }, []);
+
+  if (routeRedirect) {
+    return <Redirect to="/" />;
+  }
+
+  return (
+    <>
+      { user && <div className="user">
+        <Map user={ user } />
+
+        <UserInfo user={ user } />
+
+        { user.role === 'driver'
+          ? <TrucksPanel />
+          : <LoadsPanel />
         }
 
-        fetchUser();
-    }, []);
+        { user.role === 'driver'
+          && <OrderLoad />
+        }
 
-    useEffect(() => {
-        if (!localStorage.getItem('jwt_token')) setRouteRedirect(true)
-    }, []);
-
-    if (routeRedirect) {
-        return <Redirect to='/' />
-    }
-
-    return (
-        <>
-            {user && <div className='user'>
-                <Map user={user} />
-
-                <UserInfo user={user} />
-
-                {user.role === 'driver'
-                    ? <TrucksPanel />
-                    : <LoadsPanel />
-                }
-
-                {user.role === 'driver' &&
-                    <OrderLoad />
-                }
-
-                <WeatherPanel />
-            </div>}
-        </>
-    );
+        <WeatherPanel />
+      </div> }
+    </>
+  );
 }

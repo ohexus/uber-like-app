@@ -7,184 +7,184 @@ const CHECKUSER_API = `${API_URL}/api/recoverPassword/checkUser`;
 const RECOVERPASSWORD_API = `${API_URL}/api/recoverPassword/recover`;
 
 export default function PasswordRecoveryPage() {
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
-    const [mobileNumber, setMobileNumber] = useState('');
-    const [newPassword, setNewPassword] = useState('');
-    const [checkNewPassword, setCheckNewPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [mobileNumber, setMobileNumber] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [checkNewPassword, setCheckNewPassword] = useState('');
 
-    const [alertMessage, setAlertMessage] = useState('');
-    const [showAlertMessage, setShowAlertMessage] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [showAlertMessage, setShowAlertMessage] = useState(false);
 
-    const [routeRedirect, setRouteRedirect] = useState(false);
-    
-    const recoverPassword = async (userId) => {
-        await axios.put(RECOVERPASSWORD_API, {
-            userId,
-            newPassword
-        });
+  const [routeRedirect, setRouteRedirect] = useState(false);
+
+  const recoverPassword = async (userId) => {
+    await axios.put(RECOVERPASSWORD_API, {
+      userId,
+      newPassword,
+    });
+  };
+
+  const checkUser = async () => {
+    const user = await axios.post(CHECKUSER_API, {
+      username,
+      email,
+      firstName,
+      lastName,
+      mobileNumber,
+    });
+
+    return user.data;
+  };
+
+  const checkRecoverPassword = async (e) => {
+    e.preventDefault();
+
+    const userChecked = await checkUser();
+
+    if (userChecked) {
+      if (newPassword === userChecked.password) {
+        return handleAlert('The new password must be different from the previous one!');
+      }
+
+      if (newPassword === checkNewPassword) {
+        recoverPassword(userChecked._id);
+        alert('Password has been changed');
+        setRouteRedirect(true);
+      } else {
+        return handleAlert('Passwords does not match!');
+      }
+    } else {
+      return handleAlert('Such user not found, please check filled information!');
     }
+  };
 
-    const checkUser = async () => {
-        const user = await axios.post(CHECKUSER_API, { 
-            username,
-            email,
-            firstName,
-            lastName,
-            mobileNumber
-        });
+  const handleAlert = (message) => {
+    setAlertMessage(message);
+    setShowAlertMessage(true);
+  };
 
-        return user.data
-    }
-    
-    const checkRecoverPassword = async (e) => {
-        e.preventDefault();
+  const handleUsernameInput = (e) => {
+    setUsername(e.target.value);
+  };
 
-        const userChecked = await checkUser();
+  const handleEmailInput = (e) => {
+    setEmail(e.target.value);
+  };
 
-        if (userChecked) {
-            if (newPassword === userChecked.password) {
-                return handleAlert('The new password must be different from the previous one!');
-            }
+  const handleFirstNameInput = (e) => {
+    setFirstName(e.target.value);
+  };
 
-            if (newPassword === checkNewPassword) {
-                recoverPassword(userChecked._id);
-                alert('Password has been changed');
-                setRouteRedirect(true);
-            } else {
-                return handleAlert('Passwords does not match!');
-            }
-        } else {
-            return handleAlert('Such user not found, please check filled information!');
-        }
-    }
+  const handleLastNameInput = (e) => {
+    setLastName(e.target.value);
+  };
 
-    const handleAlert = (message) => {
-        setAlertMessage(message);
-        setShowAlertMessage(true);
-    }
+  const handleMobileNumberInput = (e) => {
+    setMobileNumber(e.target.value);
+  };
 
-    const handleUsernameInput = (e) => {
-        setUsername(e.target.value);
-    }
+  const handleNewPasswordInput = (e) => {
+    setNewPassword(e.target.value);
+  };
 
-    const handleEmailInput = (e) => {
-        setEmail(e.target.value);
-    }
+  const handleCheckNewPasswordInput = (e) => {
+    setCheckNewPassword(e.target.value);
+  };
 
-    const handleFirstNameInput = (e) => {
-        setFirstName(e.target.value);
-    }
+  if (routeRedirect) {
+    return <Redirect to="/" />;
+  }
 
-    const handleLastNameInput = (e) => {
-        setLastName(e.target.value);
-    }
+  return (
+    <form className="recoverypassword" onSubmit={ checkRecoverPassword }>
+      <h1> Password Recovery: </h1>
 
-    const handleMobileNumberInput = (e) => {
-        setMobileNumber(e.target.value);
-    }
+      <p> To change password please enter your info and new password </p>
 
-    const handleNewPasswordInput = (e) => {
-        setNewPassword(e.target.value);
-    }
+      { showAlertMessage && <p className="recoverypassword__alert"> { alertMessage } </p> }
 
-    const handleCheckNewPasswordInput = (e) => {
-        setCheckNewPassword(e.target.value);
-    }
+      <label htmlFor="username"> Username: </label>
+      <input
+        type="text"
+        name="username"
+        value={ username }
+        onChange={ handleUsernameInput }
+        required
+      />
+      <hr />
 
-    if (routeRedirect) {
-        return <Redirect to='/' />
-    }
+      <label htmlFor="email"> Email: </label>
+      <input
+        type="text"
+        name="email"
+        value={ email }
+        onChange={ handleEmailInput }
+        required
+      />
+      <hr />
 
-    return (
-        <form className='recoverypassword' onSubmit={checkRecoverPassword}>
-            <h1> Password Recovery: </h1>
+      <label htmlFor="firstName"> First Name: </label>
+      <input
+        type="text"
+        name="firstName"
+        value={ firstName }
+        onChange={ handleFirstNameInput }
+        required
+      />
+      <hr />
 
-            <p> To change password please enter your info and new password </p>
+      <label htmlFor="lastName"> Last Name: </label>
+      <input
+        type="text"
+        name="lastName"
+        value={ lastName }
+        onChange={ handleLastNameInput }
+        required
+      />
+      <hr />
 
-            {showAlertMessage && <p className='recoverypassword__alert'> {alertMessage} </p>}
+      <label htmlFor="mobileNumber"> Mobile Number: </label>
+      <input
+        type="text"
+        name="mobileNumber"
+        value={ mobileNumber }
+        onChange={ handleMobileNumberInput }
+        required
+      />
+      <hr />
 
-            <label htmlFor='username'> Username: </label>
-            <input 
-                type='text'
-                name='username'
-                value={username}
-                onChange={handleUsernameInput}
-                required 
-            />
-            <hr/>
+      <label htmlFor="newPassword"> New password: </label>
+      <input
+        type="password"
+        name="newPassword"
+        value={ newPassword }
+        onChange={ handleNewPasswordInput }
+        required
+      />
+      <hr />
 
-            <label htmlFor='email'> Email: </label>
-            <input 
-                type='text'
-                name='email'
-                value={email}
-                onChange={handleEmailInput}
-                required 
-            />
-            <hr/>
+      <label htmlFor="checkNewPassword"> Repeat new password: </label>
+      <input
+        type="password"
+        name="checkNewPassword"
+        value={ checkNewPassword }
+        onChange={ handleCheckNewPasswordInput }
+        required
+      />
+      <hr />
 
-            <label htmlFor='firstName'> First Name: </label>
-            <input 
-                type='text'
-                name='firstName'
-                value={firstName}
-                onChange={handleFirstNameInput}
-                required 
-            />
-            <hr/>
+      <button type="submit"> Submit password recovery </button>
 
-            <label htmlFor='lastName'> Last Name: </label>
-            <input 
-                type='text'
-                name='lastName'
-                value={lastName}
-                onChange={handleLastNameInput}
-                required 
-            />
-            <hr/>
+      <div className="navigation-panel">
+        <Link to="/login"> Login </Link>
 
-            <label htmlFor='mobileNumber'> Mobile Number: </label>
-            <input 
-                type='text'
-                name='mobileNumber'
-                value={mobileNumber}
-                onChange={handleMobileNumberInput}
-                required 
-            />
-            <hr/>
-            
-            <label htmlFor='newPassword'> New password: </label>
-            <input 
-                type='password'
-                name='newPassword'
-                value={newPassword}
-                onChange={handleNewPasswordInput}
-                required 
-            />
-            <hr/>
-            
-            <label htmlFor='checkNewPassword'> Repeat new password: </label>
-            <input 
-                type='password'
-                name='checkNewPassword'
-                value={checkNewPassword}
-                onChange={handleCheckNewPasswordInput}
-                required 
-            />
-            <hr/>
+        <Link to="/signup"> Sign up </Link>
 
-            <button type='submit'> Submit password recovery </button>
-                    
-            <div className='navigation-panel'>
-                <Link to='/login'> Login </Link>
-
-                <Link to='/signup'> Sign up </Link>
-
-                <Link to='/'> Home Page </Link>
-            </div>
-        </form>
-    );
+        <Link to="/"> Home Page </Link>
+      </div>
+    </form>
+  );
 }

@@ -1,5 +1,5 @@
 const express = require('express');
-const config = require("config");
+const config = require('config');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const app = express();
@@ -7,10 +7,10 @@ const app = express();
 app.use(cors());
 app.use(express.json({ extended: true }));
 
-mongoose.connect(config.get('mongoUri'), { 
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false
+mongoose.connect(config.get('mongoUri'), {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false,
 });
 
 const PORT = config.get('port') || 8081;
@@ -45,5 +45,5 @@ app.use('/api/load', loadRouter);
 app.use('/api/weather', weatherRouter);
 
 app.listen(PORT, () => {
-    console.log(`server is running on port ${PORT}`)
+  console.log(`server is running on port ${PORT}`);
 });

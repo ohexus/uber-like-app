@@ -17,9 +17,9 @@ const WEATHER_API = `${API_URL}/api/weather/update`;
 //     description: String,
 //     icon: String
 // },
-// main: {                                                     
-//     temp: Number,                                                                 
-//     feels_like: Number,   
+// main: {
+//     temp: Number,
+//     feels_like: Number,
 //     pressure: Number,
 //     humidity: Number
 // },
@@ -29,109 +29,109 @@ const WEATHER_API = `${API_URL}/api/weather/update`;
 // }
 
 function WeatherTempString(props) {
-    return (
-        `${parseInt(props.temp)} °C`
-    );
+  return (
+    `${parseInt(props.temp)} °C`
+  );
 }
 
 export default function WeatherPanel() {
-    const [userLocation, setUserLocation] = useState(null);
-    const [weatherInfo, setWeatherInfo] = useState(null);
-    const [weatherMainInfo, setWeatherMainInfo] = useState(null);
-    const [windInfo, setWindInfo] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
+  const [weatherInfo, setWeatherInfo] = useState(null);
+  const [weatherMainInfo, setWeatherMainInfo] = useState(null);
+  const [windInfo, setWindInfo] = useState(null);
 
-    const [showWeather, setShowWeather] = useState(false);
+  const [showWeather, setShowWeather] = useState(false);
 
-    const handleUserLocation = (position) => {
-        setUserLocation(position.coords);
-    }
+  const handleUserLocation = (position) => {
+    setUserLocation(position.coords);
+  };
 
-    useEffect(() => {
-        findUsersCoordinates(handleUserLocation)
-    }, []);
+  useEffect(() => {
+    findUsersCoordinates(handleUserLocation);
+  }, []);
 
-    useEffect(() => {
-        if (userLocation) {
-            const fetchWeather = async () => {
-                const weatherData = await axios.post(WEATHER_API, {
-                    lat: userLocation.latitude,
-                    lon: userLocation.longitude
-                }, {
-                    headers: {
-                        'authorization': localStorage.getItem('jwt_token')
-                    }
-                }).then(res => res.data);
+  useEffect(() => {
+    if (userLocation) {
+      const fetchWeather = async () => {
+        const weatherData = await axios.post(WEATHER_API, {
+          lat: userLocation.latitude,
+          lon: userLocation.longitude,
+        }, {
+          headers: {
+            authorization: localStorage.getItem('jwt_token'),
+          },
+        }).then((res) => res.data);
 
-                if (weatherData) {
-                    setWeatherInfo(weatherData.weather);
-                    setWeatherMainInfo(weatherData.main);
-                    setWindInfo(weatherData.wind);
+        if (weatherData) {
+          setWeatherInfo(weatherData.weather);
+          setWeatherMainInfo(weatherData.main);
+          setWindInfo(weatherData.wind);
 
-                    setShowWeather(true);
-                }
-            }
-
-            fetchWeather();
+          setShowWeather(true);
         }
-    }, [userLocation]);
+      };
 
-    return (
-        <div className='weather'>
-            <h1> Weather for now: </h1>
-            {showWeather && <>
-                <div className='weather__info'>
-                    <h2 className='weather__city'>
-                        {weatherMainInfo.city}
-                    </h2>
+      fetchWeather();
+    }
+  }, [userLocation]);
 
-                    <img
-                        className='weather__icon'
-                        src={weatherInfo.iconUrl}
-                        alt={weatherInfo.main}
-                    />
+  return (
+    <div className="weather">
+      <h1> Weather for now: </h1>
+      { showWeather && <>
+        <div className="weather__info">
+          <h2 className="weather__city">
+            { weatherMainInfo.city }
+          </h2>
 
-                    <h3> {weatherInfo.description} </h3>
-                </div>
+          <img
+            className="weather__icon"
+            src={ weatherInfo.iconUrl }
+            alt={ weatherInfo.main }
+          />
 
-                <div className='weather__temperature'>
-                    <h2 className='weather__temperature-number'>
-                        <WeatherTempString temp={weatherMainInfo.temp} />
-                    </h2>
-
-                    <InfoTile
-                        label='Feels like:'
-                        info={<WeatherTempString temp={weatherMainInfo.feels_like} />}
-                    />
-                </div>
-
-                <InfoTile
-                    label='Humidity:'
-                    info={weatherMainInfo.humidity}
-                />
-
-                <InfoTile
-                    label='Pressure:'
-                    info={weatherMainInfo.pressure}
-                />
-
-                <div className='weather__wind'>
-                    <InfoTile
-                        label='Wind:'
-                        info={`${windInfo.speed} km/h`}
-                    />
-
-                    <div className='weather__wind-arrow-wrapper'>
-                        <img
-                            className='weather__wind-arrow'
-                            src={windArrow}
-                            style={{
-                                transform: `rotate(${windInfo.deg}deg)`
-                            }}
-                            alt='wind direction'
-                        />
-                    </div>
-                </div>
-            </>}
+          <h3> { weatherInfo.description } </h3>
         </div>
-    );
+
+        <div className="weather__temperature">
+          <h2 className="weather__temperature-number">
+            <WeatherTempString temp={ weatherMainInfo.temp } />
+          </h2>
+
+          <InfoTile
+            label="Feels like:"
+            info={ <WeatherTempString temp={ weatherMainInfo.feels_like } /> }
+          />
+        </div>
+
+        <InfoTile
+          label="Humidity:"
+          info={ weatherMainInfo.humidity }
+        />
+
+        <InfoTile
+          label="Pressure:"
+          info={ weatherMainInfo.pressure }
+        />
+
+        <div className="weather__wind">
+          <InfoTile
+            label="Wind:"
+            info={ `${windInfo.speed} km/h` }
+          />
+
+          <div className="weather__wind-arrow-wrapper">
+            <img
+              className="weather__wind-arrow"
+              src={ windArrow }
+              style={ {
+                transform: `rotate(${windInfo.deg}deg)`,
+              } }
+              alt="wind direction"
+            />
+          </div>
+        </div>
+      </> }
+    </div>
+  );
 }

@@ -1,0 +1,27 @@
+{
+    "extends": [
+        "react-app",
+        "google"
+    ],
+    "parserOptions": {
+        "sourceType": "module",
+        "ecmaVersion": 2018,
+        "ecmaFeatures": {
+            "jsx": true
+        }
+    },
+    "plugins": [
+        "react"
+    ],
+    "rules": {
+        "object-curly-spacing": ["error", "always"],
+        "operator-linebreak": [2, "before"],
+        "camelcase": 0,
+        "max-len": ["error", {
+            "code": 150
+        }],
+        "require-jsdoc": 0,
+        "indent": ["error", 2],
+        "react/prop-types": 0
+    }
+}

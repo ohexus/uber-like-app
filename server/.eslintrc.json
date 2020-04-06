@@ -1,0 +1,24 @@
+{
+    "extends": [
+        "google"
+    ],
+    "parserOptions": {
+        "ecmaVersion": 2018
+    },
+    "plugins": [
+        "react"
+    ],
+    "rules": {
+        "object-curly-spacing": ["error", "always"],
+        "operator-linebreak": [2, "before"],
+        "camelcase": 0,
+        "new-cap": ["error", {
+            "capIsNewExceptions": ["Router"]
+        }],
+        "max-len": ["error", {
+            "code": 120
+        }],
+        "require-jsdoc": 0,
+        "indent": ["error", 2]
+    }
+}

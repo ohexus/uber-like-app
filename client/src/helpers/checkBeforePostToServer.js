@@ -1,14 +1,14 @@
 export default function checkBeforePostToServer(inputsArr, warnFunc) {
-    const trimmed = inputsArr.map(i => i.trim());
+  const trimmed = inputsArr.map((i) => i.trim());
 
-    let isValid = true;
+  let isValid = true;
 
-    trimmed.forEach(item => {
-        if (!item) {
-            warnFunc(true);
-            isValid = false;
-        }
-    });
+  trimmed.forEach((item) => {
+    if (!item) {
+      warnFunc(true);
+      isValid = false;
+    }
+  });
 
-    return isValid
+  return isValid;
 }

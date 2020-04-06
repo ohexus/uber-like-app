@@ -4,14 +4,12 @@ import './LoadsShelf.scss';
 import LoadInfo from '../LoadInfo/LoadInfo';
 
 export default function LoadsShelf(props) {
-    return (
-        <div className='loads__shelf'>
-            {props.loads.map(load => {
-                return <LoadInfo
-                    key={load._id}
-                    load={load} 
-                />
-            })}
-        </div>
-    );
+  return (
+    <div className="loads__shelf">
+      { props.loads.map((load) => (<LoadInfo
+        key={ load._id }
+        load={ load }
+      />)) }
+    </div>
+  );
 }

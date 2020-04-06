@@ -10,111 +10,111 @@ const API_URL = process.env.REACT_APP_API_URL;
 const LOADS_API = `${API_URL}/api/load/allForUser`;
 
 export default function LoadsPanel() {
-    const [loads, setLoads] = useState(null);
-    const [filteredLoads, setFilteredLoads] = useState(null);
+  const [loads, setLoads] = useState(null);
+  const [filteredLoads, setFilteredLoads] = useState(null);
 
-    const [currentPage, setCurrentPage] = useState(1);
-    const [loadsPerPage] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loadsPerPage] = useState(5);
 
-    const [showNewLoadForm, setShowNewloadForm] = useState(false);
+  const [showNewLoadForm, setShowNewloadForm] = useState(false);
 
-    const toggleShowNewLoadForm = () => {
-        setShowNewloadForm(!showNewLoadForm);
+  const toggleShowNewLoadForm = () => {
+    setShowNewloadForm(!showNewLoadForm);
+  };
+
+  const handleFilterSelect = (e) => {
+    if (loads) {
+      if (e.target.value !== '') {
+        setFilteredLoads(loads.filter((load) => load.status === e.target.value));
+      } else {
+        setFilteredLoads(loads);
+      }
     }
+  };
 
-    const handleFilterSelect = (e) => {
-        if (loads) {
-            if (e.target.value !== '') {
-                setFilteredLoads(loads.filter(load => load.status === e.target.value));
-            } else {
-                setFilteredLoads(loads);
-            }
+  useEffect(() => {
+    const fetchLoads = async () => {
+      const loads = await axios.get(LOADS_API, {
+        headers: {
+          authorization: localStorage.getItem('jwt_token'),
+        },
+      }).then((res) => res.data);
+
+      setLoads(loads);
+      setFilteredLoads(loads);
+    };
+
+    fetchLoads();
+  }, []);
+
+  const indexLast = currentPage * loadsPerPage;
+  const indexFirst = indexLast - loadsPerPage;
+  const currentLoads = filteredLoads ? filteredLoads.slice(indexFirst, indexLast) : [];
+
+  const paginate = (pageNum) => setCurrentPage(pageNum);
+
+  return (
+    <div className="loads">
+      <h2 className="loads__header"> Your Loads: </h2>
+
+      <button
+        type="button"
+        onClick={ toggleShowNewLoadForm }
+      >
+        { showNewLoadForm
+          ? 'Close Load form'
+          : 'Create new Load'
         }
-    }
+      </button>
 
-    useEffect(() => {
-        const fetchLoads = async () => {
-            const loads = await axios.get(LOADS_API, {
-                headers: {
-                    'authorization': localStorage.getItem('jwt_token')
-                }
-            }).then(res => res.data);
+      { showNewLoadForm && <NewLoadForm className="loads__newload" /> }
 
-            setLoads(loads);
-            setFilteredLoads(loads);
-        }
+      <div className="loads__filter">
+        <label htmlFor="type"> Filter: </label>
+        <select
+          name="type"
+          className="loads__select"
+          onChange={ handleFilterSelect }
+        >
+          <option
+            className="loads__option"
+            value=""
+          > All </option>
 
-        fetchLoads();
-    }, []);
+          <option
+            className="loads__option"
+            value="NEW"
+          > NEW </option>
 
-    const indexLast = currentPage * loadsPerPage;
-    const indexFirst = indexLast - loadsPerPage;
-    const currentLoads = filteredLoads ? filteredLoads.slice(indexFirst, indexLast) : [];
+          <option
+            className="loads__option"
+            value="POSTED"
+          > POSTED </option>
 
-    const paginate = (pageNum) => setCurrentPage(pageNum);
+          <option
+            className="loads__option"
+            value="ASSIGNED"
+          > ASSIGNED </option>
 
-    return (
-        <div className='loads'>
-            <h2 className='loads__header'> Your Loads: </h2>
+          <option
+            className="loads__option"
+            value="SHIPPED"
+          > SHIPPED </option>
+        </select>
+      </div>
 
-            <button
-                type='button'
-                onClick={toggleShowNewLoadForm}
-            >
-                {showNewLoadForm
-                    ? 'Close Load form'
-                    : 'Create new Load'
-                }
-            </button>
+      { filteredLoads
+        ? <div className="loads__panel">
+          <LoadsShelf loads={ currentLoads } />
 
-            {showNewLoadForm && <NewLoadForm className='loads__newload' />}
-
-            <div className='loads__filter'>
-                <label htmlFor='type'> Filter: </label>
-                <select
-                    name='type'
-                    className='loads__select'
-                    onChange={handleFilterSelect}
-                >
-                    <option
-                        className='loads__option'
-                        value=''
-                    > All </option>
-
-                    <option
-                        className='loads__option'
-                        value='NEW'
-                    > NEW </option>
-
-                    <option
-                        className='loads__option'
-                        value='POSTED'
-                    > POSTED </option>
-
-                    <option
-                        className='loads__option'
-                        value='ASSIGNED'
-                    > ASSIGNED </option>
-
-                    <option
-                        className='loads__option'
-                        value='SHIPPED'
-                    > SHIPPED </option>
-                </select>
-            </div>
-
-            {filteredLoads
-                ? <div className='loads__panel'>
-                    <LoadsShelf loads={currentLoads} />
-
-                    <Pagination
-                        itemsPerPage={loadsPerPage}
-                        total={filteredLoads.length}
-                        paginate={paginate}
-                    />
-                </div>
-                : <h3> You have not added any loads </h3>
-            }
+          <Pagination
+            itemsPerPage={ loadsPerPage }
+            total={ filteredLoads.length }
+            paginate={ paginate }
+          />
         </div>
-    );
+        : <h3> You have not added any loads </h3>
+      }
+    </div>
+  );
 }

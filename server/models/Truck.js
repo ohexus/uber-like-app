@@ -10,15 +10,15 @@ const { Schema, model, Types } = require('mongoose');
 // on load (OL)
 
 module.exports = model('Truck', new Schema({
-    created_by: {type: Types.ObjectId, ref: 'User'},
-    logs: [{
-        message: {type: String, default: 'Truck created'},
-        time: {type: Date, default: Date.now()}
-    }],
-    assigned_to: {type: Types.ObjectId, ref: 'User', default: null},
-    status: {type: String, default: 'IS'},
-    type: String,
-    truckName: String,
-    brand: String,
-    model: String
+  created_by: { type: Types.ObjectId, ref: 'User' },
+  logs: [{
+    message: { type: String, default: 'Truck created' },
+    time: { type: Date, default: Date.now() },
+  }],
+  assigned_to: { type: Types.ObjectId, ref: 'User', default: null },
+  status: { type: String, default: 'IS' },
+  type: String,
+  truckName: String,
+  brand: String,
+  model: String,
 }));
