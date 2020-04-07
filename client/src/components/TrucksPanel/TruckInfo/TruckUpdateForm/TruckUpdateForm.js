@@ -36,6 +36,8 @@ export default function TruckUpdateForm(props) {
         },
       });
     }
+
+    props.closeForm();
   };
 
   const handleTypeSelect = (e) => {

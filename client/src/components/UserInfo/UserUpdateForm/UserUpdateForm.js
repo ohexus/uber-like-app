@@ -32,9 +32,9 @@ export default function UserUpdateForm(props) {
           authorization: localStorage.getItem('jwt_token'),
         },
       });
-
-      window.location.reload();
     }
+
+    props.closeForm();
   };
 
   const handleFirstNameInput = (e) => {
@@ -106,7 +106,7 @@ export default function UserUpdateForm(props) {
 
       <label htmlFor="mobileNumber"> Mobile Number: </label>
       <input
-        type="text"
+        type="number"
         name="mobileNumber"
         value={ mobileNumber }
         onChange={ handleMobileNumberInput }

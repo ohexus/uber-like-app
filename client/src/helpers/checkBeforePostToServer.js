@@ -1,5 +1,5 @@
 export default function checkBeforePostToServer(inputsArr, warnFunc) {
-  const trimmed = inputsArr.map((i) => i.trim());
+  const trimmed = inputsArr.map((i) => i.toString().trim());
 
   let isValid = true;
 

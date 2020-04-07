@@ -1,21 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
 import './UserInfo.scss';
 
 import InfoTile from '../InfoTile/InfoTile';
+import NotificationTile from '../NotificationTile/NotificationTile';
 import UserUpdateForm from './UserUpdateForm/UserUpdateForm';
 import PasswordUpdateForm from './PasswordUpdateForm/PasswordUpdateForm';
 import UserAvatar from './UserAvatar/UserAvatar';
+
+import SocketContext from '../../context/SocketContext';
 
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
 const DELETEUSER_API = `${API_URL}/api/user/delete`;
 
 export default function UserInfo(props) {
-  const [user] = useState(props.user);
+  const socket = useContext(SocketContext);
+
+  const [user, setUser] = useState(props.user);
+  const [undecodedAvatarImg, setUndecodedAvatarImg] = useState(props.user.avatarImg);
 
   const [showUserUpdateForm, setShowUserUpdateForm] = useState(false);
   const [showPasswordUpdateForm, setShowPasswordUpdateForm] = useState(false);
+
+  const [NotificationMessage, setNotificationMessage] = useState(false);
+  const [showUpdatedNotification, setShowUpdatedNotification] = useState(false);
 
   const [routeRedirect, setRouteRedirect] = useState(false);
 
@@ -34,6 +43,14 @@ export default function UserInfo(props) {
     setRouteRedirect(true);
   };
 
+  const handleCloseUpdateForm = (message) => {
+    setShowUserUpdateForm(false);
+    setShowPasswordUpdateForm(false);
+
+    setNotificationMessage(message);
+    setShowUpdatedNotification(true);
+  };
+
   const deleteAccount = async () => {
     await axios.delete(DELETEUSER_API, {
       headers: {
@@ -44,6 +61,16 @@ export default function UserInfo(props) {
     handleLogout();
   };
 
+  useEffect(() => {
+    socket.on('updateUser', (updatedUser) => {
+      setUser(updatedUser);
+    });
+
+    socket.on('updateAvatar', (updatedUser) => {
+      setUndecodedAvatarImg(updatedUser.avatarImg);
+    });
+  }, [socket, user]);
+
   if (routeRedirect) {
     return <Redirect to="/" />;
   }
@@ -52,10 +79,15 @@ export default function UserInfo(props) {
     <div className="user__profile">
       <h1 className="user__role"> { user.role.toUpperCase() } </h1>
 
-      <UserAvatar undecodedImg={ user.avatarImg } />
+      <UserAvatar undecodedImg={ undecodedAvatarImg } />
 
       <div className="user__info">
         <h2> Info: </h2>
+
+        { showUpdatedNotification && <NotificationTile
+          info={ NotificationMessage }
+          closeNotification={ () => setShowUpdatedNotification(false) }
+        /> }
 
         <InfoTile
           label={ 'Username:' }
@@ -90,7 +122,11 @@ export default function UserInfo(props) {
             }
           </button>
 
-          { showUserUpdateForm && <UserUpdateForm user={ user } className="user__updateuser" /> }
+          { showUserUpdateForm && <UserUpdateForm
+            user={ user }
+            className='user__updateuser'
+            closeForm={ () => handleCloseUpdateForm('User info updated') }
+          /> }
 
           <button type="button" onClick={ toggleShowPasswordUpdateForm }>
             { showPasswordUpdateForm
@@ -99,7 +135,11 @@ export default function UserInfo(props) {
             }
           </button>
 
-          { showPasswordUpdateForm && <PasswordUpdateForm password={ user.password } className="user__updatepassword" /> }
+          { showPasswordUpdateForm && <PasswordUpdateForm
+            password={ user.password }
+            className='user__updatepassword'
+            closeForm={ () => handleCloseUpdateForm('Password updated') }
+          /> }
 
           <button type="button" onClick={ handleLogout }> Log out </button>
 

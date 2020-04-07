@@ -1,0 +1,12 @@
+.notificationtile {
+  display: flex;
+  align-items: center;
+
+  &__info {
+    margin: 0;
+  }
+
+  &__cross {
+    margin-left: 5px;
+  }
+}

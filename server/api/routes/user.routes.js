@@ -57,7 +57,7 @@ router.put('/updateUser', valid(userValid.updateUser, 'body'), async (req, res) 
       return res.status(401).json({ status: 'This email, username or mobile number is already registered' });
     }
 
-    await User.findOneAndUpdate({
+    const updatedUser = await User.findOneAndUpdate({
       _id: req.user._id,
     }, {
       firstName,
@@ -70,7 +70,9 @@ router.put('/updateUser', valid(userValid.updateUser, 'body'), async (req, res) 
           message: 'user updated',
         },
       },
-    });
+    }, { new: true });
+
+    req.io.emit('updateUser', updatedUser);
 
     res.status(200).json({ status: 'successful update' });
   } catch (e) {
@@ -119,7 +121,7 @@ router.put('/updatePassword', valid(userValid.updatePassword, 'body'), async (re
 // api/user/updateAvatar
 router.put('/updateAvatar', upload.single('avatar'), async (req, res) => {
   try {
-    await User.findOneAndUpdate({
+    const updatedUser = await User.findOneAndUpdate({
       _id: req.user._id,
     }, {
       avatarImg: {
@@ -131,7 +133,9 @@ router.put('/updateAvatar', upload.single('avatar'), async (req, res) => {
           message: 'avatar updated',
         },
       },
-    });
+    }, { new: true });
+
+    req.io.emit('updateAvatar', updatedUser);
 
     res.status(200).json({ status: 'successful updated avatar' });
   } catch (e) {

@@ -27,7 +27,7 @@ export default function PasswordUpdateForm(props) {
       setAlertMessage(validMessage);
       setShowAlertMessage(true);
     } else {
-      window.location.reload(false);
+      props.closeForm();
     }
   };
 
