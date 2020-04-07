@@ -14,18 +14,17 @@ export default function PasswordUpdateForm(props) {
   const [showAlertMessage, setShowAlertMessage] = useState(false);
 
   const updatePassword = async () => {
-    const validMessage = await axios.put(UPDATEPASSWORD_API, {
+    const validPasswordStatus = await axios.put(UPDATEPASSWORD_API, {
       oldPassword,
       newPassword,
     }, {
       headers: {
         authorization: localStorage.getItem('jwt_token'),
       },
-    });
+    }).then((res) => res.data.status);
 
-    if (validMessage === 'Wrong old password') {
-      setAlertMessage(validMessage);
-      setShowAlertMessage(true);
+    if (validPasswordStatus !== 'successful updated password') {
+      handleAlert(validPasswordStatus);
     } else {
       props.closeForm();
     }

@@ -16,25 +16,33 @@ export default function UserUpdateForm(props) {
   const [email, setEmail] = useState(user.email);
   const [mobileNumber, setMobileNumber] = useState(user.mobileNumber);
 
-  const [warningMessage] = useState('Please input all forms!');
+  const [warningMessage, setWarningMessage] = useState('');
   const [showWarning, setShowWarning] = useState(false);
 
   const updateUser = async (e) => {
     e.preventDefault();
 
+    setWarningMessage('Please input all forms!');
     const isValid = checkBeforePostToServer([firstName, lastName, username, email, mobileNumber], setShowWarning);
 
     if (isValid) {
-      await axios.put(UPDATEUSER_API, {
+      const status = await axios.put(UPDATEUSER_API, {
         firstName, lastName, username, email, mobileNumber,
       }, {
         headers: {
           authorization: localStorage.getItem('jwt_token'),
         },
-      });
-    }
+      }).then((res) => res.data.status);
 
-    props.closeForm();
+      if (status === 'successful update') {
+        props.closeForm();
+      } else {
+        setWarningMessage(status);
+        setShowWarning(true);
+      }
+    } else {
+      setShowWarning(true);
+    }
   };
 
   const handleFirstNameInput = (e) => {

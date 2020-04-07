@@ -42,19 +42,28 @@ router.put('/updateUser', valid(userValid.updateUser, 'body'), async (req, res) 
     const { firstName, lastName, username, email, mobileNumber } = req.body;
 
     if (!firstName || !lastName || !username || !email || !mobileNumber) {
-      return res.status(401).json({ status: 'Please fill in all the fields' });
+      return res.status(200).json({ status: 'Please fill in all the fields' });
     }
+    // $and: [
+    //   { $ne: { _id: req.user._id } },
+    //   {
+    //     $or: [
+    //       { username },
+    //       { email },
+    //       { mobileNumber },
+    //     ]
+    //   }
+    // ]
 
     const userFound = await User.findOne({
-      $or: [
-        { username },
-        { email },
-        { mobileNumber },
+      $and: [
+        { _id: { $ne: req.user._id } },
+        { $or: [{ username }, { email }, { mobileNumber }] },
       ],
     });
 
     if (userFound) {
-      return res.status(401).json({ status: 'This email, username or mobile number is already registered' });
+      return res.status(200).json({ status: 'This email, username or mobile number is already registered' });
     }
 
     const updatedUser = await User.findOneAndUpdate({
@@ -86,7 +95,7 @@ router.put('/updatePassword', valid(userValid.updatePassword, 'body'), async (re
     const { oldPassword, newPassword } = req.body;
 
     if (!oldPassword || !newPassword) {
-      return res.status(401).json({ status: 'Please fill in new Password' });
+      return res.status(200).json({ status: 'Please fill in all the fields' });
     }
 
     const user = await User.findOne({
@@ -96,7 +105,7 @@ router.put('/updatePassword', valid(userValid.updatePassword, 'body'), async (re
     const isValidPassword = await bcrypt.compare(oldPassword, user.password);
 
     if (!isValidPassword) {
-      return res.status(400).send('Wrong old password');
+      return res.status(200).json({ status: 'Wrong old password' });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, salt);
