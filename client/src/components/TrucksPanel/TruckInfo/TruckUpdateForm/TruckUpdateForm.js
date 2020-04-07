@@ -35,8 +35,6 @@ export default function TruckUpdateForm(props) {
           authorization: localStorage.getItem('jwt_token'),
         },
       });
-
-      window.location.reload();
     }
   };
 

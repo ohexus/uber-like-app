@@ -42,7 +42,7 @@ router.post('/create', valid(truckValid.create, 'body'), async (req, res) => {
       return res.status(403).json({ status: 'This truck name is already exist' });
     }
 
-    const truck = new Truck({
+    const newTruck = new Truck({
       created_by: req.user._id,
       type,
       truckName,
@@ -50,11 +50,11 @@ router.post('/create', valid(truckValid.create, 'body'), async (req, res) => {
       model,
     });
 
-    await truck.save();
+    await newTruck.save();
 
-    req.io.emit('newTruck', truck);
+    req.io.emit('createTruck', newTruck);
 
-    res.status(200).send(truck);
+    res.status(200).send(newTruck);
   } catch (e) {
     res.status(500).json({ status: e.message });
   }
@@ -73,7 +73,7 @@ router.put('/update', valid(truckValid.update, 'body'), async (req, res) => {
       return res.status(403).json({ status: 'Please fill in all the fields' });
     }
 
-    await Truck.findOneAndUpdate({
+    const updatedTruck = await Truck.findOneAndUpdate({
       $and: [
         { created_by: req.user._id },
         { _id: truckId },
@@ -89,7 +89,9 @@ router.put('/update', valid(truckValid.update, 'body'), async (req, res) => {
           message: 'truck updated',
         },
       },
-    });
+    }, { new: true });
+
+    req.io.emit('updateTruck', updatedTruck);
 
     res.status(200).json({ status: 'truck updated' });
   } catch (e) {
@@ -133,7 +135,7 @@ router.put('/assign', valid(truckValid.assign, 'body'), async (req, res) => {
       },
     });
 
-    await Truck.findOneAndUpdate({
+    const assignedTruck = await Truck.findOneAndUpdate({
       $and: [
         { created_by: req.user._id },
         { _id: truckId },
@@ -145,7 +147,9 @@ router.put('/assign', valid(truckValid.assign, 'body'), async (req, res) => {
           message: 'truck assigned',
         },
       },
-    });
+    }, { new: true });
+
+    req.io.emit('assignTruck', assignedTruck);
 
     res.status(200).json({ status: 'truck assigned' });
   } catch (e) {
@@ -188,13 +192,15 @@ router.delete('/delete', valid(truckValid.delete, 'body'), async (req, res) => {
       return res.status(403).json({ status: 'You are not a driver' });
     }
 
-    await Truck.findOneAndDelete({
+    const deletedTruck = await Truck.findOneAndDelete({
       $and: [
         { created_by: req.user._id },
         { _id: truckId },
         { assigned_to: null },
       ],
     });
+
+    req.io.emit('deleteTruck', deletedTruck);
 
     res.status(200).json({ status: 'truck deleted' });
   } catch (e) {

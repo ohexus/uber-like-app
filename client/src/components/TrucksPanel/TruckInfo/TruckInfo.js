@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import './TruckInfo.scss';
 
 import InfoTile from '../../InfoTile/InfoTile';
 import TruckUpdateForm from './TruckUpdateForm/TruckUpdateForm';
+
+import SocketContext from '../../../context/SocketContext';
 
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
@@ -10,11 +12,15 @@ const ASSIGNTRUCK_API = `${API_URL}/api/truck/assign`;
 const DELETETRUCK_API = `${API_URL}/api/truck/delete`;
 
 export default function TruckInfo(props) {
-  const [truck] = useState(props.truck);
+  const socket = useContext(SocketContext);
+
+  const [truck, setTruck] = useState(props.truck);
 
   const [showTruckUpdateForm, setShowTruckUpdateForm] = useState(false);
 
-  const assignTruck = async () => {
+  const assignTruck = async (e) => {
+    e.preventDefault();
+
     await axios.put(ASSIGNTRUCK_API, { truckId: truck._id }, {
       headers: {
         authorization: localStorage.getItem('jwt_token'),
@@ -22,7 +28,9 @@ export default function TruckInfo(props) {
     });
   };
 
-  const deleteTruck = async () => {
+  const deleteTruck = async (e) => {
+    e.preventDefault();
+
     await axios.delete(DELETETRUCK_API, {
       data: {
         truckId: truck._id,
@@ -31,15 +39,29 @@ export default function TruckInfo(props) {
         authorization: localStorage.getItem('jwt_token'),
       },
     });
-    window.location.reload(false);
   };
+
+  useEffect(() => {
+    let isExist = true;
+
+    socket.on('updateTruck', (updatedTruck) => {
+      if (isExist) {
+        if (truck._id === updatedTruck._id) {
+          setTruck(updatedTruck);
+        }
+      }
+    });
+
+    return () => isExist = false;
+  }, [socket, truck]);
+
 
   const toggleShowTruckUpdateForm = () => {
     setShowTruckUpdateForm(!showTruckUpdateForm);
   };
 
-  return (
-    <div className="truck-wrapper">
+  return (<>
+    { truck && <div className="truck-wrapper">
       <form className="truck" onSubmit={ assignTruck }>
         <h3 className="truck__name">{ truck.truckName.toUpperCase() }</h3>
         <h4 className="truck__assigned">{ truck.assigned_to
@@ -83,6 +105,6 @@ export default function TruckInfo(props) {
       }
 
       { showTruckUpdateForm && <TruckUpdateForm truck={ truck } className="truck-wrapper__updatetruck" /> }
-    </div>
-  );
+    </div> }
+  </>);
 }

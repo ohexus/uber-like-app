@@ -4,8 +4,9 @@ import './TrucksPanel.scss';
 import TruckInfo from './TruckInfo/TruckInfo';
 import NewTruckForm from './NewTruckForm/NewTruckForm';
 
-import axios from 'axios';
 import SocketContext from '../../context/SocketContext';
+
+import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
 const TRUCKS_API = `${API_URL}/api/truck/allForUser`;
 
@@ -13,7 +14,6 @@ export default function TrucksPanel() {
   const socket = useContext(SocketContext);
 
   const [trucks, setTrucks] = useState(null);
-  console.log(trucks);
   const [showNewTruckForm, setShowNewTruckForm] = useState(false);
 
   const toggleShowNewTruckForm = () => {
@@ -36,8 +36,25 @@ export default function TrucksPanel() {
 
   useEffect(() => {
     if (trucks) {
-      socket.on('newTruck', (truck) => {
-        setTrucks([...trucks, truck]);
+      socket.on('createTruck', (newTruck) => {
+        setTrucks([...trucks, newTruck]);
+      });
+
+      socket.on('assignTruck', (assignedTruck) => {
+        setTrucks(trucks.map((truck) => {
+          if (truck._id === assignedTruck._id) {
+            truck.assigned_to = assignedTruck.assigned_to;
+          } else {
+            truck.assigned_to = null;
+          }
+
+          return truck;
+        }));
+      });
+
+      socket.on('deleteTruck', (deletedTruck) => {
+        setTrucks(trucks.filter((truck) =>
+          truck._id !== deletedTruck._id));
       });
     }
   }, [socket, trucks]);

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import Routes from './routes';
 import { BrowserRouter } from 'react-router-dom';
 
@@ -19,12 +19,6 @@ const socket = io(process.env.REACT_APP_API_URL, {
 });
 
 function App() {
-  // useEffect(() => {
-  //   socket.on('connect', () => {
-  //     console.log('socket connected');
-  //   });
-  // }, []);
-
   return (
     <BrowserRouter>
       <div className="App">
