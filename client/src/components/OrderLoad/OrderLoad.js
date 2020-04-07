@@ -1,8 +1,10 @@
 /* eslint indent: ["error", 2, { "SwitchCase": 1 }] */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import './OrderLoad.scss';
 
 import InfoTile from '../InfoTile/InfoTile';
+
+import SocketContext from '../../context/SocketContext';
 
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
@@ -17,12 +19,31 @@ const FINISHLOAD_API = `${API_URL}/api/load/finish`;
 // Arrived to Delivery
 
 export default function OrderLoad() {
+  const socket = useContext(SocketContext);
+
   const [load, setLoad] = useState(null);
   const [loadNextState, setLoadNextState] = useState('En route to Pick Up');
-  const [showOrder, setShowOrder] = useState(true);
+
+  const [showOrder, setShowOrder] = useState(false);
+  const [noOrderMessage, setNoOrderMessage] = useState('');
 
   const updateLoadState = async (e) => {
+    e.preventDefault();
+
     await axios.put(UPDATELOADSTATE_API, {
+      loadId: load._id,
+      state: loadNextState,
+    }, {
+      headers: {
+        authorization: localStorage.getItem('jwt_token'),
+      },
+    });
+  };
+
+  const finishOrder = async (e) => {
+    e.preventDefault();
+
+    await axios.put(FINISHLOAD_API, {
       loadId: load._id,
       state: loadNextState,
     }, {
@@ -51,38 +72,45 @@ export default function OrderLoad() {
     }
   };
 
-  const finishOrder = async () => {
-    const finishedLoad = await axios.put(FINISHLOAD_API, {
-      loadId: load._id,
-      state: loadNextState,
-    }, {
-      headers: {
-        authorization: localStorage.getItem('jwt_token'),
-      },
-    });
-
-    setLoad(finishedLoad);
-  };
-
   const closeOrder = () => {
     setShowOrder(false);
   };
 
   useEffect(() => {
     const fetchLoad = async () => {
-      const load = await axios.get(CHECKFORLOAD_API, {
+      const resLoad = await axios.get(CHECKFORLOAD_API, {
         headers: {
           authorization: localStorage.getItem('jwt_token'),
         },
       }).then((res) => res.data);
 
-      setLoadNextState(findNextState(load.state));
+      if (resLoad.status === 'OK') {
+        const load = resLoad.load;
 
-      setLoad((load.status !== 'Nothing' && load.status !== 'No truck assigned') ? load : null);
+        setLoad(load);
+        setLoadNextState(findNextState(load.state));
+
+        setShowOrder(true);
+      } else {
+        setNoOrderMessage(resLoad.status === 'No truck assigned'
+          ? resLoad.status
+          : 'You have no order, just chill :)');
+      }
     };
 
     fetchLoad();
   }, []);
+
+  useEffect(() => {
+    socket.on('checkForLoad', (load) => {
+      setLoad(load);
+    });
+
+    socket.on('updateLoadState', (updatedLoad) => {
+      setLoad(updatedLoad);
+      setLoadNextState(findNextState(updatedLoad.state));
+    });
+  }, [socket, load]);
 
   return (
     <>
@@ -140,7 +168,7 @@ export default function OrderLoad() {
             </form>
           }</>
         : <>
-          <h2> You have no order, just chill :) </h2>
+          <h2>{ noOrderMessage }</h2>
         </>
       }
     </>

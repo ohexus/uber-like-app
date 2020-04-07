@@ -192,7 +192,7 @@ router.put('/assign', valid(loadValid.assign, 'body'), async (req, res) => {
 
       req.io.emit('assignLoad', assignedLoad);
 
-      return res.status(200).send(assignedLoad);
+      return res.status(200).json({ assignedLoad });
     }
 
     const updatedTruck = await Truck.findOneAndUpdate({
@@ -262,7 +262,7 @@ router.put('/updateInfo', valid(loadValid.updateInfo, 'body'), async (req, res) 
       },
     }, { new: true });
 
-    req.io.emit('updateLoad', updatedLoad);
+    req.io.emit('updateLoadInfo', updatedLoad);
 
     res.status(200).json({ status: 'load updated' });
   } catch (e) {
@@ -287,9 +287,12 @@ router.get('/checkForLoad', async (req, res) => {
       assigned_to: assignedTruck._id,
     });
 
-    if (!loadFound) return res.status(200).json({ status: 'Nothing' });
+    if (!loadFound) return res.status(200).json({ status: 'No order load' });
 
-    res.status(200).send(loadFound);
+    res.status(200).json({
+      status: 'OK',
+      load: loadFound,
+    });
   } catch (e) {
     res.status(500).json({ status: e.message });
   }
@@ -301,10 +304,10 @@ router.put('/updateState', valid(loadValid.updateState, 'body'), async (req, res
     const { loadId, state } = req.body;
 
     if (req.user.role === 'shipper') {
-      return res.status(403).json({ status: 'You are not a driver' });
+      return res.status(401).json({ status: 'You are not a driver' });
     }
 
-    await Load.findOneAndUpdate({
+    const updatedLoad = await Load.findOneAndUpdate({
       _id: loadId,
     }, {
       state,
@@ -313,9 +316,12 @@ router.put('/updateState', valid(loadValid.updateState, 'body'), async (req, res
           message: `state updated: ${req.body.state}`,
         },
       },
-    });
+    }, { new: true });
 
-    res.status(200).json({ state });
+    req.io.emit('updateLoadInfo', updatedLoad);
+    req.io.emit('updateLoadState', updatedLoad);
+
+    res.status(200).json({ updatedLoad });
   } catch (e) {
     res.status(500).json({ status: e.message });
   }
@@ -341,9 +347,9 @@ router.put('/finish', valid(loadValid.finish, 'body'), async (req, res) => {
           message: 'load status SHIPPED',
         },
       },
-    });
+    }, { new: true });
 
-    await Truck.findOneAndUpdate({
+    const updatedTruck = await Truck.findOneAndUpdate({
       assigned_to: req.user._id,
     }, {
       status: 'IS',
@@ -352,9 +358,13 @@ router.put('/finish', valid(loadValid.finish, 'body'), async (req, res) => {
           message: 'truck status IS',
         },
       },
-    });
+    }, { new: true });
 
-    res.status(200).send(shippedLoad);
+    req.io.emit('updateLoadInfo', shippedLoad);
+    req.io.emit('updateLoadState', shippedLoad);
+    req.io.emit('updateTruck', updatedTruck);
+
+    res.status(200).json({ status: 'load shipped' });
   } catch (e) {
     res.status(500).json({ status: e.message });
   }

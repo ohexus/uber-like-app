@@ -177,13 +177,15 @@ export default function Map(props) {
   useEffect(() => {
     if (user.role === 'driver') {
       const fetchLoad = async () => {
-        const load = await axios.get(CHECKFORLOAD_API, {
+        const resLoad = await axios.get(CHECKFORLOAD_API, {
           headers: {
             authorization: localStorage.getItem('jwt_token'),
           },
         }).then((res) => res.data);
 
-        if (load.status === 'Nothing' || load.status === 'No truck assigned') return;
+        if (resLoad.status !== 'OK') return;
+
+        const load = resLoad.load;
 
         setPickUpCoords({
           latitude: load.coord.pickUp.lat,

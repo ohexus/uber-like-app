@@ -1,5 +1,4 @@
 const express = require('express');
-const axios = require('axios');
 const config = require('config');
 const mongoose = require('mongoose');
 const cors = require('cors');

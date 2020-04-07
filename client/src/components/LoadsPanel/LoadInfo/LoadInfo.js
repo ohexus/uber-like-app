@@ -50,6 +50,8 @@ export default function LoadInfo(props) {
 
     if (assignedLoad.status !== 'ASSIGNED') {
       setShowWarningCantAssign(true);
+    } else {
+      setShowWarningCantAssign(false);
     }
   };
 
@@ -73,7 +75,7 @@ export default function LoadInfo(props) {
   useEffect(() => {
     let isExist = true;
 
-    socket.on('updateLoad', (updatedLoad) => {
+    socket.on('updateLoadInfo', (updatedLoad) => {
       if (isExist) {
         if (load._id === updatedLoad._id) {
           setLoad(updatedLoad);
