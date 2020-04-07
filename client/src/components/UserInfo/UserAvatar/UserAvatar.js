@@ -22,6 +22,8 @@ export default function UserAvatar(props) {
         authorization: localStorage.getItem('jwt_token'),
       },
     });
+
+    setShowAvatarUpdateForm(false);
   };
 
   const handleNewAvatarInput = (e) => {

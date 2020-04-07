@@ -1,17 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import './LoadsPanel.scss';
 
 import NewLoadForm from './NewLoadForm/NewLoadForm';
 import LoadsShelf from './LoadsShelf/LoadsShelf';
 import Pagination from '../Pagination/Pagination';
 
+import SocketContext from '../../context/SocketContext';
+
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
 const LOADS_API = `${API_URL}/api/load/allForUser`;
 
 export default function LoadsPanel() {
+  const socket = useContext(SocketContext);
+
   const [loads, setLoads] = useState(null);
   const [filteredLoads, setFilteredLoads] = useState(null);
+  const [filterCriteria, setFilterCriteria] = useState('');
 
   const [currentPage, setCurrentPage] = useState(1);
   const [loadsPerPage] = useState(5);
@@ -23,13 +28,7 @@ export default function LoadsPanel() {
   };
 
   const handleFilterSelect = (e) => {
-    if (loads) {
-      if (e.target.value !== '') {
-        setFilteredLoads(loads.filter((load) => load.status === e.target.value));
-      } else {
-        setFilteredLoads(loads);
-      }
-    }
+    setFilterCriteria(e.target.value);
   };
 
   useEffect(() => {
@@ -46,6 +45,29 @@ export default function LoadsPanel() {
 
     fetchLoads();
   }, []);
+
+  useEffect(() => {
+    if (loads) {
+      socket.on('createLoad', (newLoad) => {
+        setLoads([...loads, newLoad]);
+      });
+
+      socket.on('deleteLoad', (deletedLoad) => {
+        setLoads(loads.filter((load) =>
+          load._id !== deletedLoad._id));
+      });
+    }
+  }, [socket, loads]);
+
+  useEffect(() => {
+    if (loads) {
+      if (filterCriteria === '') {
+        setFilteredLoads(loads);
+      } else {
+        setFilteredLoads(loads.filter((load) => load.status === filterCriteria));
+      }
+    }
+  }, [loads, filterCriteria]);
 
   const indexLast = currentPage * loadsPerPage;
   const indexFirst = indexLast - loadsPerPage;

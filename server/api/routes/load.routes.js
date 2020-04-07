@@ -53,7 +53,7 @@ router.post('/create', valid(loadValid.create, 'body'), async (req, res) => {
       return res.status(403).json({ status: 'Please fill in all the fields' });
     }
 
-    const load = new Load({
+    const newLoad = new Load({
       created_by: req.user._id,
       dimensions: {
         length,
@@ -64,9 +64,11 @@ router.post('/create', valid(loadValid.create, 'body'), async (req, res) => {
       loadName,
     });
 
-    await load.save();
+    await newLoad.save();
 
-    res.status(200).send(load);
+    req.io.emit('createLoad', newLoad);
+
+    res.status(200).send(newLoad);
   } catch (e) {
     res.status(500).json({ status: e.message });
   }
@@ -132,7 +134,7 @@ router.put('/post', valid(loadValid.post, 'body'), async (req, res) => {
       return res.status(403).json({ status: 'Please fill in loadId' });
     }
 
-    await Load.findOneAndUpdate({
+    const postedLoad = await Load.findOneAndUpdate({
       $and: [
         { created_by: req.user._id },
         { _id: loadId },
@@ -145,7 +147,9 @@ router.put('/post', valid(loadValid.post, 'body'), async (req, res) => {
           message: 'load status POSTED',
         },
       },
-    });
+    }, { new: true });
+
+    req.io.emit('postLoad', postedLoad);
 
     res.status(200).json({ status: 'load posted' });
   } catch (e) {
@@ -175,7 +179,7 @@ router.put('/assign', valid(loadValid.assign, 'body'), async (req, res) => {
     });
 
     if (!truckFound) {
-      const updatedLoad = await Load.findOneAndUpdate({
+      const assignedLoad = await Load.findOneAndUpdate({
         _id: loadId,
       }, {
         status: 'NEW',
@@ -186,10 +190,12 @@ router.put('/assign', valid(loadValid.assign, 'body'), async (req, res) => {
         },
       }, { new: true });
 
-      return res.status(200).send(updatedLoad);
+      req.io.emit('assignLoad', assignedLoad);
+
+      return res.status(200).send(assignedLoad);
     }
 
-    await Truck.findOneAndUpdate({
+    const updatedTruck = await Truck.findOneAndUpdate({
       _id: truckFound._id,
     }, {
       status: 'OL',
@@ -200,7 +206,7 @@ router.put('/assign', valid(loadValid.assign, 'body'), async (req, res) => {
       },
     });
 
-    await Load.findOneAndUpdate({
+    const assignedLoad = await Load.findOneAndUpdate({
       _id: loadId,
     }, {
       assigned_to: truckFound._id,
@@ -211,7 +217,11 @@ router.put('/assign', valid(loadValid.assign, 'body'), async (req, res) => {
           message: 'load assigned',
         },
       },
-    });
+    }, { new: true });
+
+    req.io.emit('updateTruck', updatedTruck);
+    req.io.emit('assignLoad', assignedLoad);
+    req.io.emit('checkForLoad', assignedLoad);
 
     res.status(200).json({ status: 'load assigned' });
   } catch (e) {
@@ -232,7 +242,7 @@ router.put('/updateInfo', valid(loadValid.updateInfo, 'body'), async (req, res) 
       return res.status(403).json({ status: 'Please fill in all the fields' });
     }
 
-    await Load.findOneAndUpdate({
+    const updatedLoad = await Load.findOneAndUpdate({
       $and: [
         { created_by: req.user._id },
         { _id: loadId },
@@ -244,13 +254,15 @@ router.put('/updateInfo', valid(loadValid.updateInfo, 'body'), async (req, res) 
         width,
         height,
       },
-      payload: payload,
+      payload,
       $push: {
         logs: {
           message: 'load updated',
         },
       },
-    });
+    }, { new: true });
+
+    req.io.emit('updateLoad', updatedLoad);
 
     res.status(200).json({ status: 'load updated' });
   } catch (e) {
@@ -414,13 +426,15 @@ router.delete('/delete', valid(loadValid.delete, 'body'), async (req, res) => {
       return res.status(403).json({ status: 'You are not a shipper' });
     }
 
-    await Load.findOneAndDelete({
+    const deletedLoad = await Load.findOneAndDelete({
       $and: [
         { created_by: req.user._id },
         { _id: loadId },
         { status: 'NEW' },
       ],
     });
+
+    req.io.emit('deleteLoad', deletedLoad);
 
     res.status(200).json({ status: 'load deleted' });
   } catch (e) {

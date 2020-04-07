@@ -1,20 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import './LoadInfo.scss';
 
 import InfoTile from '../../InfoTile/InfoTile';
 import LoadUpdateForm from './LoadUpdateForm/LoadUpdateForm';
 import DriversInfo from './DriversInfo/DriversInfo';
+import ReportDownloadPanel from './ReportDownloadPanel/ReportDownloadPanel';
+
+import SocketContext from '../../../context/SocketContext';
 
 import axios from 'axios';
-import ReportDownloadPanel from './ReportDownloadPanel/ReportDownloadPanel';
 const API_URL = process.env.REACT_APP_API_URL;
 const POSTLOAD_API = `${API_URL}/api/load/post`;
 const ASSIGNLOAD_API = `${API_URL}/api/load/assign`;
 const DELETELOAD_API = `${API_URL}/api/load/delete`;
 
 export default function LoadInfo(props) {
-  const [load] = useState(props.load);
-  const [dimensions] = useState(load.dimensions);
+  const socket = useContext(SocketContext);
+
+  const [load, setLoad] = useState(props.load);
   const [isLoadFinished] = useState(load.status === 'SHIPPED');
   const [hasCooords] = useState(props.load.coord.pickUp.lat !== null && props.load.coord.delivery.lat !== null);
 
@@ -39,20 +42,20 @@ export default function LoadInfo(props) {
   };
 
   const assignLoad = async () => {
-    const updatedLoad = await axios.put(ASSIGNLOAD_API, { loadId: load._id }, {
+    const assignedLoad = await axios.put(ASSIGNLOAD_API, { loadId: load._id }, {
       headers: {
         authorization: localStorage.getItem('jwt_token'),
       },
     }).then((res) => res.data);
 
-    if (updatedLoad.status === 'NEW') {
+    if (assignedLoad.status !== 'ASSIGNED') {
       setShowWarningCantAssign(true);
-    } else {
-      window.location.reload();
     }
   };
 
-  const deleteLoad = async () => {
+  const deleteLoad = async (e) => {
+    e.preventDefault();
+
     await axios.delete(DELETELOAD_API, {
       data: {
         loadId: load._id,
@@ -61,12 +64,41 @@ export default function LoadInfo(props) {
         authorization: localStorage.getItem('jwt_token'),
       },
     });
-    window.location.reload(false);
   };
 
   const toggleShowLoadUpdateForm = () => {
     setShowLoadUpdateForm(!showLoadUpdateForm);
   };
+
+  useEffect(() => {
+    let isExist = true;
+
+    socket.on('updateLoad', (updatedLoad) => {
+      if (isExist) {
+        if (load._id === updatedLoad._id) {
+          setLoad(updatedLoad);
+        }
+      }
+    });
+
+    socket.on('postLoad', (postedLoad) => {
+      if (isExist) {
+        if (load._id === postedLoad._id) {
+          setLoad(postedLoad);
+        }
+      }
+    });
+
+    socket.on('assignLoad', (assignedLoad) => {
+      if (isExist) {
+        if (load._id === assignedLoad._id) {
+          setLoad(assignedLoad);
+        }
+      }
+    });
+
+    return () => isExist = false;
+  }, [socket, load]);
 
   return (
     <div className="load-wrapper">
@@ -81,6 +113,10 @@ export default function LoadInfo(props) {
             ? 'Assigned'
             : 'Not assigned'
           }
+        </h4> }
+
+        { load.status === 'POSTED' && <h4 className="load__assigned">
+          Load posted. Looking for a driver...
         </h4> }
 
         { showWarningHasNoCoords && <h5>
@@ -127,17 +163,17 @@ export default function LoadInfo(props) {
 
         <InfoTile
           label={ 'Length:' }
-          info={ dimensions.length }
+          info={ load.dimensions.length }
         />
 
         <InfoTile
           label={ 'Width:' }
-          info={ dimensions.width }
+          info={ load.dimensions.width }
         />
 
         <InfoTile
           label={ 'Height:' }
-          info={ dimensions.height }
+          info={ load.dimensions.height }
         />
 
         <InfoTile
@@ -163,7 +199,11 @@ export default function LoadInfo(props) {
       </> }
 
       { !isLoadFinished && <>
-        { showLoadUpdateForm && <LoadUpdateForm load={ load } className="load-wrapper__updateload" /> }
+        { showLoadUpdateForm && <LoadUpdateForm
+          load={ load }
+          className="load-wrapper__updateload"
+          closeForm={ () => setShowLoadUpdateForm(false) }
+        /> }
       </> }
 
       { isLoadFinished && <ReportDownloadPanel load={ load } /> }

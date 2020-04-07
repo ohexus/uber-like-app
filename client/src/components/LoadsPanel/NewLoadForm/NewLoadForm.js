@@ -33,8 +33,6 @@ export default function NewLoadForm(props) {
             authorization: localStorage.getItem('jwt_token'),
           },
         });
-
-        window.location.reload();
       } else {
         setWarningMessage('Dimensions and payload cant be 0!');
         setShowWarning(true);

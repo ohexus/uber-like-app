@@ -104,7 +104,11 @@ export default function TruckInfo(props) {
       </button>
       }
 
-      { showTruckUpdateForm && <TruckUpdateForm truck={ truck } className='truck-wrapper__updatetruck' closeForm={() => setShowTruckUpdateForm(false)} /> }
+      { showTruckUpdateForm && <TruckUpdateForm
+        truck={ truck }
+        className='truck-wrapper__updatetruck'
+        closeForm={ () => setShowTruckUpdateForm(false) }
+      /> }
     </div> }
   </>);
 }

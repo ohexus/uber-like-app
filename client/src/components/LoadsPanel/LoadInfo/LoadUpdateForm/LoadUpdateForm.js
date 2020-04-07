@@ -33,7 +33,7 @@ export default function TruckUpdateForm(props) {
         },
       });
 
-      window.location.reload();
+      props.closeForm();
     } else {
       setShowWarning(true);
     }
