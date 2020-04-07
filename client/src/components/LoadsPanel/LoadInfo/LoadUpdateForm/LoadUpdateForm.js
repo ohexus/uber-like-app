@@ -14,13 +14,13 @@ export default function TruckUpdateForm(props) {
   const [height, setHeight] = useState(dimensions.height);
   const [payload, setPayload] = useState(load.payload);
 
-  const [warningMessage] = useState('Dimensions and payload cant be 0!');
+  const [warningMessage] = useState('Dimensions and payload cant be less then 1!');
   const [showWarning, setShowWarning] = useState(false);
 
   const updateLoad = async (e) => {
     e.preventDefault();
 
-    if (length !== 0 && width !== 0 && height !== 0 && payload !== 0) {
+    if (length > 0 && width > 0 && height > 0 && payload > 0) {
       await axios.put(UPDATELOAD_API, {
         loadId: load._id,
         length,
@@ -67,6 +67,7 @@ export default function TruckUpdateForm(props) {
         type="number"
         name="length"
         value={ length }
+        min="1"
         onChange={ handleLengthInput }
         required
       />
@@ -76,6 +77,7 @@ export default function TruckUpdateForm(props) {
         type="number"
         name="width"
         value={ width }
+        min="1"
         onChange={ handleWidthInput }
         required
       />
@@ -85,6 +87,7 @@ export default function TruckUpdateForm(props) {
         type="number"
         name="height"
         value={ height }
+        min="1"
         onChange={ handleHeightInput }
         required
       />
@@ -94,6 +97,7 @@ export default function TruckUpdateForm(props) {
         type="number"
         name="payload"
         value={ payload }
+        min="1"
         onChange={ handlePayloadInput }
         required
       />

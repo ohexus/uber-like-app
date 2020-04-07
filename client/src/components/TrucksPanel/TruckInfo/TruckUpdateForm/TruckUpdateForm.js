@@ -15,7 +15,7 @@ export default function TruckUpdateForm(props) {
   const [brand, setBrand] = useState(truck.brand);
   const [model, setModel] = useState(truck.model);
 
-  const [warningMessage] = useState('Please input all forms!');
+  const [warningMessage, setWarningMessage] = useState('');
   const [showWarning, setShowWarning] = useState(false);
 
   const updateTruck = async (e) => {
@@ -24,7 +24,7 @@ export default function TruckUpdateForm(props) {
     const isValid = checkBeforePostToServer([truckName, brand, model], setShowWarning);
 
     if (isValid) {
-      await axios.put(UPDATETRUCK_API, {
+      const status = await axios.put(UPDATETRUCK_API, {
         truckId: truck._id,
         type,
         truckName,
@@ -34,10 +34,21 @@ export default function TruckUpdateForm(props) {
         headers: {
           authorization: localStorage.getItem('jwt_token'),
         },
-      });
-    }
+      }).then((res) => res.data.status);
 
-    props.closeForm();
+      console.log(status);
+
+      if (status === 'OK') {
+        props.closeForm();
+      } else {
+        handleWarning(status);
+      }
+    }
+  };
+
+  const handleWarning = (message) => {
+    setWarningMessage(message);
+    setShowWarning(true);
   };
 
   const handleTypeSelect = (e) => {
@@ -61,7 +72,7 @@ export default function TruckUpdateForm(props) {
       className={ `updatetruck ${props.className}` }
       onSubmit={ updateTruck }
     >
-      { showWarning && <h3>{ warningMessage }</h3> }
+      { showWarning && <span>{ warningMessage }</span> }
 
       <label htmlFor="type"> Type: </label>
       <select
@@ -91,6 +102,7 @@ export default function TruckUpdateForm(props) {
         type="text"
         name="truckName"
         value={ truckName }
+        minLength="3"
         onChange={ handleTruckNameInput }
         required
       />
@@ -100,6 +112,7 @@ export default function TruckUpdateForm(props) {
         type="text"
         name="brand"
         value={ brand }
+        minLength="3"
         onChange={ handleBrandInput }
         required
       />
@@ -109,6 +122,7 @@ export default function TruckUpdateForm(props) {
         type="text"
         name="model"
         value={ model }
+        minLength="3"
         onChange={ handleModelInput }
         required
       />

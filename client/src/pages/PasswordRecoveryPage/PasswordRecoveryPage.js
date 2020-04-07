@@ -107,6 +107,7 @@ export default function PasswordRecoveryPage() {
         type="text"
         name="username"
         value={ username }
+        minLength="3"
         onChange={ handleUsernameInput }
         required
       />
@@ -127,6 +128,7 @@ export default function PasswordRecoveryPage() {
         type="text"
         name="firstName"
         value={ firstName }
+        minLength="3"
         onChange={ handleFirstNameInput }
         required
       />
@@ -137,6 +139,7 @@ export default function PasswordRecoveryPage() {
         type="text"
         name="lastName"
         value={ lastName }
+        minLength="3"
         onChange={ handleLastNameInput }
         required
       />
@@ -144,9 +147,10 @@ export default function PasswordRecoveryPage() {
 
       <label htmlFor="mobileNumber"> Mobile Number: </label>
       <input
-        type="text"
+        type="number"
         name="mobileNumber"
         value={ mobileNumber }
+        min="0"
         onChange={ handleMobileNumberInput }
         required
       />
@@ -157,6 +161,7 @@ export default function PasswordRecoveryPage() {
         type="password"
         name="newPassword"
         value={ newPassword }
+        minLength="3"
         onChange={ handleNewPasswordInput }
         required
       />
@@ -167,6 +172,7 @@ export default function PasswordRecoveryPage() {
         type="password"
         name="checkNewPassword"
         value={ checkNewPassword }
+        minLength="3"
         onChange={ handleCheckNewPasswordInput }
         required
       />

@@ -13,7 +13,7 @@ export default function NewTruckForm(props) {
   const [brand, setBrand] = useState('');
   const [model, setModel] = useState('');
 
-  const [warningMessage] = useState('Please input all forms!');
+  const [warningMessage, setWarningMessage] = useState('');
   const [showWarning, setShowWarning] = useState(false);
 
   const createTruck = async (e) => {
@@ -22,16 +22,25 @@ export default function NewTruckForm(props) {
     const isValid = checkBeforePostToServer([truckName, brand, model], setShowWarning);
 
     if (isValid) {
-      await axios.post(CREATETRUCK_API, {
+      const status = await axios.post(CREATETRUCK_API, {
         type, truckName, brand, model,
       }, {
         headers: {
           authorization: localStorage.getItem('jwt_token'),
         },
-      });
+      }).then((res) => res.data.status);
 
-      props.closeForm();
+      if (status === 'OK') {
+        props.closeForm();
+      } else {
+        handleWarning(status);
+      }
     }
+  };
+
+  const handleWarning = (message) => {
+    setWarningMessage(message);
+    setShowWarning(true);
   };
 
   const handleTypeSelect = (e) => {
@@ -85,6 +94,7 @@ export default function NewTruckForm(props) {
         type="text"
         name="truckName"
         value={ truckName }
+        minLength="3"
         onChange={ handleTruckNameInput }
         required
       />
@@ -94,6 +104,7 @@ export default function NewTruckForm(props) {
         type="text"
         name="brand"
         value={ brand }
+        minLength="3"
         onChange={ handleBrandInput }
         required
       />
@@ -103,6 +114,7 @@ export default function NewTruckForm(props) {
         type="text"
         name="model"
         value={ model }
+        minLength="3"
         onChange={ handleModelInput }
         required
       />

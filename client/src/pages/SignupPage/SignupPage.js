@@ -100,6 +100,7 @@ export default function SignupPage() {
           type="text"
           name="firstName"
           value={ firstName }
+          minLength="3"
           onChange={ handleFirstNameInput }
           required
         />
@@ -110,6 +111,7 @@ export default function SignupPage() {
           type="text"
           name="lastName"
           value={ lastName }
+          minLength="3"
           onChange={ handleLastNameInput }
           required
         />
@@ -120,6 +122,7 @@ export default function SignupPage() {
           type="text"
           name="username"
           value={ username }
+          minLength="3"
           onChange={ handleUsernameInput }
           required
         />
@@ -140,6 +143,7 @@ export default function SignupPage() {
           type="number"
           name="mobileNumber"
           value={ mobileNumber }
+          min="0"
           onChange={ handleMobileNumberInput }
           required
         />
@@ -150,6 +154,7 @@ export default function SignupPage() {
           type="password"
           name="password"
           value={ password }
+          minLength="3"
           onChange={ handlePasswordInput }
           required
         />

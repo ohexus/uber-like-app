@@ -22,10 +22,10 @@ export default function NewLoadForm(props) {
 
     setShowWarning(false);
     setWarningMessage('Please input all forms!');
-    const isValid = checkBeforePostToServer([loadName], setShowWarning);
+    const isValid = checkBeforePostToServer([loadName]);
 
     if (isValid) {
-      if (length !== 0 && width !== 0 && height !== 0 && payload !== 0) {
+      if (length > 0 && width > 0 && height > 0 && payload > 0) {
         await axios.post(CREATELOAD_API, {
           loadName, length, width, height, payload,
         }, {
@@ -36,9 +36,11 @@ export default function NewLoadForm(props) {
 
         props.closeForm();
       } else {
-        setWarningMessage('Dimensions and payload cant be 0!');
+        setWarningMessage('Dimensions and payload cant be less then 1!');
         setShowWarning(true);
       }
+    } else {
+      setShowWarning(true);
     }
   };
 
@@ -74,6 +76,7 @@ export default function NewLoadForm(props) {
         type="text"
         name="loadName"
         value={ loadName }
+        minLength="3"
         onChange={ handleLoadNameInput }
         required
       />
@@ -83,6 +86,7 @@ export default function NewLoadForm(props) {
         type="number"
         name="length"
         value={ length }
+        min="1"
         onChange={ handleLengthInput }
         required
       />
@@ -92,6 +96,7 @@ export default function NewLoadForm(props) {
         type="number"
         name="width"
         value={ width }
+        min="1"
         onChange={ handleWidthInput }
         required
       />
@@ -101,6 +106,7 @@ export default function NewLoadForm(props) {
         type="number"
         name="height"
         value={ height }
+        min="1"
         onChange={ handleHeightInput }
         required
       />
@@ -110,6 +116,7 @@ export default function NewLoadForm(props) {
         type="number"
         name="payload"
         value={ payload }
+        min="1"
         onChange={ handlePayloadInput }
         required
       />

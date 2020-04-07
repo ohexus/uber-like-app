@@ -62,6 +62,7 @@ export default function LoginPage() {
           type="text"
           name="login"
           value={ login }
+          minLength="3"
           onChange={ handleLoginInput }
           required
         />
@@ -72,6 +73,7 @@ export default function LoginPage() {
           type="password"
           name="password"
           value={ password }
+          minLength="3"
           onChange={ handlePasswordInput }
           required
         />

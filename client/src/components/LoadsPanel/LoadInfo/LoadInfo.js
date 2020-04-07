@@ -95,6 +95,7 @@ export default function LoadInfo(props) {
       if (isExist) {
         if (load._id === assignedLoad._id) {
           setLoad(assignedLoad);
+          setShowWarningCantAssign(false);
         }
       }
     });

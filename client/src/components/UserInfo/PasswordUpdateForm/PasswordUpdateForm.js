@@ -72,6 +72,7 @@ export default function PasswordUpdateForm(props) {
         type="password"
         name="oldPassword"
         value={ oldPassword }
+        minLength="3"
         onChange={ handleOldPasswordInput }
         required
       />
@@ -82,6 +83,7 @@ export default function PasswordUpdateForm(props) {
         type="password"
         name="newPassword"
         value={ newPassword }
+        minLength="3"
         onChange={ handleNewPasswordInput }
         required
       />
@@ -92,6 +94,7 @@ export default function PasswordUpdateForm(props) {
         type="password"
         name="checkNewPassword"
         value={ checkNewPassword }
+        minLength="3"
         onChange={ handleCheckNewPasswordInput }
         required
       />
