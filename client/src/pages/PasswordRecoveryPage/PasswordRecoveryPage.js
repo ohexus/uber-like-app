@@ -15,8 +15,8 @@ export default function PasswordRecoveryPage() {
   const [newPassword, setNewPassword] = useState('');
   const [checkNewPassword, setCheckNewPassword] = useState('');
 
-  const [alertMessage, setAlertMessage] = useState('');
-  const [showAlertMessage, setShowAlertMessage] = useState(false);
+  const [warningMessage, setWarningMessage] = useState('');
+  const [showWarning, setShowWarning] = useState(false);
 
   const [routeRedirect, setRouteRedirect] = useState(false);
 
@@ -44,13 +44,9 @@ export default function PasswordRecoveryPage() {
 
     const userChecked = await checkUser();
 
-    if (userChecked) {
-      if (newPassword === userChecked.password) {
-        return handleAlert('The new password must be different from the previous one!');
-      }
-
+    if (userChecked.status === 'OK') {
       if (newPassword === checkNewPassword) {
-        recoverPassword(userChecked._id);
+        recoverPassword(userChecked.user._id);
         alert('Password has been changed');
         setRouteRedirect(true);
       } else {
@@ -62,8 +58,8 @@ export default function PasswordRecoveryPage() {
   };
 
   const handleAlert = (message) => {
-    setAlertMessage(message);
-    setShowAlertMessage(true);
+    setWarningMessage(message);
+    setShowWarning(true);
   };
 
   const handleUsernameInput = (e) => {
@@ -104,7 +100,7 @@ export default function PasswordRecoveryPage() {
 
       <p> To change password please enter your info and new password </p>
 
-      { showAlertMessage && <p className="recoverypassword__alert"> { alertMessage } </p> }
+      { showWarning && <h3>{ warningMessage }</h3> }
 
       <label htmlFor="username"> Username: </label>
       <input
@@ -177,6 +173,8 @@ export default function PasswordRecoveryPage() {
       <hr />
 
       <button type="submit"> Submit password recovery </button>
+
+      <hr />
 
       <div className="navigation-panel">
         <Link to="/login"> Login </Link>

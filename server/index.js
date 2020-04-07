@@ -53,10 +53,10 @@ app.use('/api/clearDB', clearDBRouter);
 app.use('/api/allRequestLogs', allRequestLogsRouter);
 
 app.use('/api/auth', authRouter);
+app.use('/api/recoverPassword', recoverPasswordRouter);
 
 app.use(auth);
 
-app.use('/api/recoverPassword', recoverPasswordRouter);
 app.use('/api/user', userRouter);
 app.use('/api/truck', truckRouter);
 app.use('/api/load', loadRouter);

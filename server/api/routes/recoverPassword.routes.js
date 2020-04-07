@@ -20,9 +20,9 @@ router.put('/recover', valid(recoverPasswordValid.recover, 'body'), async (req, 
       _id: userId,
     }, {
       password: hashedPassword,
-    }, { new: true });
+    });
 
-    res.status(200).json({ status: 'successful updated password' });
+    res.status(200).json({ status: 'OK' });
   } catch (e) {
     res.status(500).json({ status: e.message });
   }
@@ -44,10 +44,13 @@ router.post('/checkUser', valid(recoverPasswordValid.checkUser, 'body'), async (
     });
 
     if (!user) {
-      return res.status(403).send('Nothing');
+      return res.status(200).json({ status: 'User not found' });
     }
 
-    res.status(200).send(user);
+    res.status(200).json({
+      status: 'OK',
+      user,
+    });
   } catch (e) {
     res.status(500).json({ status: e.message });
   }
