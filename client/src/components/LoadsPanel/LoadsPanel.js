@@ -89,7 +89,10 @@ export default function LoadsPanel() {
         }
       </button>
 
-      { showNewLoadForm && <NewLoadForm className="loads__newload" /> }
+      { showNewLoadForm && <NewLoadForm
+        className="loads__newload"
+        closeForm={ () => setShowNewloadForm(false) }
+      /> }
 
       <div className="loads__filter">
         <label htmlFor="type"> Filter: </label>

@@ -73,7 +73,10 @@ export default function TrucksPanel() {
         }
       </button>
 
-      { showNewTruckForm && <NewTruckForm className="trucks__newtruck" /> }
+      { showNewTruckForm && <NewTruckForm
+        className="trucks__newtruck"
+        closeForm={ () => setShowNewTruckForm(false) }
+      /> }
 
       { trucks
         ? <div className="trucks__panel">

@@ -3,7 +3,11 @@
 
     list-style: none;
 
+    &__item {
+        padding: 20px 0;
+    }
+
     &__link {
-        padding: 5px;
+        padding: 20px;
     }
 }
