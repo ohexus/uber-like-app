@@ -1,15 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import './TrucksPanel.scss';
 
 import TruckInfo from './TruckInfo/TruckInfo';
 import NewTruckForm from './NewTruckForm/NewTruckForm';
 
 import axios from 'axios';
+import SocketContext from '../../context/SocketContext';
 const API_URL = process.env.REACT_APP_API_URL;
 const TRUCKS_API = `${API_URL}/api/truck/allForUser`;
 
 export default function TrucksPanel() {
+  const socket = useContext(SocketContext);
+
   const [trucks, setTrucks] = useState(null);
+  console.log(trucks);
   const [showNewTruckForm, setShowNewTruckForm] = useState(false);
 
   const toggleShowNewTruckForm = () => {
@@ -29,6 +33,14 @@ export default function TrucksPanel() {
 
     fetchTrucks();
   }, []);
+
+  useEffect(() => {
+    if (trucks) {
+      socket.on('newTruck', (truck) => {
+        setTrucks([...trucks, truck]);
+      });
+    }
+  }, [socket, trucks]);
 
   return (
     <div className="trucks">

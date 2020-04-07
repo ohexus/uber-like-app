@@ -1,10 +1,21 @@
 const express = require('express');
+const axios = require('axios');
 const config = require('config');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const app = express();
 const server = require('http').Server(app);
-const io = require('socket.io')(server);
+const io = require('socket.io')(server, {
+  handlePreflightRequest: (req, res) => {
+    const headers = {
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Origin': req.headers.origin,
+      'Access-Control-Allow-Credentials': true,
+    };
+    res.writeHead(200, headers);
+    res.end();
+  },
+});
 
 app.use(cors());
 app.use(express.json({ extended: true }));
@@ -51,8 +62,12 @@ app.use('/api/truck', truckRouter);
 app.use('/api/load', loadRouter);
 app.use('/api/weather', weatherRouter);
 
-io.on('connection', () => {
-  console.log('io connected');
+io.on('connection', (socket) => {
+  console.log('socket connected');
+
+  socket.on('disconnect', () => {
+    console.log('socket disconnected');
+  });
 });
 
 server.listen(PORT, () => {

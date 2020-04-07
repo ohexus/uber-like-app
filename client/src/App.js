@@ -2,26 +2,36 @@ import React, { useEffect } from 'react';
 import Routes from './routes';
 import { BrowserRouter } from 'react-router-dom';
 
-import io from 'socket.io-client';
-
 import './App.scss';
 import 'semantic-ui-css/semantic.min.css';
 
-const SERVER_URL = process.env.REACT_APP_API_URL;
-const socket = io(SERVER_URL);
+import SocketContext from './context/SocketContext';
+
+import io from 'socket.io-client';
+const socket = io(process.env.REACT_APP_API_URL, {
+  transportOptions: {
+    polling: {
+      extraHeaders: {
+        authorization: localStorage.getItem('jwt_token'),
+      },
+    },
+  },
+});
 
 function App() {
-  useEffect(() => {
-    socket.on('connect', () => {
-      console.log('socket connected');
-    });
-  }, []);
+  // useEffect(() => {
+  //   socket.on('connect', () => {
+  //     console.log('socket connected');
+  //   });
+  // }, []);
 
   return (
     <BrowserRouter>
       <div className="App">
         <h1> Easy Breeze </h1>
-        <Routes />
+        <SocketContext.Provider value={ socket }>
+          <Routes />
+        </SocketContext.Provider>
       </div>
     </BrowserRouter>
   );

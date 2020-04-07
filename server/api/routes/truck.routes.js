@@ -52,6 +52,8 @@ router.post('/create', valid(truckValid.create, 'body'), async (req, res) => {
 
     await truck.save();
 
+    req.io.emit('newTruck', truck);
+
     res.status(200).send(truck);
   } catch (e) {
     res.status(500).json({ status: e.message });

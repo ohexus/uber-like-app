@@ -30,7 +30,7 @@ export default function NewTruckForm(props) {
         },
       });
 
-      window.location.reload();
+      // window.location.reload();
     }
   };
 
