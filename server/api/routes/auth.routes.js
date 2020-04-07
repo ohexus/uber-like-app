@@ -29,7 +29,7 @@ router.post('/signup', valid(authValid.signup, 'body'), async (req, res) => {
     const { firstName, lastName, username, email, mobileNumber, password, role } = req.body;
 
     if (!firstName || !lastName || !username || !email || !mobileNumber || !password || !role) {
-      return res.status(401).json({ status: 'Please fill in all the fields' });
+      return res.status(200).json({ status: 'Please fill in all the fields' });
     }
 
     const userFound = await User.findOne({
@@ -41,7 +41,7 @@ router.post('/signup', valid(authValid.signup, 'body'), async (req, res) => {
     });
 
     if (userFound) {
-      return res.status(401).json({ status: 'This email, username or mobile number is already registered' });
+      return res.status(200).json({ status: 'This email, username or mobile number is already registered' });
     }
 
     const defaultImg = fs.readFileSync(path);
@@ -71,7 +71,10 @@ router.post('/signup', valid(authValid.signup, 'body'), async (req, res) => {
 
     await weather.save();
 
-    res.status(200).send({ _id: user._id });
+    res.status(200).json({
+      status: 'OK',
+      _id: user._id,
+    });
   } catch (e) {
     res.status(500).json({ status: e.message });
   }
@@ -83,7 +86,7 @@ router.post('/login', valid(authValid.login, 'body'), async (req, res) => {
     const { login, password } = req.body;
 
     if (!login || !password) {
-      return res.status(401).json({ status: 'Please fill in the login and password fields' });
+      return res.status(200).json({ status: 'Please fill in the login and password fields' });
     }
 
     const user = await User.findOne({
@@ -94,13 +97,13 @@ router.post('/login', valid(authValid.login, 'body'), async (req, res) => {
     });
 
     if (!user) {
-      return res.status(400).json({ status: 'User not found' });
+      return res.status(200).json({ status: 'User not found' });
     }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
 
     if (!isValidPassword) {
-      return res.status(400).json({ status: 'Incorrect password' });
+      return res.status(200).json({ status: 'Incorrect password' });
     }
 
     const jwt_token = jwt.sign(
@@ -110,7 +113,10 @@ router.post('/login', valid(authValid.login, 'body'), async (req, res) => {
 
     res.header('authorization', jwt_token);
 
-    res.status(200).send(jwt_token);
+    res.status(200).json({
+      status: 'OK',
+      jwt_token,
+    });
   } catch (e) {
     res.status(500).json({ status: e.message });
   }

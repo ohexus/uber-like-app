@@ -18,19 +18,33 @@ export default function SignupPage() {
 
   const [routeRedirect, setRouteRedirect] = useState(false);
 
-  const [warningMessage] = useState('Please input all forms!');
+  const [warningMessage, setWarningMessage] = useState('');
   const [showWarning, setShowWarning] = useState(false);
 
   const fetchSignup = async (e) => {
     e.preventDefault();
 
-    const isValid = checkBeforePostToServer([firstName, lastName, username, email, mobileNumber, password], setShowWarning);
+    const isValid = checkBeforePostToServer([firstName, lastName, username, email, mobileNumber, password]);
 
     if (isValid && role !== null) {
-      await axios.post(SIGNUP_API, { firstName, lastName, username, email, mobileNumber, password, role });
-      alert('Signed up successfully!');
-      setRouteRedirect(true);
+      const status = await axios.post(SIGNUP_API, {
+        firstName, lastName, username, email, mobileNumber, password, role,
+      }).then((res) => res.data.status);
+
+      if (status === 'OK') {
+        alert('Signed up successfully!');
+        setRouteRedirect(true);
+      } else {
+        handleWarning(status);
+      }
+    } else {
+      handleWarning('Please input all forms!');
     }
+  };
+
+  const handleWarning = (message) => {
+    setWarningMessage(message);
+    setShowWarning(true);
   };
 
   const handleFirstNameInput = (e) => {
@@ -141,26 +155,31 @@ export default function SignupPage() {
         />
         <hr />
 
-        <h4> You are: </h4>
-        <input
-          type="radio"
-          id="driver"
-          name="role"
-          value="driver"
-          onChange={ handleRadioDriver }
-        />
-        <label htmlFor="driver"> Driver </label>
+        <div>
+          <h4> You are: </h4>
+          <input
+            type="radio"
+            id="driver"
+            name="role"
+            value="driver"
+            onChange={ handleRadioDriver }
+          />
+          <label htmlFor="driver"> Driver </label>
 
-        <input
-          type="radio"
-          id="shipper"
-          name="role"
-          value="shipper"
-          onChange={ handleRadioShipper }
-        />
-        <label htmlFor="shipper"> Shipper </label>
+          <input
+            type="radio"
+            id="shipper"
+            name="role"
+            value="shipper"
+            onChange={ handleRadioShipper }
+          />
+          <label htmlFor="shipper"> Shipper </label>
+        </div>
+        <hr />
 
         <button type="submit"> Sign Up </button>
+
+        <hr />
 
         <div className="navigation-panel">
           <Link to="/login"> Login </Link>

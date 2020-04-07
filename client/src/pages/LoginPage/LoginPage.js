@@ -9,19 +9,30 @@ export default function LoginPage() {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
 
+  const [warningMessage, setWarningMessage] = useState('');
+  const [showWarning, setShowWarning] = useState(false);
+
   const [routeRedirect, setRouteRedirect] = useState(false);
 
   const fetchLogin = async (e) => {
     e.preventDefault();
-    const jwt_token = await axios.post(LOGIN_API, { login, password });
-    localStorage.setItem('jwt_token', jwt_token.data);
-    setRouteRedirect(true);
+
+    const resJson = await axios.post(LOGIN_API, {
+      login, password,
+    }).then((res) => res.data);
+
+    if (resJson.status === 'OK') {
+      localStorage.setItem('jwt_token', resJson.jwt_token);
+      setRouteRedirect(true);
+    } else {
+      handleWarning(resJson.status);
+    }
   };
 
-  useEffect(() => {
-    const jwt_token = localStorage.getItem('jwt_token');
-    setRouteRedirect(!!jwt_token);
-  }, []);
+  const handleWarning = (message) => {
+    setWarningMessage(message);
+    setShowWarning(true);
+  };
 
   const handleLoginInput = (e) => {
     setLogin(e.target.value);
@@ -31,6 +42,11 @@ export default function LoginPage() {
     setPassword(e.target.value);
   };
 
+  useEffect(() => {
+    const jwt_token = localStorage.getItem('jwt_token');
+    setRouteRedirect(!!jwt_token);
+  }, []);
+
   if (routeRedirect) {
     return <Redirect to="/" />;
   }
@@ -39,31 +55,33 @@ export default function LoginPage() {
     <div>
       <h1> LOGIN: </h1>
       <form onSubmit={ fetchLogin }>
-        <div>
-          <label htmlFor="login"> Email or Username: </label>
-          <input
-            type="text"
-            name="login"
-            value={ login }
-            onChange={ handleLoginInput }
-            required
-          />
-        </div>
+        { showWarning && <h3>{ warningMessage }</h3> }
 
-        <div>
-          <label htmlFor="password"> Password: </label>
-          <input
-            type="password"
-            name="password"
-            value={ password }
-            onChange={ handlePasswordInput }
-            required
-          />
-        </div>
+        <label htmlFor="login"> Email or Username: </label>
+        <input
+          type="text"
+          name="login"
+          value={ login }
+          onChange={ handleLoginInput }
+          required
+        />
+        <hr />
+
+        <label htmlFor="password"> Password: </label>
+        <input
+          type="password"
+          name="password"
+          value={ password }
+          onChange={ handlePasswordInput }
+          required
+        />
+        <hr />
 
         <Link to="/password-recovery"> forgot password? </Link>
 
-        <button type="submit"> Login </button><br />
+        <button type="submit"> Login </button>
+
+        <hr />
 
         <div className="navigation-panel">
           <Link to="/signup"> Sign up </Link>
