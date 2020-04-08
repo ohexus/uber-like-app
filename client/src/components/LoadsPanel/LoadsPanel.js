@@ -52,6 +52,12 @@ export default function LoadsPanel() {
         setLoads([...loads, newLoad]);
       });
 
+      socket.on('assignLoad', (assignedLoad) => {
+        setLoads(loads.map((load) => {
+          return load._id === assignedLoad._id ? assignedLoad : load;
+        }));
+      });
+
       socket.on('deleteLoad', (deletedLoad) => {
         setLoads(loads.filter((load) =>
           load._id !== deletedLoad._id));

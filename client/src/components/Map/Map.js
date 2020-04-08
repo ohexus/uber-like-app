@@ -265,6 +265,10 @@ export default function Map(props) {
         setShowPickUpCoords(false);
         setShowDeliveryCoords(false);
       });
+    } else {
+      socket.on('createLoad', (newLoad) => {
+        setLoadsNew([newLoad]);
+      });
     }
   }, [socket, loadsNew]);
 

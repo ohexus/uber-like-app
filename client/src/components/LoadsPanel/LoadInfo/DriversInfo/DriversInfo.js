@@ -21,7 +21,7 @@ export default function DriversInfo(props) {
         headers: {
           authorization: localStorage.getItem('jwt_token'),
         },
-      }).then((res) => res.data);
+      }).then((res) => res.data.driver);
 
       setDriver(assignedDriver);
     };

@@ -18,7 +18,7 @@ export default function LoadInfo(props) {
   const socket = useContext(SocketContext);
 
   const [load, setLoad] = useState(props.load);
-  const [isLoadFinished] = useState(load.status === 'SHIPPED');
+  const [isLoadFinished, setIsLoadFinished] = useState(load.status === 'SHIPPED');
 
   const [showLoadUpdateForm, setShowLoadUpdateForm] = useState(false);
   const [showWarningCantAssign, setShowWarningCantAssign] = useState(false);
@@ -47,7 +47,7 @@ export default function LoadInfo(props) {
       },
     }).then((res) => res.data);
 
-    if (assignedLoad.status !== 'ASSIGNED') {
+    if (assignedLoad.status !== 'ASSIGNED' && assignedLoad.status !== 'SHIPPED') {
       setShowWarningCantAssign(true);
     } else {
       setShowWarningCantAssign(false);
@@ -74,34 +74,40 @@ export default function LoadInfo(props) {
   useEffect(() => {
     let isExist = true;
 
-    socket.on('updateLoadInfo', (updatedLoad) => {
-      if (isExist) {
-        if (load._id === updatedLoad._id) {
-          setLoad(updatedLoad);
-          setShowWarningHasNoCoords(false);
+    if (load) {
+      socket.on('updateLoadInfo', (updatedLoad) => {
+        if (isExist) {
+          if (load._id === updatedLoad._id) {
+            setLoad(updatedLoad);
+            setShowWarningHasNoCoords(false);
+          }
         }
-      }
-    });
+      });
 
-    socket.on('postLoad', (postedLoad) => {
-      if (isExist) {
-        if (load._id === postedLoad._id) {
-          setLoad(postedLoad);
+      socket.on('postLoad', (postedLoad) => {
+        if (isExist) {
+          if (load._id === postedLoad._id) {
+            setLoad(postedLoad);
+          }
         }
-      }
-    });
+      });
 
-    socket.on('assignLoad', (assignedLoad) => {
-      if (isExist) {
-        if (load._id === assignedLoad._id) {
-          setLoad(assignedLoad);
-          setShowWarningCantAssign(false);
+      socket.on('assignLoad', (assignedLoad) => {
+        if (isExist) {
+          if (load._id === assignedLoad._id) {
+            setLoad(assignedLoad);
+            setShowWarningCantAssign(false);
+          }
         }
-      }
-    });
+      });
+    }
 
     return () => isExist = false;
   }, [socket, load]);
+
+  useEffect(() => {
+    setIsLoadFinished(load.status === 'SHIPPED');
+  }, [load]);
 
   return (
     <div className="load-wrapper">

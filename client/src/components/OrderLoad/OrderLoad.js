@@ -24,7 +24,6 @@ export default function OrderLoad() {
   const [load, setLoad] = useState(null);
   const [loadNextState, setLoadNextState] = useState('En route to Pick Up');
 
-  const [showOrder, setShowOrder] = useState(false);
   const [noOrderMessage, setNoOrderMessage] = useState('');
 
   const updateLoadState = async (e) => {
@@ -73,7 +72,8 @@ export default function OrderLoad() {
   };
 
   const closeOrder = () => {
-    setShowOrder(false);
+    setLoad(null);
+    setNoOrderMessage('You have no order, just chill :)');
   };
 
   useEffect(() => {
@@ -89,8 +89,6 @@ export default function OrderLoad() {
 
         setLoad(load);
         setLoadNextState(findNextState(load.state));
-
-        setShowOrder(true);
       } else {
         setNoOrderMessage(resLoad.status === 'No truck assigned'
           ? resLoad.status
@@ -102,8 +100,8 @@ export default function OrderLoad() {
   }, []);
 
   useEffect(() => {
-    socket.on('checkForLoad', (load) => {
-      setLoad(load);
+    socket.on('checkForLoad', (assignedLoad) => {
+      setLoad(assignedLoad);
     });
 
     socket.on('updateLoadState', (updatedLoad) => {
@@ -115,61 +113,56 @@ export default function OrderLoad() {
   return (
     <>
       { load
-        ? <>
-          { showOrder
-            && <form
-              className="order"
-              onSubmit={ loadNextState === 'Arrived to Delivery'
-                ? finishOrder
-                : updateLoadState
-              }
-            >
-              <h2> Your order: </h2>
+        ? <form
+          className="order"
+          onSubmit={ loadNextState === 'Arrived to Delivery'
+            ? finishOrder
+            : updateLoadState
+          }
+        >
+          <h2> Your order: </h2>
 
-              <InfoTile
-                label={ 'Pick Up address:' }
-                info={ load.address.pickUp }
-              />
+          <InfoTile
+            label={ 'Pick Up address:' }
+            info={ load.address.pickUp }
+          />
 
-              <InfoTile
-                label={ 'Delivery address:' }
-                info={ load.address.delivery }
-              />
+          <InfoTile
+            label={ 'Delivery address:' }
+            info={ load.address.delivery }
+          />
 
-              <InfoTile
-                label={ 'State:' }
-                info={ load.state }
-              />
+          <InfoTile
+            label={ 'State:' }
+            info={ load.state }
+          />
 
-              <InfoTile
-                label={ 'Length:' }
-                info={ load.dimensions.length }
-              />
+          <InfoTile
+            label={ 'Length:' }
+            info={ load.dimensions.length }
+          />
 
-              <InfoTile
-                label={ 'Width:' }
-                info={ load.dimensions.width }
-              />
+          <InfoTile
+            label={ 'Width:' }
+            info={ load.dimensions.width }
+          />
 
-              <InfoTile
-                label={ 'Height:' }
-                info={ load.dimensions.height }
-              />
+          <InfoTile
+            label={ 'Height:' }
+            info={ load.dimensions.height }
+          />
 
-              <InfoTile
-                label={ 'Payload:' }
-                info={ load.payload }
-              />
+          <InfoTile
+            label={ 'Payload:' }
+            info={ load.payload }
+          />
 
-              { loadNextState === 'Finish Order'
-                ? <button type="button" onClick={ closeOrder }> { loadNextState } </button>
-                : <button type="submit"> { loadNextState } </button>
-              }
-            </form>
-          }</>
-        : <>
-          <h2>{ noOrderMessage }</h2>
-        </>
+          { loadNextState === 'Finish Order'
+            ? <button type="button" onClick={ closeOrder }> { loadNextState } </button>
+            : <button type="submit"> { loadNextState } </button>
+          }
+        </form>
+        : <h2>{ noOrderMessage }</h2>
       }
     </>
   );

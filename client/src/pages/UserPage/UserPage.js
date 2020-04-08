@@ -44,11 +44,12 @@ export default function UserPage() {
   }, []);
 
   useEffect(() => {
-    if (user) {
-      socket.on('ableUpdateProfile', (res) => {
+    // TODO
+    socket.on('ableUpdateProfile', (res) => {
+      if (user) {
         if (res.userId === user._id) setAbleUpdateProfile(res.isAble);
-      });
-    }
+      }
+    });
   }, [socket, user]);
 
   useEffect(() => {

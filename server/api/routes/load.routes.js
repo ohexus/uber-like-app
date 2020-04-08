@@ -283,8 +283,8 @@ router.put('/updateInfo', valid(loadValid.updateInfo, 'body'), async (req, res) 
 // api/load/checkForLoad
 router.get('/checkForLoad', async (req, res) => {
   try {
-    if (req.userRole === 'driver') {
-      return res.status(403).json({ status: 'You are not a shipper' });
+    if (req.userRole === 'shipper') {
+      return res.status(403).json({ status: 'You are not a driver' });
     }
 
     const assignedTruck = await Truck.findOne({
@@ -298,6 +298,11 @@ router.get('/checkForLoad', async (req, res) => {
     });
 
     if (!loadFound) return res.status(200).json({ status: 'No order load' });
+
+    req.io.emit('ableUpdateProfile', {
+      userId: req.userId,
+      isAble: false,
+    });
 
     res.status(200).json({
       status: 'OK',
