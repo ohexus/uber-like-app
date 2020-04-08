@@ -15,7 +15,7 @@ router.delete('/', async (req, res) => {
     const truck = await Truck.deleteMany({});
     const weather = await Weather.deleteMany({});
 
-    res.status(200).send({
+    res.status(200).json({
       requestLog,
       user,
       load,

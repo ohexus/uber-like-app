@@ -18,6 +18,8 @@ export default function TruckInfo(props) {
 
   const [showTruckUpdateForm, setShowTruckUpdateForm] = useState(false);
 
+  const [ableUpdateProfile] = useState(props.ableUpdateProfile);
+
   const assignTruck = async (e) => {
     e.preventDefault();
 
@@ -69,7 +71,7 @@ export default function TruckInfo(props) {
           : 'Not assigned'
         }</h4>
 
-        { !truck.assigned_to && <button type="submit"> Assign this truck </button> }
+        { ableUpdateProfile && !truck.assigned_to && <button type="submit"> Assign this truck </button> }
 
         <InfoTile
           label={ 'Brand:' }
@@ -91,12 +93,12 @@ export default function TruckInfo(props) {
           info={ truck.status }
         />
 
-        { !truck.assigned_to && <button type="button" onClick={ deleteTruck }>
+        { ableUpdateProfile && !truck.assigned_to && <button type="button" onClick={ deleteTruck }>
           Delete this truck
         </button> }
       </form>
 
-      { !truck.assigned_to && <button type="button" onClick={ toggleShowTruckUpdateForm }>
+      {ableUpdateProfile && !truck.assigned_to && <button type="button" onClick={ toggleShowTruckUpdateForm }>
         { showTruckUpdateForm
           ? 'Close update Truck Info'
           : 'Update Truck Info'

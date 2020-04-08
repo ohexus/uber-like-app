@@ -43,7 +43,7 @@ router.post('/update', valid(weatherValid.update, 'body'), async (req, res) => {
     const weatherIconUrl = `http://openweathermap.org/img/wn/${weatherResponse.weather[0].icon}@2x.png`;
 
     const weather = await Weather.findOneAndUpdate({
-      created_by: req.user._id,
+      created_by: req.userId,
     }, {
       coord: {
         lat: weatherResponse.coord.lat,
@@ -67,7 +67,7 @@ router.post('/update', valid(weatherValid.update, 'body'), async (req, res) => {
       },
     }, { new: true });
 
-    res.status(200).send(weather);
+    res.status(200).json({ weather });
   } catch (e) {
     res.status(500).json({ status: e.message });
   }
@@ -76,11 +76,11 @@ router.post('/update', valid(weatherValid.update, 'body'), async (req, res) => {
 // api/weather/deleteall
 router.delete('/deleteAll', async (req, res) => {
   try {
-    await Weather.deleteMany({}, (e) => {
+    const deletedWeather = await Weather.deleteMany({}, (e) => {
       if (e) return handleError(e);
     });
 
-    res.status(200).json({ status: 'successful deletion' });
+    res.status(200).json({ deletedWeather });
   } catch (e) {
     res.status(500).json({ status: e.message });
   }
@@ -91,7 +91,7 @@ router.get('/all', async (req, res) => {
   try {
     const weather = await Weather.find({});
 
-    res.status(200).send(weather);
+    res.status(200).json({ weather });
   } catch (e) {
     res.status(500).json({ status: e.message });
   }

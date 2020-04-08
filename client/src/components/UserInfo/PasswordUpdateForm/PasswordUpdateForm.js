@@ -10,8 +10,9 @@ export default function PasswordUpdateForm(props) {
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [checkNewPassword, setCheckNewPassword] = useState('');
-  const [alertMessage, setAlertMessage] = useState('');
-  const [showAlertMessage, setShowAlertMessage] = useState(false);
+
+  const [warningMessage, setWarningMessage] = useState('');
+  const [showWarning, setShowWarning] = useState(false);
 
   const updatePassword = async () => {
     const validPasswordStatus = await axios.put(UPDATEPASSWORD_API, {
@@ -23,10 +24,10 @@ export default function PasswordUpdateForm(props) {
       },
     }).then((res) => res.data.status);
 
-    if (validPasswordStatus !== 'successful updated password') {
-      handleAlert(validPasswordStatus);
-    } else {
+    if (validPasswordStatus === 'OK') {
       props.closeForm();
+    } else {
+      handleWarning(validPasswordStatus);
     }
   };
 
@@ -34,19 +35,19 @@ export default function PasswordUpdateForm(props) {
     e.preventDefault();
 
     if (newPassword === oldPassword) {
-      return handleAlert('The new password must be different!');
+      return handleWarning('The new password must be different!');
     }
 
     if (newPassword === checkNewPassword) {
       updatePassword();
     } else {
-      return handleAlert('New passwords does not match!');
+      return handleWarning('New passwords does not match!');
     }
   };
 
-  const handleAlert = (message) => {
-    setAlertMessage(message);
-    setShowAlertMessage(true);
+  const handleWarning = (message) => {
+    setWarningMessage(message);
+    setShowWarning(true);
   };
 
   const handleOldPasswordInput = (e) => {
@@ -65,7 +66,7 @@ export default function PasswordUpdateForm(props) {
     <form className={ `updatepassword ${props.className}` } onSubmit={ checkUpdatePassword }>
       <h1> Password Update: </h1>
 
-      { showAlertMessage && <span className="updatepassword__alert"> { alertMessage } </span> }
+      { showWarning && <span className="updatepassword__alert"> { warningMessage } </span> }
 
       <label htmlFor="oldPassword"> Old password: </label>
       <input

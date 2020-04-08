@@ -26,6 +26,8 @@ export default function UserInfo(props) {
   const [NotificationMessage, setNotificationMessage] = useState(false);
   const [showUpdatedNotification, setShowUpdatedNotification] = useState(false);
 
+  const [ableUpdateProfile] = useState(props.ableUpdateProfile);
+
   const [routeRedirect, setRouteRedirect] = useState(false);
 
   const toggleShowUserUpdateForm = () => {
@@ -115,12 +117,12 @@ export default function UserInfo(props) {
         />
 
         <div className="user__panel">
-          <button type="button" onClick={ toggleShowUserUpdateForm }>
+          { ableUpdateProfile && <button type="button" onClick={ toggleShowUserUpdateForm }>
             { showUserUpdateForm
               ? 'Close update User Info'
               : 'Update User Info'
             }
-          </button>
+          </button> }
 
           { showUserUpdateForm && <UserUpdateForm
             user={ user }
@@ -128,12 +130,12 @@ export default function UserInfo(props) {
             closeForm={ () => handleCloseUpdateForm('User info updated') }
           /> }
 
-          <button type="button" onClick={ toggleShowPasswordUpdateForm }>
+          { ableUpdateProfile && <button type="button" onClick={ toggleShowPasswordUpdateForm }>
             { showPasswordUpdateForm
               ? 'Close update Password Info'
               : 'Update Password Info'
             }
-          </button>
+          </button> }
 
           { showPasswordUpdateForm && <PasswordUpdateForm
             password={ user.password }
@@ -143,7 +145,7 @@ export default function UserInfo(props) {
 
           <button type="button" onClick={ handleLogout }> Log out </button>
 
-          { user.role === 'shipper'
+          {ableUpdateProfile && user.role === 'shipper'
             && <button type="button" onClick={ deleteAccount }> Delete Account </button>
           }
         </div>

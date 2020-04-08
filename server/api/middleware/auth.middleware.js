@@ -9,9 +9,10 @@ module.exports = (req, res, next) => {
 
     const user = jwt.verify(jwt_token, config.get('jwtSecret'));
 
-    req.user = user;
+    req.userId = user._id;
+    req.userRole = user.role;
   } catch (e) {
-    res.status(401).json({ status: e.message });
+    res.status(500).json({ status: e.message });
   }
 
   next();

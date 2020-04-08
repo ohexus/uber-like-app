@@ -37,7 +37,7 @@ export default function LoadsPanel() {
         headers: {
           authorization: localStorage.getItem('jwt_token'),
         },
-      }).then((res) => res.data);
+      }).then((res) => res.data.loads);
 
       setLoads(loads);
       setFilteredLoads(loads);

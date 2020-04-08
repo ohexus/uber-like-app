@@ -22,8 +22,7 @@ export default function UserUpdateForm(props) {
   const updateUser = async (e) => {
     e.preventDefault();
 
-    setWarningMessage('Please input all forms!');
-    const isValid = checkBeforePostToServer([firstName, lastName, username, email, mobileNumber], setShowWarning);
+    const isValid = checkBeforePostToServer([firstName, lastName, username, email, mobileNumber]);
 
     if (isValid) {
       const status = await axios.put(UPDATEUSER_API, {
@@ -34,15 +33,19 @@ export default function UserUpdateForm(props) {
         },
       }).then((res) => res.data.status);
 
-      if (status === 'successful update') {
+      if (status === 'OK') {
         props.closeForm();
       } else {
-        setWarningMessage(status);
-        setShowWarning(true);
+        handleWarning(status);
       }
     } else {
-      setShowWarning(true);
+      handleWarning('Please input all forms!');
     }
+  };
+
+  const handleWarning = (message) => {
+    setWarningMessage(message);
+    setShowWarning(true);
   };
 
   const handleFirstNameInput = (e) => {

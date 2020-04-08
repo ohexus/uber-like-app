@@ -1,13 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import './DriversInfo.scss';
 
 import InfoTile from '../../../InfoTile/InfoTile';
+
+import SocketContext from '../../../../context/SocketContext';
 
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
 const GETASSIGNEDDRIVER_API = `${API_URL}/api/load/assignedDriver`;
 
 export default function DriversInfo(props) {
+  const socket = useContext(SocketContext);
+
   const [loadId] = useState(props.loadId);
   const [driver, setDriver] = useState(null);
 
@@ -24,6 +28,18 @@ export default function DriversInfo(props) {
 
     fetchDriver();
   }, [loadId]);
+
+  useEffect(() => {
+    let isExist = true;
+
+    socket.on('updateLoadDriverInfo', (driver) => {
+      if (isExist) {
+        setDriver(driver);
+      }
+    });
+
+    return () => isExist = false;
+  }, [socket]);
 
   return (
     <>

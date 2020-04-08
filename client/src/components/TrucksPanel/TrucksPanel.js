@@ -10,11 +10,13 @@ import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
 const TRUCKS_API = `${API_URL}/api/truck/allForUser`;
 
-export default function TrucksPanel() {
+export default function TrucksPanel(props) {
   const socket = useContext(SocketContext);
 
   const [trucks, setTrucks] = useState(null);
   const [showNewTruckForm, setShowNewTruckForm] = useState(false);
+
+  const [ableUpdateProfile] = useState(props.ableUpdateProfile);
 
   const toggleShowNewTruckForm = () => {
     setShowNewTruckForm(!showNewTruckForm);
@@ -26,7 +28,7 @@ export default function TrucksPanel() {
         headers: {
           authorization: localStorage.getItem('jwt_token'),
         },
-      }).then((res) => res.data);
+      }).then((res) => res.data.trucks);
 
       setTrucks(trucks);
     };
@@ -63,7 +65,7 @@ export default function TrucksPanel() {
     <div className="trucks">
       <h2 className="trucks__header"> Your Trucks: </h2>
 
-      <button
+      { ableUpdateProfile && <button
         type="button"
         onClick={ toggleShowNewTruckForm }
       >
@@ -71,7 +73,7 @@ export default function TrucksPanel() {
           ? 'Close Truck form'
           : 'Create new Truck'
         }
-      </button>
+      </button> }
 
       { showNewTruckForm && <NewTruckForm
         className="trucks__newtruck"
@@ -83,6 +85,7 @@ export default function TrucksPanel() {
           { trucks.map((truck) => (<TruckInfo
             key={ truck._id }
             truck={ truck }
+            ableUpdateProfile={ ableUpdateProfile }
           />)) }
         </div>
         : <h3>You have not added any trucks</h3>

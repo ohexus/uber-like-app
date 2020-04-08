@@ -26,11 +26,14 @@ const User = require('../../models/User');
 // api/user/userinfo
 router.get('/userInfo', async (req, res) => {
   try {
-    const user = await User.findOne({ _id: req.user._id });
+    const user = await User.findOne({ _id: req.userId });
 
-    if (!user) return res.status(200).send('User not found');
+    if (!user) return res.status(200).json({ status: 'User not found' });
 
-    res.status(200).send(user);
+    res.status(200).json({
+      status: 'OK',
+      user,
+    });
   } catch (e) {
     res.status(500).json({ status: e.message });
   }
@@ -44,20 +47,10 @@ router.put('/updateUser', valid(userValid.updateUser, 'body'), async (req, res) 
     if (!firstName || !lastName || !username || !email || !mobileNumber) {
       return res.status(200).json({ status: 'Please fill in all the fields' });
     }
-    // $and: [
-    //   { $ne: { _id: req.user._id } },
-    //   {
-    //     $or: [
-    //       { username },
-    //       { email },
-    //       { mobileNumber },
-    //     ]
-    //   }
-    // ]
 
     const userFound = await User.findOne({
       $and: [
-        { _id: { $ne: req.user._id } },
+        { _id: { $ne: req.userId } },
         { $or: [{ username }, { email }, { mobileNumber }] },
       ],
     });
@@ -67,7 +60,7 @@ router.put('/updateUser', valid(userValid.updateUser, 'body'), async (req, res) 
     }
 
     const updatedUser = await User.findOneAndUpdate({
-      _id: req.user._id,
+      _id: req.userId,
     }, {
       firstName,
       lastName,
@@ -83,7 +76,10 @@ router.put('/updateUser', valid(userValid.updateUser, 'body'), async (req, res) 
 
     req.io.emit('updateUser', updatedUser);
 
-    res.status(200).json({ status: 'successful update' });
+    res.status(200).json({
+      status: 'OK',
+      updatedUser,
+    });
   } catch (e) {
     res.status(500).json({ status: e.message });
   }
@@ -99,7 +95,7 @@ router.put('/updatePassword', valid(userValid.updatePassword, 'body'), async (re
     }
 
     const user = await User.findOne({
-      _id: req.user._id,
+      _id: req.userId,
     });
 
     const isValidPassword = await bcrypt.compare(oldPassword, user.password);
@@ -111,7 +107,7 @@ router.put('/updatePassword', valid(userValid.updatePassword, 'body'), async (re
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
     await User.findOneAndUpdate({
-      _id: req.user._id,
+      _id: req.userId,
     }, {
       password: hashedPassword,
       $push: {
@@ -121,7 +117,7 @@ router.put('/updatePassword', valid(userValid.updatePassword, 'body'), async (re
       },
     });
 
-    res.status(200).json({ status: 'successful updated password' });
+    res.status(200).json({ status: 'OK' });
   } catch (e) {
     res.status(500).json({ status: e.message });
   }
@@ -131,7 +127,7 @@ router.put('/updatePassword', valid(userValid.updatePassword, 'body'), async (re
 router.put('/updateAvatar', upload.single('avatar'), async (req, res) => {
   try {
     const updatedUser = await User.findOneAndUpdate({
-      _id: req.user._id,
+      _id: req.userId,
     }, {
       avatarImg: {
         data: fs.readFileSync(req.file.path),
@@ -157,7 +153,7 @@ router.get('/all', async (req, res) => {
   try {
     const users = await User.find({});
 
-    res.status(200).send(users);
+    res.status(200).json({ users });
   } catch (e) {
     res.status(500).json({ status: e.message });
   }
@@ -166,11 +162,11 @@ router.get('/all', async (req, res) => {
 // api/user/delete
 router.delete('/delete', async (req, res) => {
   try {
-    await User.deleteOne({ _id: req.user._id }, (e) => {
+    const deletedUser = await User.deleteOne({ _id: req.userId }, (e) => {
       if (e) return handleError(e);
     });
 
-    res.status(200).json({ status: 'successful deletion' });
+    res.status(200).json({ deletedUser });
   } catch (e) {
     res.status(500).json({ status: e.message });
   }
@@ -179,11 +175,11 @@ router.delete('/delete', async (req, res) => {
 // api/user/deleteAll
 router.delete('/deleteAll', async (req, res) => {
   try {
-    await User.deleteMany({}, (e) => {
+    const deletedUsers = await User.deleteMany({}, (e) => {
       if (e) return handleError(e);
     });
 
-    res.status(200).json({ status: 'successful deletion' });
+    res.status(200).json({ deletedUsers });
   } catch (e) {
     res.status(500).json({ status: e.message });
   }

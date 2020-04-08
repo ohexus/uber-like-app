@@ -150,7 +150,7 @@ export default function Map(props) {
             headers: {
               authorization: localStorage.getItem('jwt_token'),
             },
-          }).then((res) => res.data);
+          }).then((res) => res.data.loads);
 
           const filteredLoads = loads.filter((l) => l.status === 'NEW');
 
@@ -219,17 +219,35 @@ export default function Map(props) {
   }, [user.role, loadsNew]);
 
   useEffect(() => {
+    let isExist = true;
+
     const handleUserLocation = (position) => {
-      setViewport({
-        ...viewport,
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-      });
-      setUserLocation(position.coords);
+      if (isExist) {
+        setUserLocation(position.coords);
+      }
     };
 
-    findUsersCoordinates(handleUserLocation);
-  }, [viewport]);
+    const interval = setInterval(() => {
+      findUsersCoordinates(handleUserLocation);
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+      isExist = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (userLocation) {
+      if (!viewport.latitude || !viewport.longitude) {
+        setViewport({
+          ...viewport,
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+        });
+      }
+    }
+  }, [viewport, userLocation]);
 
   useEffect(() => {
     if (loadsNew) {
@@ -249,6 +267,32 @@ export default function Map(props) {
       });
     }
   }, [socket, loadsNew]);
+
+  useEffect(() => {
+    let isExist = true;
+
+    if (isExist) {
+      socket.on('checkForLoad', (load) => {
+        setPickUpCoords({
+          latitude: load.coord.pickUp.lat,
+          longitude: load.coord.pickUp.lon,
+        });
+
+        setDeliveryCoords({
+          latitude: load.coord.delivery.lat,
+          longitude: load.coord.delivery.lon,
+        });
+
+        setPickUpAddress(load.address.pickUp);
+        setDeliveryAddress(load.address.delivery);
+
+        setShowPickUpCoords(true);
+        setShowDeliveryCoords(true);
+      });
+    }
+
+    return () => isExist = false;
+  }, [socket]);
 
   // TODO window resize
 
@@ -277,7 +321,7 @@ export default function Map(props) {
           className="custom-marker"
           longitude={ pickUpCoords.longitude }
           latitude={ pickUpCoords.latitude }
-          draggable
+          draggable={ user.role === 'shipper' ? true : false }
           onDragEnd={ (event) => onMarkerDragEnd(event, setPickUpCoords, setPickUpAddress) }
         >
           <div
@@ -294,7 +338,7 @@ export default function Map(props) {
           className="custom-marker"
           longitude={ deliveryCoords.longitude }
           latitude={ deliveryCoords.latitude }
-          draggable
+          draggable={ user.role === 'shipper' ? true : false }
           onDragEnd={ (event) =>
             onMarkerDragEnd(event, setDeliveryCoords, setDeliveryAddress)
           }

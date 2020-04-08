@@ -7,7 +7,7 @@ router.get('/api/allRequestLogs', async (req, res) => {
   try {
     const logs = await RequestLog.find({});
 
-    res.status(200).send(logs);
+    res.status(200).json({ logs });
   } catch (e) {
     res.status(500).json({ status: e.message });
   }

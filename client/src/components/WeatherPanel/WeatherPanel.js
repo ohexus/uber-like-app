@@ -51,87 +51,96 @@ export default function WeatherPanel() {
   }, []);
 
   useEffect(() => {
-    if (userLocation) {
-      const fetchWeather = async () => {
-        const weatherData = await axios.post(WEATHER_API, {
-          lat: userLocation.latitude,
-          lon: userLocation.longitude,
-        }, {
-          headers: {
-            authorization: localStorage.getItem('jwt_token'),
-          },
-        }).then((res) => res.data);
+    let isExist = true;
 
-        if (weatherData) {
-          setWeatherInfo(weatherData.weather);
-          setWeatherMainInfo(weatherData.main);
-          setWindInfo(weatherData.wind);
+    if (isExist) {
+      if (userLocation) {
+        const fetchWeather = async () => {
+          const weatherData = await axios.post(WEATHER_API, {
+            lat: userLocation.latitude,
+            lon: userLocation.longitude,
+          }, {
+            headers: {
+              authorization: localStorage.getItem('jwt_token'),
+            },
+          }).then((res) => res.data.weather);
 
-          setShowWeather(true);
-        }
-      };
+          if (weatherData) {
+            setWeatherInfo(weatherData.weather);
+            setWeatherMainInfo(weatherData.main);
+            setWindInfo(weatherData.wind);
 
-      fetchWeather();
+            setShowWeather(true);
+          }
+        };
+
+        fetchWeather();
+      }
     }
+
+    return () => isExist = false;
   }, [userLocation]);
 
   return (
     <div className="weather">
       <h1> Weather for now: </h1>
-      { showWeather && <>
-        <div className="weather__info">
-          <h2 className="weather__city">
-            { weatherMainInfo.city }
-          </h2>
+      { showWeather
+        ? <>
+          <div className="weather__info">
+            <h2 className="weather__city">
+              { weatherMainInfo.city }
+            </h2>
 
-          <img
-            className="weather__icon"
-            src={ weatherInfo.iconUrl }
-            alt={ weatherInfo.main }
-          />
-
-          <h3> { weatherInfo.description } </h3>
-        </div>
-
-        <div className="weather__temperature">
-          <h2 className="weather__temperature-number">
-            <WeatherTempString temp={ weatherMainInfo.temp } />
-          </h2>
-
-          <InfoTile
-            label="Feels like:"
-            info={ <WeatherTempString temp={ weatherMainInfo.feels_like } /> }
-          />
-        </div>
-
-        <InfoTile
-          label="Humidity:"
-          info={ weatherMainInfo.humidity }
-        />
-
-        <InfoTile
-          label="Pressure:"
-          info={ weatherMainInfo.pressure }
-        />
-
-        <div className="weather__wind">
-          <InfoTile
-            label="Wind:"
-            info={ `${windInfo.speed} km/h` }
-          />
-
-          <div className="weather__wind-arrow-wrapper">
             <img
-              className="weather__wind-arrow"
-              src={ windArrow }
-              style={ {
-                transform: `rotate(${windInfo.deg}deg)`,
-              } }
-              alt="wind direction"
+              className="weather__icon"
+              src={ weatherInfo.iconUrl }
+              alt={ weatherInfo.main }
+            />
+
+            <h3> { weatherInfo.description } </h3>
+          </div>
+
+          <div className="weather__temperature">
+            <h2 className="weather__temperature-number">
+              <WeatherTempString temp={ weatherMainInfo.temp } />
+            </h2>
+
+            <InfoTile
+              label="Feels like:"
+              info={ <WeatherTempString temp={ weatherMainInfo.feels_like } /> }
             />
           </div>
-        </div>
-      </> }
+
+          <InfoTile
+            label="Humidity:"
+            info={ weatherMainInfo.humidity }
+          />
+
+          <InfoTile
+            label="Pressure:"
+            info={ weatherMainInfo.pressure }
+          />
+
+          <div className="weather__wind">
+            <InfoTile
+              label="Wind:"
+              info={ `${windInfo.speed} km/h` }
+            />
+
+            <div className="weather__wind-arrow-wrapper">
+              <img
+                className="weather__wind-arrow"
+                src={ windArrow }
+                style={ {
+                  transform: `rotate(${windInfo.deg}deg)`,
+                } }
+                alt="wind direction"
+              />
+            </div>
+          </div>
+        </>
+        : 'Weather is loading ...'
+      }
     </div>
   );
 }

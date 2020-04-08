@@ -43,18 +43,18 @@ const findTruckType = require('../../helpers/findTruckType');
 // api/load/create
 router.post('/create', valid(loadValid.create, 'body'), async (req, res) => {
   try {
-    if (req.user.role === 'driver') {
+    if (req.userRole === 'driver') {
       return res.status(403).json({ status: 'You are not a shipper' });
     }
 
     const { loadName, length, width, height, payload } = req.body;
 
     if (!loadName || !length || !width || !height || !payload) {
-      return res.status(403).json({ status: 'Please fill in all the fields' });
+      return res.status(200).json({ status: 'Please fill in all the fields' });
     }
 
     const newLoad = new Load({
-      created_by: req.user._id,
+      created_by: req.userId,
       dimensions: {
         length,
         width,
@@ -68,7 +68,7 @@ router.post('/create', valid(loadValid.create, 'body'), async (req, res) => {
 
     req.io.emit('createLoad', newLoad);
 
-    res.status(200).send(newLoad);
+    res.status(200).json({ newLoad });
   } catch (e) {
     res.status(500).json({ status: e.message });
   }
@@ -77,19 +77,19 @@ router.post('/create', valid(loadValid.create, 'body'), async (req, res) => {
 // api/load/updateCoords
 router.put('/updateCoords', valid(loadValid.updateCoords, 'body'), async (req, res) => {
   try {
-    if (req.user.role === 'driver') {
+    if (req.userRole === 'driver') {
       return res.status(403).json({ status: 'You are not a shipper' });
     }
 
     const { loadId, pickUpCoords, deliveryCoords, pickUpAddress, deliveryAddress } = req.body;
 
     if (!loadId || !pickUpCoords || !deliveryCoords) {
-      return res.status(403).json({ status: 'Please fill in all fields' });
+      return res.status(200).json({ status: 'Please fill in all fields' });
     }
 
     const updatedLoad = await Load.findOneAndUpdate({
       $and: [
-        { created_by: req.user._id },
+        { created_by: req.userId },
         { _id: loadId },
         { status: 'NEW' },
       ],
@@ -126,7 +126,7 @@ router.put('/updateCoords', valid(loadValid.updateCoords, 'body'), async (req, r
 // api/load/post
 router.put('/post', valid(loadValid.post, 'body'), async (req, res) => {
   try {
-    if (req.user.role === 'driver') {
+    if (req.userRole === 'driver') {
       return res.status(403).json({ status: 'You are not a shipper' });
     }
 
@@ -138,7 +138,7 @@ router.put('/post', valid(loadValid.post, 'body'), async (req, res) => {
 
     const postedLoad = await Load.findOneAndUpdate({
       $and: [
-        { created_by: req.user._id },
+        { created_by: req.userId },
         { _id: loadId },
         { status: 'NEW' },
       ],
@@ -164,7 +164,7 @@ router.put('/assign', valid(loadValid.assign, 'body'), async (req, res) => {
   try {
     const { loadId } = req.body;
 
-    if (req.user.role === 'driver') {
+    if (req.userRole === 'driver') {
       return res.status(403).json({ status: 'You are not a shipper' });
     }
 
@@ -224,6 +224,14 @@ router.put('/assign', valid(loadValid.assign, 'body'), async (req, res) => {
     req.io.emit('updateTruck', updatedTruck);
     req.io.emit('assignLoad', assignedLoad);
     req.io.emit('checkForLoad', assignedLoad);
+    req.io.emit('ableUpdateProfile', {
+      userId: updatedTruck.created_by,
+      isAble: false,
+    });
+
+    const driver = await User.findOne({ _id: updatedTruck.assigned_to });
+
+    req.io.emit('updateLoadDriverInfo', driver);
 
     res.status(200).json({ status: 'load assigned' });
   } catch (e) {
@@ -234,7 +242,7 @@ router.put('/assign', valid(loadValid.assign, 'body'), async (req, res) => {
 // api/load/updateInfo
 router.put('/updateInfo', valid(loadValid.updateInfo, 'body'), async (req, res) => {
   try {
-    if (req.user.role === 'driver') {
+    if (req.userRole === 'driver') {
       return res.status(403).json({ status: 'You are not a shipper' });
     }
 
@@ -246,7 +254,7 @@ router.put('/updateInfo', valid(loadValid.updateInfo, 'body'), async (req, res) 
 
     const updatedLoad = await Load.findOneAndUpdate({
       $and: [
-        { created_by: req.user._id },
+        { created_by: req.userId },
         { _id: loadId },
         { status: 'NEW' },
       ],
@@ -275,12 +283,12 @@ router.put('/updateInfo', valid(loadValid.updateInfo, 'body'), async (req, res) 
 // api/load/checkForLoad
 router.get('/checkForLoad', async (req, res) => {
   try {
-    if (req.user.role === 'driver') {
+    if (req.userRole === 'driver') {
       return res.status(403).json({ status: 'You are not a shipper' });
     }
 
     const assignedTruck = await Truck.findOne({
-      assigned_to: req.user._id,
+      assigned_to: req.userId,
     });
 
     if (!assignedTruck) return res.status(200).json({ status: 'No truck assigned' });
@@ -305,8 +313,8 @@ router.put('/updateState', valid(loadValid.updateState, 'body'), async (req, res
   try {
     const { loadId, state } = req.body;
 
-    if (req.user.role === 'shipper') {
-      return res.status(401).json({ status: 'You are not a driver' });
+    if (req.userRole === 'shipper') {
+      return res.status(403).json({ status: 'You are not a driver' });
     }
 
     const updatedLoad = await Load.findOneAndUpdate({
@@ -334,7 +342,7 @@ router.put('/finish', valid(loadValid.finish, 'body'), async (req, res) => {
   try {
     const { loadId, state } = req.body;
 
-    if (req.user.role === 'shipper') {
+    if (req.userRole === 'shipper') {
       return res.status(403).json({ status: 'You are not a driver' });
     }
 
@@ -352,7 +360,7 @@ router.put('/finish', valid(loadValid.finish, 'body'), async (req, res) => {
     }, { new: true });
 
     const updatedTruck = await Truck.findOneAndUpdate({
-      assigned_to: req.user._id,
+      assigned_to: req.userId,
     }, {
       status: 'IS',
       $push: {
@@ -365,6 +373,10 @@ router.put('/finish', valid(loadValid.finish, 'body'), async (req, res) => {
     req.io.emit('updateLoadInfo', shippedLoad);
     req.io.emit('updateLoadState', shippedLoad);
     req.io.emit('updateTruck', updatedTruck);
+    req.io.emit('ableUpdateProfile', {
+      userId: updatedTruck.created_by,
+      isAble: true,
+    });
 
     res.status(200).json({ status: 'load shipped' });
   } catch (e) {
@@ -384,7 +396,7 @@ router.post('/assignedDriver', valid(loadValid.assignedDriver, 'body'), async (r
       ],
     });
 
-    if (!load) return;
+    if (!load) return res.status(200).json({ status: 'No load' });
 
     const truck = await Truck.findOne({
       $and: [
@@ -393,15 +405,15 @@ router.post('/assignedDriver', valid(loadValid.assignedDriver, 'body'), async (r
       ],
     });
 
-    if (!truck) return;
+    if (!truck) return res.status(200).json({ status: 'No truck' });
 
     const driver = await User.findOne({
       _id: truck.assigned_to,
     });
 
-    if (!driver) return;
+    if (!driver) return res.status(200).json({ status: 'No driver' });
 
-    res.status(200).send(driver);
+    res.status(200).json({ driver });
   } catch (e) {
     res.status(500).json({ status: e.message });
   }
@@ -412,7 +424,7 @@ router.get('/all', async (req, res) => {
   try {
     const loads = await Load.find({});
 
-    res.status(200).send(loads);
+    res.status(200).json({ loads });
   } catch (e) {
     res.status(500).json({ status: e.message });
   }
@@ -421,9 +433,9 @@ router.get('/all', async (req, res) => {
 // api/load/allForUser
 router.get('/allForUser', async (req, res) => {
   try {
-    const loads = await Load.find({ created_by: req.user._id });
+    const loads = await Load.find({ created_by: req.userId });
 
-    res.status(200).send(loads);
+    res.status(200).json({ loads });
   } catch (e) {
     res.status(500).json({ status: e.message });
   }
@@ -434,13 +446,13 @@ router.delete('/delete', valid(loadValid.delete, 'body'), async (req, res) => {
   try {
     const { loadId } = req.body;
 
-    if (req.user.role === 'driver') {
+    if (req.userRole === 'driver') {
       return res.status(403).json({ status: 'You are not a shipper' });
     }
 
     const deletedLoad = await Load.findOneAndDelete({
       $and: [
-        { created_by: req.user._id },
+        { created_by: req.userId },
         { _id: loadId },
         { status: 'NEW' },
       ],
