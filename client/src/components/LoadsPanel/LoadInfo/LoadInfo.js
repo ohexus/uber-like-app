@@ -19,7 +19,6 @@ export default function LoadInfo(props) {
 
   const [load, setLoad] = useState(props.load);
   const [isLoadFinished] = useState(load.status === 'SHIPPED');
-  const [hasCooords] = useState(props.load.coord.pickUp.lat !== null && props.load.coord.delivery.lat !== null);
 
   const [showLoadUpdateForm, setShowLoadUpdateForm] = useState(false);
   const [showWarningCantAssign, setShowWarningCantAssign] = useState(false);
@@ -28,7 +27,7 @@ export default function LoadInfo(props) {
   const postLoad = async (e) => {
     e.preventDefault();
 
-    if (hasCooords) {
+    if (load.address.pickUp !== null && load.address.delivery !== null) {
       await axios.put(POSTLOAD_API, { loadId: load._id }, {
         headers: {
           authorization: localStorage.getItem('jwt_token'),
@@ -79,6 +78,7 @@ export default function LoadInfo(props) {
       if (isExist) {
         if (load._id === updatedLoad._id) {
           setLoad(updatedLoad);
+          setShowWarningHasNoCoords(false);
         }
       }
     });

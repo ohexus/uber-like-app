@@ -87,7 +87,7 @@ router.put('/updateCoords', valid(loadValid.updateCoords, 'body'), async (req, r
       return res.status(403).json({ status: 'Please fill in all fields' });
     }
 
-    await Load.findOneAndUpdate({
+    const updatedLoad = await Load.findOneAndUpdate({
       $and: [
         { created_by: req.user._id },
         { _id: loadId },
@@ -113,7 +113,9 @@ router.put('/updateCoords', valid(loadValid.updateCoords, 'body'), async (req, r
           message: 'load coordinates updated',
         },
       },
-    });
+    }, { new: true });
+
+    req.io.emit('updateLoadInfo', updatedLoad);
 
     res.status(200).json({ status: 'load coordinates updated' });
   } catch (e) {

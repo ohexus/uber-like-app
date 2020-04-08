@@ -28,7 +28,7 @@ router.post('/create', valid(truckValid.create, 'body'), async (req, res) => {
     const { type, truckName, brand, model } = req.body;
 
     if (!type || !truckName || !brand || !model) {
-      return res.status(403).json({ status: 'Please fill in all the fields' });
+      return res.status(200).json({ status: 'Please fill in all the fields' });
     }
 
     const truckNameFound = await Truck.findOne({
@@ -39,7 +39,7 @@ router.post('/create', valid(truckValid.create, 'body'), async (req, res) => {
     });
 
     if (truckNameFound) {
-      return res.status(403).json({ status: 'This truck name is already exist' });
+      return res.status(200).json({ status: 'This truck name is already exist' });
     }
 
     const newTruck = new Truck({
@@ -54,7 +54,10 @@ router.post('/create', valid(truckValid.create, 'body'), async (req, res) => {
 
     req.io.emit('createTruck', newTruck);
 
-    res.status(200).send(newTruck);
+    res.status(200).json({
+      status: 'OK',
+      newTruck,
+    });
   } catch (e) {
     res.status(500).json({ status: e.message });
   }
@@ -70,7 +73,18 @@ router.put('/update', valid(truckValid.update, 'body'), async (req, res) => {
     const { truckId, type, truckName, brand, model } = req.body;
 
     if (!truckId || !type || !truckName || !brand || !model) {
-      return res.status(403).json({ status: 'Please fill in all the fields' });
+      return res.status(200).json({ status: 'Please fill in all the fields' });
+    }
+
+    const truckNameFound = await Truck.findOne({
+      $and: [
+        { created_by: req.user._id },
+        { truckName },
+      ],
+    });
+
+    if (truckNameFound) {
+      return res.status(200).json({ status: 'This truck name is already exist' });
     }
 
     const updatedTruck = await Truck.findOneAndUpdate({
@@ -93,7 +107,10 @@ router.put('/update', valid(truckValid.update, 'body'), async (req, res) => {
 
     req.io.emit('updateTruck', updatedTruck);
 
-    res.status(200).json({ status: 'truck updated' });
+    res.status(200).json({
+      status: 'OK',
+      updatedTruck,
+    });
   } catch (e) {
     res.status(500).json({ status: e.message });
   }

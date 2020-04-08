@@ -9,18 +9,22 @@ module.exports = {
 
     length: Joi.number()
       .integer()
+      .positive()
       .required(),
 
     width: Joi.number()
       .integer()
+      .positive()
       .required(),
 
     height: Joi.number()
       .integer()
+      .positive()
       .required(),
 
     payload: Joi.number()
       .integer()
+      .positive()
       .required(),
   }),
 
@@ -71,18 +75,22 @@ module.exports = {
 
     length: Joi.number()
       .integer()
+      .positive()
       .required(),
 
     width: Joi.number()
       .integer()
+      .positive()
       .required(),
 
     height: Joi.number()
       .integer()
+      .positive()
       .required(),
 
     payload: Joi.number()
       .integer()
+      .positive()
       .required(),
   }),
 

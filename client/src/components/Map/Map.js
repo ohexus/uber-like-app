@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import './Map.scss';
 import 'react-map-gl-geocoder/dist/mapbox-gl-geocoder.css';
 
@@ -6,6 +6,8 @@ import findUsersCoordinates from '../../helpers/findLocationInfo';
 
 import { NavigationControl, Marker, Popup, InteractiveMap } from 'react-map-gl';
 import Geocoder from 'react-map-gl-geocoder';
+
+import SocketContext from '../../context/SocketContext';
 
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
@@ -16,9 +18,11 @@ const CHECKFORLOAD_API = `${API_URL}/api/load/checkForLoad`;
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiZWFzeWJyZWV6ZSIsImEiOiJjazhqczkydmEwM3ByM3Jub2E5MjV3aWFyIn0.PZM-0d_B-QKbR4TxTRhvug';
 
 export default function Map(props) {
+  const socket = useContext(SocketContext);
+
   const [user] = useState(props.user);
 
-  const [loadsData, setLoadsData] = useState(null);
+  const [loadsNew, setLoadsNew] = useState(null);
 
   const [activeLoadIndex, setActiveLoadIndex] = useState(0);
 
@@ -42,8 +46,6 @@ export default function Map(props) {
   const [popupInfo, setPopupInfo] = useState(false);
   const [showPopupInfo, setShowPopupInfo] = useState(false);
 
-  const [reloadPage, setReloadPage] = useState(false);
-
   const mapRef = useRef();
 
   const getAddressFromCoords = async (lon, lat) => {
@@ -57,7 +59,7 @@ export default function Map(props) {
     e.preventDefault();
 
     await axios.put(UPDATELOADCOORDS_API, {
-      loadId: loadsData[activeLoadIndex]._id,
+      loadId: loadsNew[activeLoadIndex]._id,
       pickUpCoords,
       deliveryCoords,
       pickUpAddress,
@@ -69,12 +71,23 @@ export default function Map(props) {
     });
 
     alert('coordinates updated');
-    setReloadPage(true);
   };
 
   const onMarkerDragEnd = async (event, funcCoordSet, funcAddressSet) => {
     const lon = event.lngLat[0];
     const lat = event.lngLat[1];
+
+    funcCoordSet({
+      longitude: lon,
+      latitude: lat,
+    });
+
+    funcAddressSet(await getAddressFromCoords(lon, lat));
+  };
+
+  const toggleShowLocationButton = async (show, showSet, funcCoordSet, funcAddressSet) => {
+    const lon = viewport.longitude;
+    const lat = viewport.latitude;
 
     funcAddressSet(await getAddressFromCoords(lon, lat));
 
@@ -82,28 +95,21 @@ export default function Map(props) {
       longitude: lon,
       latitude: lat,
     });
-  };
-
-  const toggleShowLocationButton = (show, showSet, locationSet) => {
-    locationSet({
-      latitude: viewport.latitude,
-      longitude: viewport.longitude,
-    });
     showSet(!show);
   };
 
   const handleSelectChange = (e) => {
     setActiveLoadIndex(e.target.value);
 
-    const pickUpLat = loadsData[e.target.value].coord.pickUp.lat;
-    const pickUpLon = loadsData[e.target.value].coord.pickUp.lon;
+    const pickUpLat = loadsNew[e.target.value].coord.pickUp.lat;
+    const pickUpLon = loadsNew[e.target.value].coord.pickUp.lon;
     setPickUpCoords({
       latitude: pickUpLat !== null ? pickUpLat : viewport.latitude,
       longitude: pickUpLon !== null ? pickUpLon : viewport.longitude,
     });
 
-    const deliveryLat = loadsData[e.target.value].coord.delivery.lat;
-    const deliveryLon = loadsData[e.target.value].coord.delivery.lon;
+    const deliveryLat = loadsNew[e.target.value].coord.delivery.lat;
+    const deliveryLon = loadsNew[e.target.value].coord.delivery.lon;
     setDeliveryCoords({
       latitude: deliveryLat !== null ? deliveryLat : viewport.latitude,
       longitude: deliveryLon !== null ? deliveryLon : viewport.longitude,
@@ -138,75 +144,79 @@ export default function Map(props) {
 
   useEffect(() => {
     if (user.role === 'shipper') {
-      const fetchLoads = async () => {
-        const loads = await axios.get(LOADS_API, {
-          headers: {
-            authorization: localStorage.getItem('jwt_token'),
-          },
-        }).then((res) => res.data);
+      if (!loadsNew) {
+        const fetchLoads = async () => {
+          const loads = await axios.get(LOADS_API, {
+            headers: {
+              authorization: localStorage.getItem('jwt_token'),
+            },
+          }).then((res) => res.data);
 
-        const filteredLoads = loads.filter((l) => l.status === 'NEW');
+          const filteredLoads = loads.filter((l) => l.status === 'NEW');
 
-        if (filteredLoads.length) {
-          setLoadsData(filteredLoads);
+          if (filteredLoads.length) {
+            setLoadsNew(filteredLoads);
 
-          const load = filteredLoads[0];
+            const load = filteredLoads[0];
+
+            setPickUpCoords({
+              latitude: load.coord.pickUp.lat || viewport.latitude,
+              longitude: load.coord.pickUp.lon || viewport.longitude,
+            });
+
+            setDeliveryCoords({
+              latitude: load.coord.delivery.lat || viewport.latitude,
+              longitude: load.coord.delivery.lon || viewport.longitude,
+            });
+
+            setPickUpAddress(load.address.pickUp);
+            setDeliveryAddress(load.address.delivery);
+
+            setShowPickUpCoords(!!load.coord.pickUp.lat);
+            setShowDeliveryCoords(!!load.coord.delivery.lat);
+          }
+        };
+
+        fetchLoads();
+      }
+    }
+  }, [user.role, loadsNew, viewport.latitude, viewport.longitude]);
+
+  useEffect(() => {
+    if (user.role === 'driver') {
+      if (!loadsNew) {
+        const fetchLoad = async () => {
+          const resLoad = await axios.get(CHECKFORLOAD_API, {
+            headers: {
+              authorization: localStorage.getItem('jwt_token'),
+            },
+          }).then((res) => res.data);
+
+          if (resLoad.status !== 'OK') return;
+
+          const load = resLoad.load;
 
           setPickUpCoords({
-            latitude: load.coord.pickUp.lat || viewport.latitude,
-            longitude: load.coord.pickUp.lon || viewport.longitude,
+            latitude: load.coord.pickUp.lat,
+            longitude: load.coord.pickUp.lon,
           });
 
           setDeliveryCoords({
-            latitude: load.coord.delivery.lat || viewport.latitude,
-            longitude: load.coord.delivery.lon || viewport.longitude,
+            latitude: load.coord.delivery.lat,
+            longitude: load.coord.delivery.lon,
           });
 
           setPickUpAddress(load.address.pickUp);
           setDeliveryAddress(load.address.delivery);
 
-          setShowPickUpCoords(!!load.coord.pickUp.lat);
-          setShowDeliveryCoords(!!load.coord.delivery.lat);
-        }
-      };
+          setShowPickUpCoords(true);
+          setShowDeliveryCoords(true);
+        };
 
-      fetchLoads();
+        fetchLoad();
+      }
     }
-  }, [user.role, viewport.latitude, viewport.longitude]);
-
-  useEffect(() => {
-    if (user.role === 'driver') {
-      const fetchLoad = async () => {
-        const resLoad = await axios.get(CHECKFORLOAD_API, {
-          headers: {
-            authorization: localStorage.getItem('jwt_token'),
-          },
-        }).then((res) => res.data);
-
-        if (resLoad.status !== 'OK') return;
-
-        const load = resLoad.load;
-
-        setPickUpCoords({
-          latitude: load.coord.pickUp.lat,
-          longitude: load.coord.pickUp.lon,
-        });
-
-        setDeliveryCoords({
-          latitude: load.coord.delivery.lat,
-          longitude: load.coord.delivery.lon,
-        });
-
-        setPickUpAddress(load.address.pickUp);
-        setDeliveryAddress(load.address.delivery);
-
-        setShowPickUpCoords(true);
-        setShowDeliveryCoords(true);
-      };
-
-      fetchLoad();
-    }
-  }, [user.role]);
+  }, [user.role, loadsNew]);
 
   useEffect(() => {
     const handleUserLocation = (position) => {
@@ -221,9 +231,24 @@ export default function Map(props) {
     findUsersCoordinates(handleUserLocation);
   }, [viewport]);
 
-  if (reloadPage) {
-    window.location.reload();
-  }
+  useEffect(() => {
+    if (loadsNew) {
+      socket.on('createLoad', (newLoad) => {
+        setLoadsNew([...loadsNew, newLoad]);
+      });
+
+      socket.on('deleteLoad', (deletedLoad) => {
+        setLoadsNew(loadsNew.filter((load) =>
+          load._id !== deletedLoad._id));
+
+        setPickUpAddress(null);
+        setDeliveryAddress(null);
+
+        setShowPickUpCoords(false);
+        setShowDeliveryCoords(false);
+      });
+    }
+  }, [socket, loadsNew]);
 
   // TODO window resize
 
@@ -258,7 +283,9 @@ export default function Map(props) {
           <div
             className="custom-marker__icon custom-marker__icon--pick-up"
             alt=""
-            onMouseEnter={ () => handleShowPopup('Pick Up Address:', pickUpCoords, pickUpAddress) }
+            onMouseEnter={ () =>
+              handleShowPopup('Pick Up Address:', pickUpCoords, pickUpAddress)
+            }
             onMouseLeave={ () => setShowPopupInfo(false) }
           />
         </Marker> }
@@ -268,12 +295,16 @@ export default function Map(props) {
           longitude={ deliveryCoords.longitude }
           latitude={ deliveryCoords.latitude }
           draggable
-          onDragEnd={ (event) => onMarkerDragEnd(event, setDeliveryCoords, setDeliveryAddress) }
+          onDragEnd={ (event) =>
+            onMarkerDragEnd(event, setDeliveryCoords, setDeliveryAddress)
+          }
         >
           <div
             className="custom-marker__icon custom-marker__icon--delivery"
             alt=""
-            onMouseEnter={ () => handleShowPopup('Delivery Address:', deliveryCoords, deliveryAddress) }
+            onMouseEnter={ () =>
+              handleShowPopup('Delivery Address:', deliveryCoords, deliveryAddress)
+            }
             onMouseLeave={ () => setShowPopupInfo(false) }
           />
         </Marker> }
@@ -288,23 +319,42 @@ export default function Map(props) {
         { user.role === 'shipper' && <form onSubmit={ updateLoadCoords } className="pad">
           <button
             type="button"
-            onClick={ () => toggleShowLocationButton(showPickUpCoords, setShowPickUpCoords, setPickUpCoords) }
-          > { showPickUpCoords ? 'Delete Pick Up Mark' : 'Set Pick Up Mark' } </button>
+            onClick={ () =>
+              toggleShowLocationButton(showPickUpCoords, setShowPickUpCoords, setPickUpCoords, setPickUpAddress)
+            }
+          >
+            { showPickUpCoords
+              ? 'Delete Pick Up Mark'
+              : 'Set Pick Up Mark' }
+          </button>
+
           <button
             type="button"
-            onClick={ () => toggleShowLocationButton(showDeliveryCoords, setShowDeliveryCoords, setDeliveryCoords) }
-          > { showDeliveryCoords ? 'Delete Delivery Mark' : 'Set Delivery Mark' } </button>
+            onClick={ () =>
+              toggleShowLocationButton(showDeliveryCoords, setShowDeliveryCoords, setDeliveryCoords, setDeliveryAddress)
+            }
+          >
+            { showDeliveryCoords
+              ? 'Delete Delivery Mark'
+              : 'Set Delivery Mark' }
+          </button>
+
           <select onChange={ handleSelectChange }>
-            <option disabled value={ null }> { loadsData ? 'select load' : 'create new load first' }</option>
-            { loadsData && loadsData.map((load, index) => (<option
+            <option disabled value={ null }>
+              { loadsNew ? 'New loads' : 'Create new load first' }
+            </option>
+
+            { loadsNew && loadsNew.map((load, index) => (<option
               key={ index }
               value={ index }
             >{ load.loadName }</option>)) }
           </select>
+
           <button
             type="submit"
-            disabled={ !((loadsData && showPickUpCoords && showDeliveryCoords)) }
+            disabled={ !((loadsNew && showPickUpCoords && showDeliveryCoords)) }
           >Update Coordinates</button>
+
         </form> }
 
         <Geocoder

@@ -23,6 +23,7 @@ module.exports = {
 
     mobileNumber: Joi.number()
       .integer()
+      .positive()
       .required(),
   }),
 
