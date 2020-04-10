@@ -16,6 +16,8 @@ export default function DriversInfo(props) {
   const [driver, setDriver] = useState(null);
 
   useEffect(() => {
+    let isExist = true;
+
     const fetchDriver = async () => {
       const assignedDriver = await axios.post(GETASSIGNEDDRIVER_API, { loadId }, {
         headers: {
@@ -23,10 +25,14 @@ export default function DriversInfo(props) {
         },
       }).then((res) => res.data.driver);
 
-      setDriver(assignedDriver);
+      if (isExist) {
+        setDriver(assignedDriver);
+      }
     };
 
     fetchDriver();
+
+    return () => isExist = false;
   }, [loadId]);
 
   useEffect(() => {

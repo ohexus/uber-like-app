@@ -8,6 +8,7 @@ const Load = require('../../models/Load');
 const Truck = require('../../models/Truck');
 
 const findTruckType = require('../../helpers/findTruckType');
+const findNextLoadState = require('../../helpers/findNextLoadState');
 
 // Load Schema {
 // created_by: { type: Types.ObjectId, ref: 'User' },
@@ -87,6 +88,9 @@ router.put('/updateCoords', valid(loadValid.updateCoords, 'body'), async (req, r
       return res.status(200).json({ status: 'Please fill in all fields' });
     }
 
+    console.log(pickUpCoords);
+    console.log(deliveryCoords);
+
     const updatedLoad = await Load.findOneAndUpdate({
       $and: [
         { created_by: req.userId },
@@ -114,6 +118,8 @@ router.put('/updateCoords', valid(loadValid.updateCoords, 'body'), async (req, r
         },
       },
     }, { new: true });
+
+    console.log(updatedLoad);
 
     req.io.emit('updateLoadInfo', updatedLoad);
 
@@ -221,9 +227,14 @@ router.put('/assign', valid(loadValid.assign, 'body'), async (req, res) => {
       },
     }, { new: true });
 
+    const nextState = findNextLoadState(assignedLoad.state);
+
     req.io.emit('updateTruck', updatedTruck);
     req.io.emit('assignLoad', assignedLoad);
-    req.io.emit('checkForLoad', assignedLoad);
+    req.io.emit('checkForLoad', {
+      assignedLoad,
+      nextState,
+    });
     req.io.emit('ableUpdateProfile', {
       userId: updatedTruck.created_by,
       isAble: false,
@@ -299,6 +310,8 @@ router.get('/checkForLoad', async (req, res) => {
 
     if (!loadFound) return res.status(200).json({ status: 'No order load' });
 
+    const nextState = findNextLoadState(loadFound.state);
+
     req.io.emit('ableUpdateProfile', {
       userId: req.userId,
       isAble: false,
@@ -307,6 +320,7 @@ router.get('/checkForLoad', async (req, res) => {
     res.status(200).json({
       status: 'OK',
       load: loadFound,
+      nextState,
     });
   } catch (e) {
     res.status(500).json({ status: e.message });
@@ -316,74 +330,74 @@ router.get('/checkForLoad', async (req, res) => {
 // api/load/updateState
 router.put('/updateState', valid(loadValid.updateState, 'body'), async (req, res) => {
   try {
-    const { loadId, state } = req.body;
+    const { loadId } = req.body;
 
     if (req.userRole === 'shipper') {
       return res.status(403).json({ status: 'You are not a driver' });
     }
 
-    const updatedLoad = await Load.findOneAndUpdate({
-      _id: loadId,
-    }, {
-      state,
-      $push: {
-        logs: {
-          message: `state updated: ${req.body.state}`,
+    const load = await Load.findOne({ _id: loadId });
+
+    const state = findNextLoadState(load.state);
+    const nextState = findNextLoadState(state);
+
+    if (state === 'Arrived to Delivery') {
+      const updatedLoad = await Load.findOneAndUpdate({
+        _id: loadId,
+      }, {
+        assigned_to: null,
+        state,
+        status: 'SHIPPED',
+        $push: {
+          logs: {
+            message: 'load status SHIPPED',
+          },
         },
-      },
-    }, { new: true });
+      }, { new: true });
 
-    req.io.emit('updateLoadInfo', updatedLoad);
-    req.io.emit('updateLoadState', updatedLoad);
+      const updatedTruck = await Truck.findOneAndUpdate({
+        assigned_to: req.userId,
+      }, {
+        status: 'IS',
+        $push: {
+          logs: {
+            message: 'truck status IS',
+          },
+        },
+      }, { new: true });
 
-    res.status(200).json({ updatedLoad });
-  } catch (e) {
-    res.status(500).json({ status: e.message });
-  }
-});
+      req.io.emit('updateLoadInfo', updatedLoad);
+      req.io.emit('updateLoadState', {
+        updatedLoad,
+        nextState,
+      });
+      req.io.emit('updateTruck', { updatedTruck });
+      req.io.emit('ableUpdateProfile', {
+        userId: updatedTruck.created_by,
+        isAble: true,
+      });
 
-// api/load/finish
-router.put('/finish', valid(loadValid.finish, 'body'), async (req, res) => {
-  try {
-    const { loadId, state } = req.body;
+      res.status(200).json({ updatedLoad });
+    } else {
+      const updatedLoad = await Load.findOneAndUpdate({
+        _id: loadId,
+      }, {
+        state,
+        $push: {
+          logs: {
+            message: `state updated: ${nextState}`,
+          },
+        },
+      }, { new: true });
 
-    if (req.userRole === 'shipper') {
-      return res.status(403).json({ status: 'You are not a driver' });
+      req.io.emit('updateLoadInfo', updatedLoad);
+      req.io.emit('updateLoadState', {
+        updatedLoad,
+        nextState,
+      });
+
+      res.status(200).json({ updatedLoad });
     }
-
-    const shippedLoad = await Load.findOneAndUpdate({
-      _id: loadId,
-    }, {
-      assigned_to: null,
-      state: state,
-      status: 'SHIPPED',
-      $push: {
-        logs: {
-          message: 'load status SHIPPED',
-        },
-      },
-    }, { new: true });
-
-    const updatedTruck = await Truck.findOneAndUpdate({
-      assigned_to: req.userId,
-    }, {
-      status: 'IS',
-      $push: {
-        logs: {
-          message: 'truck status IS',
-        },
-      },
-    }, { new: true });
-
-    req.io.emit('updateLoadInfo', shippedLoad);
-    req.io.emit('updateLoadState', shippedLoad);
-    req.io.emit('updateTruck', updatedTruck);
-    req.io.emit('ableUpdateProfile', {
-      userId: updatedTruck.created_by,
-      isAble: true,
-    });
-
-    res.status(200).json({ status: 'load shipped' });
   } catch (e) {
     res.status(500).json({ status: e.message });
   }

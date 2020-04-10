@@ -47,7 +47,7 @@ export default function LoadInfo(props) {
       },
     }).then((res) => res.data);
 
-    if (assignedLoad.status !== 'ASSIGNED' && assignedLoad.status !== 'SHIPPED') {
+    if (assignedLoad.status === 'ASSIGNED' || assignedLoad.status === 'SHIPPED') {
       setShowWarningCantAssign(true);
     } else {
       setShowWarningCantAssign(false);

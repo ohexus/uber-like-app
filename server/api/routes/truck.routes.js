@@ -129,14 +129,14 @@ router.put('/assign', valid(truckValid.assign, 'body'), async (req, res) => {
       return res.status(403).json({ status: 'You are not a driver' });
     }
 
-    const truckFound = await Truck.findOne({
+    const truckOnLoad = await Truck.findOne({
       $and: [
         { created_by: req.userId },
         { status: 'OL' },
       ],
     });
 
-    if (truckFound) return res.status(200).json({ status: 'You are on load!!' });
+    if (truckOnLoad) return res.status(200).json({ status: 'You are on load!!' });
 
     await Truck.findOneAndUpdate({
       $and: [

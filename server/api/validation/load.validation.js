@@ -8,22 +8,18 @@ module.exports = {
       .required(),
 
     length: Joi.number()
-      .integer()
       .positive()
       .required(),
 
     width: Joi.number()
-      .integer()
       .positive()
       .required(),
 
     height: Joi.number()
-      .integer()
       .positive()
       .required(),
 
     payload: Joi.number()
-      .integer()
       .positive()
       .required(),
   }),
@@ -74,22 +70,18 @@ module.exports = {
       .required(),
 
     length: Joi.number()
-      .integer()
       .positive()
       .required(),
 
     width: Joi.number()
-      .integer()
       .positive()
       .required(),
 
     height: Joi.number()
-      .integer()
       .positive()
       .required(),
 
     payload: Joi.number()
-      .integer()
       .positive()
       .required(),
   }),
@@ -97,18 +89,6 @@ module.exports = {
   updateState: Joi.object({
     loadId: Joi.string()
       .pattern(new RegExp('^[a-zA-Z0-9]+$'))
-      .required(),
-
-    state: Joi.string()
-      .required(),
-  }),
-
-  finish: Joi.object({
-    loadId: Joi.string()
-      .pattern(new RegExp('^[a-zA-Z0-9]+$'))
-      .required(),
-
-    state: Joi.string()
       .required(),
   }),
 

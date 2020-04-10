@@ -10,7 +10,6 @@ import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL;
 const CHECKFORLOAD_API = `${API_URL}/api/load/checkForLoad`;
 const UPDATELOADSTATE_API = `${API_URL}/api/load/updateState`;
-const FINISHLOAD_API = `${API_URL}/api/load/finish`;
 
 // load state transitions
 // En route to Pick Up
@@ -31,7 +30,6 @@ export default function OrderLoad() {
 
     await axios.put(UPDATELOADSTATE_API, {
       loadId: load._id,
-      state: loadNextState,
     }, {
       headers: {
         authorization: localStorage.getItem('jwt_token'),
@@ -39,39 +37,9 @@ export default function OrderLoad() {
     });
   };
 
-  const finishOrder = async (e) => {
+  const closeOrder = (e) => {
     e.preventDefault();
 
-    await axios.put(FINISHLOAD_API, {
-      loadId: load._id,
-      state: loadNextState,
-    }, {
-      headers: {
-        authorization: localStorage.getItem('jwt_token'),
-      },
-    });
-  };
-
-  const findNextState = (prev) => {
-    switch (prev) {
-      case 'En route to Pick Up':
-        return 'Arrived to Pick Up';
-
-      case 'Arrived to Pick Up':
-        return 'En route to Delivery';
-
-      case 'En route to Delivery':
-        return 'Arrived to Delivery';
-
-      case 'Arrived to Delivery':
-        return 'Finish Order';
-
-      default:
-        return 'En route to Pick Up';
-    }
-  };
-
-  const closeOrder = () => {
     setLoad(null);
     setNoOrderMessage('You have no order, just chill :)');
   };
@@ -85,10 +53,8 @@ export default function OrderLoad() {
       }).then((res) => res.data);
 
       if (resLoad.status === 'OK') {
-        const load = resLoad.load;
-
-        setLoad(load);
-        setLoadNextState(findNextState(load.state));
+        setLoad(resLoad.load);
+        setLoadNextState(resLoad.nextState);
       } else {
         setNoOrderMessage(resLoad.status === 'No truck assigned'
           ? resLoad.status
@@ -100,12 +66,18 @@ export default function OrderLoad() {
   }, []);
 
   useEffect(() => {
-    socket.on('checkForLoad', (assignedLoad) =>
-      setLoad(assignedLoad));
+    socket.on('checkForLoad', (res) => {
+      setLoad(res.assignedLoad);
+      setLoadNextState(res.nextState);
+    });
 
-    socket.on('updateLoadState', (updatedLoad) => {
-      setLoad(updatedLoad);
-      setLoadNextState(findNextState(updatedLoad.state));
+    socket.on('updateLoadState', (res) => {
+      setLoad(res.updatedLoad);
+      setLoadNextState(res.nextState);
+    });
+
+    socket.on('assignTruck', () => {
+      setNoOrderMessage('You have no order, just chill :)');
     });
   }, [socket, load]);
 
@@ -114,10 +86,9 @@ export default function OrderLoad() {
       { load
         ? <form
           className="order"
-          onSubmit={ loadNextState === 'Arrived to Delivery'
-            ? finishOrder
-            : updateLoadState
-          }
+          onSubmit={ loadNextState !== 'Close Order'
+            ? updateLoadState
+            : closeOrder }
         >
           <h2> Your order: </h2>
 
@@ -156,10 +127,8 @@ export default function OrderLoad() {
             info={ load.payload }
           />
 
-          { loadNextState === 'Finish Order'
-            ? <button type="button" onClick={ closeOrder }> { loadNextState } </button>
-            : <button type="submit"> { loadNextState } </button>
-          }
+          <button type="submit"> { loadNextState } </button>
+
         </form>
         : <h2>{ noOrderMessage }</h2>
       }

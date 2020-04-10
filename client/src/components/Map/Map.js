@@ -273,8 +273,10 @@ export default function Map(props) {
   useEffect(() => {
     let isExist = true;
 
-    if (isExist) {
-      socket.on('checkForLoad', (load) => {
+    socket.on('checkForLoad', (res) => {
+      if (isExist) {
+        const load = res.assignedLoad;
+
         setPickUpCoords({
           latitude: load.coord.pickUp.lat,
           longitude: load.coord.pickUp.lon,
@@ -290,8 +292,8 @@ export default function Map(props) {
 
         setShowPickUpCoords(true);
         setShowDeliveryCoords(true);
-      });
-    }
+      }
+    });
 
     return () => isExist = false;
   }, [socket]);
