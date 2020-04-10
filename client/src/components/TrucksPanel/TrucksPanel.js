@@ -38,9 +38,8 @@ export default function TrucksPanel(props) {
 
   useEffect(() => {
     if (trucks) {
-      socket.on('createTruck', (newTruck) => {
-        setTrucks([...trucks, newTruck]);
-      });
+      socket.on('createTruck', (newTruck) =>
+        setTrucks([...trucks, newTruck]));
 
       socket.on('assignTruck', (assignedTruck) => {
         setTrucks(trucks.map((truck) => {

@@ -64,13 +64,11 @@ export default function UserInfo(props) {
   };
 
   useEffect(() => {
-    socket.on('updateUser', (updatedUser) => {
-      setUser(updatedUser);
-    });
+    socket.on('updateUser', (updatedUser) =>
+      setUser(updatedUser));
 
-    socket.on('updateAvatar', (updatedUser) => {
-      setUndecodedAvatarImg(updatedUser.avatarImg);
-    });
+    socket.on('updateAvatar', (updatedUser) =>
+      setUndecodedAvatarImg(updatedUser.avatarImg));
   }, [socket, user]);
 
   if (routeRedirect) {
@@ -145,7 +143,7 @@ export default function UserInfo(props) {
 
           <button type="button" onClick={ handleLogout }> Log out </button>
 
-          {ableUpdateProfile && user.role === 'shipper'
+          { ableUpdateProfile && user.role === 'shipper'
             && <button type="button" onClick={ deleteAccount }> Delete Account </button>
           }
         </div>

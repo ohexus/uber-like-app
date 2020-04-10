@@ -251,9 +251,8 @@ export default function Map(props) {
 
   useEffect(() => {
     if (loadsNew) {
-      socket.on('createLoad', (newLoad) => {
-        setLoadsNew([...loadsNew, newLoad]);
-      });
+      socket.on('createLoad', (newLoad) =>
+        setLoadsNew([...loadsNew, newLoad]));
 
       socket.on('deleteLoad', (deletedLoad) => {
         setLoadsNew(loadsNew.filter((load) =>
@@ -266,9 +265,8 @@ export default function Map(props) {
         setShowDeliveryCoords(false);
       });
     } else {
-      socket.on('createLoad', (newLoad) => {
-        setLoadsNew([newLoad]);
-      });
+      socket.on('createLoad', (newLoad) =>
+        setLoadsNew([newLoad]));
     }
   }, [socket, loadsNew]);
 

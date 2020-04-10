@@ -36,8 +36,6 @@ export default function TruckUpdateForm(props) {
         },
       }).then((res) => res.data.status);
 
-      console.log(status);
-
       if (status === 'OK') {
         props.closeForm();
       } else {

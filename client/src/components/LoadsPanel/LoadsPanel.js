@@ -48,14 +48,12 @@ export default function LoadsPanel() {
 
   useEffect(() => {
     if (loads) {
-      socket.on('createLoad', (newLoad) => {
-        setLoads([...loads, newLoad]);
-      });
+      socket.on('createLoad', (newLoad) =>
+        setLoads([...loads, newLoad]));
 
       socket.on('assignLoad', (assignedLoad) => {
-        setLoads(loads.map((load) => {
-          return load._id === assignedLoad._id ? assignedLoad : load;
-        }));
+        setLoads(loads.map((load) =>
+          load._id === assignedLoad._id ? assignedLoad : load));
       });
 
       socket.on('deleteLoad', (deletedLoad) => {

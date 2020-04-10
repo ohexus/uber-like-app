@@ -100,9 +100,8 @@ export default function OrderLoad() {
   }, []);
 
   useEffect(() => {
-    socket.on('checkForLoad', (assignedLoad) => {
-      setLoad(assignedLoad);
-    });
+    socket.on('checkForLoad', (assignedLoad) =>
+      setLoad(assignedLoad));
 
     socket.on('updateLoadState', (updatedLoad) => {
       setLoad(updatedLoad);
